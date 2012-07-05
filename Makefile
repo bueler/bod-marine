@@ -1,6 +1,5 @@
 all: ph.pdf
 
-
 figures := figure1.pdf plhalfar.pdf twoparabolas.pdf bodverifbetaB.pdf \
            bodverifthickvel.pdf verifN.pdf
 
@@ -19,7 +18,15 @@ bodverifthickvel.pdf bodverifbetaB.pdf: bodverifpicture.py
 verifN.pdf: conv.txt verifNfigure.py
 	./verifNfigure.py conv.txt verifN.pdf
 
+# TO BUILD ph.pdf:
 # ice_bib.bib needs to be a link to the same object in pism-dev/doc/
+# also need links from files in
+#    http://www.igsoc.org/production/igs-v2_00-distrib.zip
+# namely
+#    igs.cls
+#    igs.bst
+#    igsnatbib.sty
+
 ph.pdf: ph.aux ph.bbl ph.tex $(figures)
 	pdflatex ph
 
