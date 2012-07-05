@@ -1,0 +1,92 @@
+\NeedsTeXFormat{LaTeX2e}
+\documentclass[12pt]{amsart}
+\addtolength\topmargin{-.2in}
+\addtolength{\oddsidemargin}{-.5in}
+\addtolength{\evensidemargin}{-.5in}
+\addtolength{\textwidth}{1.1in}
+\addtolength{\textheight}{0.6in}
+
+% check if we are compiling under latex or pdflatex
+\ifx\pdftexversion\undefined
+  \usepackage[dvips]{graphicx}
+\else
+  \usepackage[pdftex]{graphicx}
+\fi
+
+\usepackage{amsmath,amssymb,xspace}
+
+% macros
+\newcommand{\bQ}{\mathbf{Q}}
+\newcommand{\bq}{\hat{\mathbf{q}}}
+\newcommand{\br}{\hat{\mathbf{r}}}
+\newcommand{\bU}{\mathbf{U}}
+\newcommand{\hatx}{\hat{\mathbf{x}}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\Div}{\nabla\cdot}
+\newcommand{\ddx}[1]{\frac{\partial #1}{\partial x}}
+\newcommand{\ddy}[1]{\frac{\partial #1}{\partial y}}
+\newcommand{\pp}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\ppt}[1]{\frac{\partial #1}{\partial t}}
+\newcommand{\ppT}[1]{\frac{\partial #1}{\partial T}}
+\newcommand{\ppx}[1]{\frac{\partial #1}{\partial x}}
+\newcommand{\ppy}[1]{\frac{\partial #1}{\partial y}}
+\newcommand{\ppz}[1]{\frac{\partial #1}{\partial z}}
+\newcommand{\ppzz}[1]{\frac{\partial^2 #1}{\partial z^2}}
+\newcommand{\eps}{\epsilon}
+\newcommand{\grad}{\nabla}
+\newcommand{\hh}{\hat h}
+\newcommand{\ip}[2]{\left(#1,#2\right)}
+\newcommand{\lam}{\lambda}
+\newcommand{\lap}{\triangle}
+\newcommand{\mtt}{\texttt}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\vf}{\varphi}
+
+\begin{document}
+
+\scriptsize \hfill \today
+\thispagestyle{empty}
+
+\normalsize
+\bigskip
+
+\noindent Will--
+\medskip
+
+It may be reasonable to set a task for your one credit research.  Below is a possibility that both is a modest exercise in differential equations and is connected to research I am currently doing.  Thus I am interested in the topic and will be attentive.  The topic could potentially lead further.  I can explain the physical meaning of anything below, of course.  But as an exercise it is laid out so you can do some computations without worrying about meaning, and then we can chat about the context at our leisure, if desired.
+
+If you do the below, to some very modest standard of quality, I will be quite happy with the 1.0 credit.  There are other things you might do, but perhaps it is good psychologically, at this point, for me to just suggest an ``assignment''.  Thereby you can be reactive only, instead of initiating anything yourself this late in the semester.  In any case, my point is not to tie you down but just to be concrete and practical.
+\medskip
+
+\noindent Ed
+
+\bigskip\bigskip\bigskip
+
+The second order differential equation describes an ice sheet profile $H(x)$:
+\begin{equation}
+a (H_{ela} - H) - (k^{-1} H H')' = 0  \label{bodsteady}
+\end{equation}
+Here $k>0$ and $a>0$ and $H_{ela}>0$ are all constants.  Of course, prime denotes differentiation with respect to $x$.
+
+\noindent \textbf{Part 1}. \quad  Let $H_0>0$ be another constant.  Show by hand that there is a solution to equation \eqref{bodsteady} which is a \emph{quadratic polynomial in} $x$, satisfying the single boundary condition $H(0)=H_0$.
+
+\noindent \textbf{Part 2}. \quad  The solution to \textbf{Part 1} gives a function $H(x)$ with a positive zero at $x=L$.  Find $L$.   Using $a=1$, $k=1$, $H_{ela}=1$, and $H_0=1.5$, find $L$ concretely and plot $H(x)$ on $0\le x \le L$.  You have now solved a ``free boundary'' problem for the location $L$ of the ice sheet margin, and the shape of the ice sheet.
+
+\noindent \textbf{Part 3}. \quad  Set up a numerical method to solve equation \eqref{bodsteady} with the two boundary conditions $H(0)=H_0$ and $H(L)=0$.  Use the concrete values from \textbf{Part 2}, including the computed $L$.  Evaluate the quality of your numerical solution using the exact solution already computed.
+
+\bigskip
+\emph{Comment}.  In \textbf{Part 3} you are solving a \emph{two-point boundary value problem}.  One very good method would indeed be to use the Chebyshev spectral method from Trefethen's little book.  But you could look into ``shooting'' or a finite difference method as well.  In any case, just use \textsc{Matlab} or \textsc{Octave}, and implement a scheme.  Talk to me about any difficulties that arise.
+
+
+%         References
+%\bibliography{ice_bib}
+%\bibliographystyle{siam}
+
+
+
+
+\end{document}
+
+
+
