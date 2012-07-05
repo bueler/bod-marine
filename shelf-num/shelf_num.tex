@@ -1,0 +1,257 @@
+\documentclass[12pt]{amsart}%default 10pt
+%\documentclass[12pt,final]{amsart}%default 10pt
+%prepared in AMSLaTeX, under LaTeX2e
+\addtolength{\topmargin}{-0.15in}
+\addtolength{\textheight}{0.7in}
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\evensidemargin}{-0.6in}
+\addtolength{\textwidth}{1.0in}
+\newcommand{\normalspacing}{\renewcommand{\baselinestretch}{1.1}\tiny\normalsize}
+\newcommand{\tablespacing}{\renewcommand{\baselinestretch}{1.0}\tiny\normalsize}
+\normalspacing
+
+\usepackage{amssymb,alltt,verbatim,xspace}
+
+% check if we are compiling under latex or pdflatex
+\ifx\pdftexversion\undefined
+  \usepackage[final,dvips]{graphicx}
+\else
+  \usepackage[final,pdftex]{graphicx}
+\fi
+
+\theoremstyle{plain}
+\newtheorem*{thm*}{Theorem}
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+% \newtheorem{lem}[thm]{Lemma}  would put lemmas and thms in same seq.
+%\newtheorem*{prop*}{Proposition}
+\theoremstyle{definition}
+\newtheorem*{defn}{Definition}
+\newtheorem*{example}{Example}
+
+% inclusion/figure macros
+\newcommand{\regfigure}[2]{\includegraphics[height=#2in,keepaspectratio=true]{#1}}
+\newcommand{\mfile}[1]{\scriptsize\begin{quote} \verbatiminput{#1.m} \end{quote}\normalsize}
+
+% math macros
+\newcommand\CC{\mathbb{C}}
+\newcommand{\DDt}[1]{\ensuremath{\frac{d #1}{d t}}}
+\newcommand{\ddt}[1]{\ensuremath{\frac{\partial #1}{\partial t}}}
+\newcommand{\ddx}[1]{\ensuremath{\frac{\partial #1}{\partial x}}}
+\newcommand{\ddy}[1]{\ensuremath{\frac{\partial #1}{\partial y}}}
+\newcommand{\ddxp}[1]{\ensuremath{\frac{\partial #1}{\partial x'}}}
+\newcommand{\ddz}[1]{\ensuremath{\frac{\partial #1}{\partial z}}}
+\newcommand{\ddxx}[1]{\ensuremath{\frac{\partial^2 #1}{\partial x^2}}}
+\newcommand{\ddyy}[1]{\ensuremath{\frac{\partial^2 #1}{\partial y^2}}}
+\newcommand{\ddxy}[1]{\ensuremath{\frac{\partial^2 #1}{\partial x \partial y}}}
+\newcommand{\ddzz}[1]{\ensuremath{\frac{\partial^2 #1}{\partial z^2}}}
+\newcommand{\Div}{\nabla\cdot}
+\newcommand\eps{\epsilon}
+\newcommand{\grad}{\nabla}
+\newcommand{\ihat}{\mathbf{i}}
+\newcommand{\ip}[2]{\ensuremath{\left<#1,#2\right>}}
+\newcommand{\jhat}{\mathbf{j}}
+\newcommand{\khat}{\mathbf{k}}
+\newcommand{\nhat}{\mathbf{n}}
+\newcommand\lam{\lambda}
+\newcommand\lap{\triangle}
+\newcommand\Matlab{\textsc{Matlab}\xspace}
+\newcommand\RR{\mathbb{R}}
+\newcommand{\Up}{\ensuremath{\operatorname{Up}}}
+\newcommand\vf{\varphi}
+
+% macros for this paper only
+
+
+\begin{document}
+\title[Computing velocity for ice shelves and streams]{On computing the velocity \\ of shallow ice shelves and ice streams}
+
+\author{Ed Bueler}
+
+\date{\today.  ORIGINAL DRAFT September 2007.  Dept.~of Mathematics and Statistics, Univ.~of Alaska, Fairbanks.}
+
+\maketitle
+%\tablespacing \setcounter{tocdepth}{1}
+%\tableofcontents \normalspacing
+\thispagestyle{empty}
+
+\section{Introduction}
+
+
+\begin{table}[h] \small
+\caption{Notation.}\label{tab:notation}
+\begin{tabular}{lll}\hline
+\textbf{Symbol} & \textbf{Meaning} & \textbf{Units [\emph{value}]}\\ \hline
+$b$ & bedrock surface elevation & m \\
+$g$ & acceleration of gravity & m\,$\text{s}^{-1}$\,[9.81] \\
+$h$ & ice surface elevation & m \\
+$H$ & ice thickness & m \\
+$H_0$ & constant in subsection \ref{subsect:ex1} & m\,[500] \\
+$\nu$ & vertically-averaged effective & M Pa a \\
+ & \quad viscosity of ice &  \\
+$\nu_0$ & constant in subsection \ref{subsect:ex1} & M Pa a\,[30] \\
+$\rho$ & density of ice & kg\,$\text{m}^{-3}$\,[910] \\
+$\rho_{\text{sw}}$ & density of sea water & kg\,$\text{m}^{-3}$\,[1028] \\
+$u$ & $x$-component of velocity & m\,$\text{a}^{-1}$ \\
+$v$ & $y$-component of velocity & m\,$\text{a}^{-1}$ \\
+$x$ & horizontal coordinate & km \\
+$y$ & horizontal coordinate & km \\
+\hline
+\normalsize \end{tabular}
+\end{table}
+
+Let $T_{ij}$ be the depth-integrated viscous stress tensor defined by equation (2.6) in \cite{SchoofStream} [AND REFERENCE \cite{Morland}].  Let $\tau_{(b)i}$ be the components of the basal shear stress applied to the base of the ice.  Let $f_i$ be the driving stress $f_i = - \rho g H \partial h/\partial x_i$ where $\rho$ is the density of ice, $g$ the acceleration of gravity, $H$ the thickness of the ice, and $h$ the elevation of the ice surface.  The balance of momentum equations in the SSA are, in their cleanest form, and roughly speaking, that the sum of non-inertial forces in the horizontal directions on each column of the ice is zero,
+\begin{equation}\label{deepSSA}
+  0 = \frac{\partial T_{ij}}{\partial x_j} + \tau_{(b)i} + f_i
+\end{equation}
+where $i,j$ range over $x,y$ and the summation convention applies \cite{SchoofStream}.
+
+These equations have been applied to modelling both ice shelves \cite{MacAyealetal} and ice streams \cite{MacAyeal}.  They are derived in a unified manner by a small aspect ratio argument in \cite{Morland} and \cite{WeisGreveHutter}.  They are also derived in Appendix A of \cite{SchoofStream}.
+
+For ice shelves $\tau_{(b)i} = 0$ because the stress applied to the base of the ice by liquid water can be neglected.  For ice streams with a basal till modelled as a linearly-viscous material, $\tau_{(b)i} = - \beta u_i$ where $\beta$ is the basal drag (friction) parameter \cite{HulbeMacAyeal,MacAyeal}.  For ice streams with a basal till modelled as a plastic material, $\tau_{(b)x} = - \tau_c u/\sqrt{u^2 + v^2}$ and $\tau_{(b)y} = - \tau_c v/\sqrt{u^2 + v^2}$.  In this case $\tau_c$ is the yield stress of the till, and actually this form for the basal shear stress $\tau_{(b)}$ only applies in the sense of a free boundary problem, as discovered by C.~Schoof \cite{SchoofStream}.
+
+These equations determine velocity in a manner which is more-or-less elliptic in the sense of partial differential equations.  More precisely, these equations can be derived from a variational principle applied to a convex and bounded-below functional \cite{SchoofStream}.  The equations express the fact that the derivative of the functional is zero at its minimum.
+
+We have not defined the ``depth-integrated viscous stress tensor'' $T_{ij}$ which appears in equations \eqref{deepSSA} because we will actually use the SSA equations in a more concrete and better known form.  Namely \cite{HulbeMacAyeal,Morland,SchoofStream},
+\begin{align}\label{SSA}
+ - 2 \ddx{}\left[\nu H \left(2 \ddx{u} + \ddy{v}\right)\right]
+ - \ddy{}\left[\nu H \left(\ddy{u} + \ddx{v}\right)\right] - \tau_{(b)x}
+        &= - \rho g H \frac{\partial h}{\partial x}, \\
+ - \ddx{}\left[\nu H \left(\ddy{u} + \ddx{v}\right)\right]
+ - 2 \ddy{}\left[\nu H \left(\ddx{u} + 2 \ddy{v}\right)\right] - \tau_{(b)y}
+        &= - \rho g H \frac{\partial h}{\partial y}.\notag
+\end{align}
+
+We will consider exact and numerical solutions to equations \eqref{SSA} and so, of necessity, we will assume that the associated boundary value problem is well-posed.  In the case of a plasticity assumption for ice streams this is actually proven in \cite{SchoofStream}, but further work would be required to show the well-posedness of the boundary problem in the generality considered here (e.g.~with periodic and Dirichlet boundary conditions, and with grounding line and calving conditions).
+
+\section{Linearized ice shelves with constant coefficients \\ and periodic boundary conditions}\label{sect:case1}
+
+\subsection{The linearized, constant-coefficient case}  We need an example well-understood enough to help us analyze numerical solution methods for the SSA, and we also want a concrete solution to use for verification of actual numerical ice flow models.\footnote{Verification for the shallow ice approximation is discussed in \cite{BBL,BLKCB}.}  To meet these goals we create a mildly artificial example ice shelf.
+
+For fixed $L>0$, consider a square region $(x,y) \in [-L,L]\times [-L,L]$.  Suppose $H=H(x,y)$ describes the thickness of a floating ice shelf in this square, and assume $H$ is smooth and everywhere positive.  In addition, suppose $H$ is \emph{periodic} with period $2L$ in each coordinate.  Furthermore, suppose that the vertically-averaged effective viscosity $\nu=\nu(x,y)$ is also smooth, everywhere positive, and periodic.  (In this subsection ``periodic'' will always mean ``with period $2L$ in each coordinate.'')
+
+We also make the more severe assumption that the product of the thickness and the vertically-averaged effective viscosity is \emph{constant}:
+\begin{equation}\label{nuHconstant}
+  \nu(x,y)\, H(x,y) = \nu_0 H_0.
+\end{equation}
+Here $\nu_0$ and $H_0$ are positive constants to be chosen.  In this case equations \eqref{SSA} can be analyzed by Fourier series (next).  Of course assuming this product is exactly constant is severe for practical modelling.  But, at least in floating ice shelves, the variation of this product is limited in practice.  For instance, in the Ross ice shelf [GIVE RANGE AS average +- percent OR THE LIKE].  Ritz and others \cite{Ritzetal2001} note that linearized equations are effective for modelling the floating ice shelves attached to Antarctica.
+
+Now, for a floating ice shelf 
+	$$h(x,y) = \left(1-\frac{\rho}{\rho_{\text{sw}}}\right)\, H(x,y)$$
+where $\rho_{\text{sw}}$ is the density of sea water.  Therefore we define
+\begin{equation}\label{Gdefn}
+G(x,y) = - \frac{1}{2}\, \rho g \left(1-\frac{\rho}{\rho_{\text{sw}}}\right)\,  H(x,y)^2.
+\end{equation}
+(This function $G$ is a kind of potential for the driving stress of floating ice, but mostly we define $G$ to clean up the appearance of the equations which follow.)  Under assumption \eqref{nuHconstant} and using definition \eqref{Gdefn}, we can rewrite equations \eqref{SSA} as
+\begin{align}\label{constantSSA}
+ - 2 \nu_0 H_0 \ddx{}\left[2 \ddx{u} + \ddy{v}\right]
+ - \nu_0 H_0 \ddy{}\left[\ddy{u} + \ddx{v}\right] &= \ddx{G}, \\
+ - \nu_0 H_0 \ddx{}\left[\ddy{u} + \ddx{v}\right]
+ - 2 \nu_0 H_0 \ddy{}\left[\ddx{u} + 2 \ddy{v}\right] &= \ddy{G}.\notag
+\end{align}
+
+We will see that, under the periodicity assumption for $H$, and up to a uniform motion, equations \eqref{constantSSA} have only periodic solutions.  So we seek such solutions by expanding $u$, $v$, and $G$ in (complex) Fourier series \cite{BrownChurchill}:
+	$$u(x,y) = \alpha_{kl}\, e^{ik\pi x/L}\, e^{il\pi y/L}, \quad v(x,y) = \beta_{kl}\, e^{ik\pi x/L}\, e^{il\pi y/L}, \quad G(x,y) = \gamma_{kl}\, e^{ik\pi x/L}\, e^{il\pi y/L}.$$
+The summation is over all integer values for $k$ and $l$.
+
+Note that the smoothness of $H$ determines the rate of decay of the Fourier coefficients $\gamma_{kl}$ as $|k|+|l|\to\infty$.  We will see that the Fourier coefficients of $u$ and $v$ decay faster than those of $G$.  It follows that $u$ and $v$ are smoother that $G$, and thus smoother than $H$.  This is expected because the SSA equations are, roughly speaking, elliptic.
+
+By differentiating these Fourier series, equations \eqref{constantSSA} become
+\begin{align}\label{fourierSSA}
+(4 k^2 + l^2) \,\alpha_{kl}  + 3 kl \,\beta_{kl}  &= \frac{iL}{\pi \nu_0 H_0} k\, \gamma_{kl}, \\
+3 kl \,\alpha_{kl}  + (k^2 + 4 l^2) \,\beta_{kl}  &= \frac{iL}{\pi \nu_0 H_0} l\, \gamma_{kl}. \notag
+\end{align}
+for all integer $k$ and $l$.  Thus we have a linear pair of equations which determine the Fourier coefficients for $u$ and $v$ if we are given the Fourier coefficients for $G$.
+
+When $k\ne 0$ or $l\ne 0$ this linear system has a unique solution.  By an application of Cramer's rule, for instance, we find the simple forms
+\begin{equation}\label{alfbetSSA}
+  \alpha_{kl} = \frac{i L}{4 \pi \nu_0 H_0}\, \frac{k}{k^2+l^2}\, \gamma_{kl}, \qquad  \beta_{kl} = \frac{i L}{4 \pi \nu_0 H_0}\, \frac{l}{k^2+l^2}\, \gamma_{kl} 
+\end{equation}
+
+Coefficients $\alpha_{00}$ and $\beta_{00}$ are not determined by equations \eqref{alfbetSSA}.  Indeed the average values of $u$ and $v$ are proportional to $\alpha_{00}$ and $\beta_{00}$, respectively, but these average values are not determined by partial differential equations \eqref{SSA}.  Said another way, the solution to \eqref{SSA} is not unique, in this periodic case, exactly because equations \eqref{SSA} only determine the velocity field $(u,v)$ up to an arbitrary uniform motion in the plane.  Additional conditions must be specified.  For the construction of a particular solution we will, for example, impose zero motion at the center of the region:
+\begin{equation}\label{nomotioncenter}
+  u(0,0) =0, \qquad v(0,0) = 0.
+\end{equation}
+At the level of coefficients this zero-motion-at-center condition requires $\alpha_{00} = - \sum_{k,l \ne 0} \alpha_{kl}$ and $\beta_{00} = - \sum_{k,l \ne 0} \beta_{kl}$.  One could also require zero average motion over the whole region, which is to choose $\alpha_{00} = \beta_{00} = 0$.
+
+\subsection{An example. An exact solution for verification.}\label{subsect:ex1}  For illustration and verification purposes we specify all constants to yield a completely concrete example.  Regarding the basic physical constants let $\rho_{\text{ice}} = 910\,\text{kg}\,\text{m}^{-3}$, $\rho_{\text{sw}} = 1028\,\text{kg}\,\text{m}^{-3}$, and $g = 9.81\,\text{m}\,\text{s}^{-2}$ \cite{Paterson}.  Let $L=300$ km so that our ice shelf has side with $2L = 600$\,km and area $3.6 \times 10^5\,\text{km}^2$.  The area is comparable to, but a bit smaller than, the Ross ice shelf (with area $4.65 \times 10^5\,\text{km}^2$ \cite{MacAyealetal}).
+
+For the thickness, let $H_0 = 500$~m and define
+\begin{equation}\label{Hexact}
+H(x,y) = H_0\, \left(1 + 0.4 \cos(\pi x/L)\right)\, \left(1 + 0.1 \cos(\pi y/L)\right).
+\end{equation}
+This thickness function has a central hump and it varies more in the $x$-direction than in the $y$-direction.  It has a range of thicknesses between $270$ m and $770$ m, compared to a range of thicknesses for the Ross ice shelf of $302.5$ m to $800$ m in the EISMINT Ross ice shelf intercomparison \cite{MacAyealetal}.
+
+We choose a vertically-averaged viscosity constant $\nu_0 = 30$ MPa yr \cite{Ritzetal2001}.  Again note that by \eqref{nuHconstant} the function $\nu$ is not constant because $H$ is not constant.  The thickness and viscosity functions are illustrated in figure \ref{fig:nuthick}.
+
+\begin{figure}[ht]
+\regfigure{testJ_H_contour}{2.4} \qquad \regfigure{testJ_nu_contour}{2.4}
+\medskip
+\caption{\emph{Left}: Contours of thickness $H(x,y)$ from equation \eqref{Hexact}.  Contours are labeled in meters and axes are labeled in km.  \emph{Right}: Contours of vertically-integrated effective viscosity $\nu(x,y)$ from equations \eqref{nuHconstant} and \eqref{Hexact}; labels in MPa yr.}
+\label{fig:nuthick}
+\end{figure}
+
+No calculus is required to compute the coefficients of $G$, $u$, or $v$ in this case because $G$, which is proportional to $H(x,y)^2$, has a finite Fourier expansion.  In fact the only nonzero coefficients $\gamma_{kl}$ of $G$ are for $|k| \le 2$ and $|l| \le 2$.  For completeness, these nonzero coefficients are listed in Appendix A.  The coefficients $\alpha_{kl}$ and $\beta_{kl}$ of $u$ and $v$ follow from formulas \eqref{alfbetSSA} and \eqref{nomotioncenter}.  There is no convergence issue because the finiteness of the Fourier expansion for $G$ implies finiteness of the Fourier expansion for $u$ and $v$.  
+
+The resulting velocity field $(u,v)$ is shown in figure \ref{fig:uv}.  The maximum ice speed of 181.4\,m $\text{yr}^{-1}$ is much smaller than the maximum velocities observed in the Ross ice shelf, which were up to 1007\,m $\text{yr}^{-1}$ measured in the RIGGS survey \cite{RIGGS2,RIGGS1}.  The difference relates to boundary conditions.  Indeed, in the Ross ice shelf the majority of the flow is explained by the input velocities from the Siple coast ice streams and the outlet glaciers flowing through the Transantarctic mountains.  For the exact solution in question there is no boundary inputs at all and all flow comes from the variable thicknesses of the ice and the resulting driving stresses.  In some sense we would expect, based on the exact solution here, only $100$ to $200$\,m $\text{yr}^{-1}$ maximum speed in the Ross ice shelf, with the current ice thickness variation, if the ice stream and outlet glacier inputs were stopped.
+
+\begin{figure}[ht]
+\regfigure{testJ_uv_quiver}{2.6}
+\caption{Velocity field $(u,v)$, with maximum magnitude of 181.4 m $\text{yr}^{-1}$.}
+\label{fig:uv}
+\end{figure}
+
+\subsection{An operator spectrum}  Our simplification of the SSA to a linearized, constant-coefficient, periodic boundary condition case has led already to the construction of an exact solution.  It also allows us to compute the exact eigenvalues of the differential operator on the left side of the SSA equations.  These eigenvalues will be useful in choosing iterative numerical linear algebra procedures for solving the SSA equations.  The exact eigenvalues are also useful in evaluating the quality of numerical approximations to the SSA equations themselves.
+
+In fact, under the assumption $\nu H = \nu_0 H_0$ of the previous subsections, we can write the differential operator by the formula
+	$$\mathcal{A}\,\begin{pmatrix} u \\ v \end{pmatrix} = - \nu_0\,H_0\,\begin{pmatrix} \left(4\ddxx{} + \ddyy{}\right) u + \left(3 \ddxy{}\right) v \\ \left(3 \ddxy{}\right) u + \left(\ddxx{} + 4\ddyy{}\right) v \end{pmatrix}.$$
+The calculations already done show that in the Fourier basis $\{e^{ik\pi x/L}\, e^{il\pi y/L}\}_{k,l}$ this operator has symmetric block diagonal form
+	$$\begin{bmatrix} \mathcal{A} \end{bmatrix} = \frac{\nu_0 H_0 \pi^2}{L^2}\,
+            \begin{pmatrix} \ddots &            &            &        \\
+                                   & 4k^2 + l^2 & 3kl        &        \\
+                                   & 3kl        & k^2 + 4l^2 &        \\
+                                   &            &            & \ddots \end{pmatrix}$$
+in the appropriate ordering of the Fourier coefficients for $u$ and $v$.  [EXPLAIN WHY THE OPERATOR IS SYMMETRIC.  WHY IS IT NON-NEGATIVE?]
+
+It is straightforward to compute the eigenvalues of the two-by-two blocks.  We then see that the complete list of the eigenvalues of the operator $\mathcal{A}$ is
+	$$\lambda_{kl,0} = \frac{\nu_0 H_0 \pi^2}{L^2}\, (k^2+l^2), \quad \lambda_{kl,1} = \frac{\nu_0 H_0 \pi^2}{L^2}\, 4 (k^2 + l^2),$$
+where $k,l$ range over all the integers.  The multiplicity of each nonzero eigenvalue is at least four because, for example, $\lambda_{-1,0,0} = \lambda_{1,0,0} = \lambda_{0,-1,0} = \lambda_{0,1,0}$, but the multiplicity of some eigenvalues is higher.  We see that there is a multiplicity two eigenvalue of zero, namely $\lambda_{0,0,0} = \lambda_{0,0,1} = 0$, which confirms that we need two scalar conditions, for instance conditions \eqref{nomotioncenter}, to determine a unique solution to this case of the SSA.
+
+[So what?  USE OF SPECTRUM TO MEASURE QUALITY OF FINITE DIFFERENCE SOLUTION.  IMPLICATIONS FOR WHICH ITERATIVE LINEAR SCHEME TO USE.  ADDRESS SMOOTHING EFFECT OF THE EQUATIONS AND RELATION TO FREE SURFACE EQUATION (I.E. MASS CONTINUITY)]
+
+\subsection{Convergence of finite difference method}
+
+
+\begin{figure}[ht]
+\regfigure{testJPISMaverr}{3.0}
+\caption{Convergence of the average ($L^1$) error.}
+\label{fig:averr}
+\end{figure}
+
+
+
+\small
+\bibliography{ice_bib}
+\bibliographystyle{siam}
+
+\appendix
+\section{Fourier coefficients of $G(x,y)$ for the exact solution} Consider $G$, which is proportional to $H^2$, defined in equation \eqref{Gdefn}.  Consider the case where $H(x,y)$ is given by equation \eqref{Hexact}.  Suppose $G$ is expanded in Fourier series
+\begin{equation*}
+G(x,y) = \sum_{k,l = -\infty}^\infty \gamma_{kl}\, e^{i k \pi x/L}\,e^{i l \pi y/L}.
+\end{equation*}
+The nonzero coefficients $\gamma_{kl}$ are given in table \ref{tab:coeffs}.  They are all real because $H(x,y) = H(-x,y) = H(x,-y) = H(-x,-y)$ and the same symmetries hold for $G$.  Coefficients with $|k|>2$ or $|l|>2$ are zero. Note $\gamma_{k,l} = \gamma_{-k,l} = \gamma_{k,-1} = \gamma_{-k,-l}$, so only $|k|$ and $|l|$ are used as indexes into the table.  There are a total of 25 nonzero coefficients $\gamma_{kl}$.
+
+\begin{table}[h] \small
+\caption{Nonzero Fourier coefficients $\gamma_{kl}$ of $G$.  The value of $\gamma_{kl}$ is $\rho_{\text{ice}} g (1 - \rho_{\text{ice}}/\rho_{\text{sw}}) H_0 / (2 \nu_0)$ times the given number.  These coefficients are not rounded; they are exact decimal expansions!}\label{tab:coeffs}
+\begin{tabular}{r|c|c|c|c|c}
+$\mathbf{|l|}$ \Large $\backslash$ \normalsize $\mathbf{|k|}$ & \textbf{0} & \textbf{1} & \textbf{2} \\ \hline
+\textbf{0} & 1.0854 & 0.402 & 0.0402 \\ \hline
+\textbf{1} & 0.108 & 0.04 & 0.004 \\ \hline
+\textbf{2} & 0.0027 & 0.001 & 0.0001
+\normalsize
+\end{tabular}
+\end{table}
+
+When computing the Fourier coefficients of $u$ and $v$ using equations \eqref{alfbetSSA}, note that, because of the symmetries of $\gamma_{kl}$, $\alpha_{00} = \beta_{00} = 0$.  Also, to compute $u$ by summing the Fourier series, only the real parts of the expressions $\alpha_{kl} \exp(i k \pi x/L) \exp(i l \pi y/L)$ must be summed because $u$ is real.  A similar statement applies to $v$.
+
+\end{document}
