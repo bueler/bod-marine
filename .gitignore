@@ -31,7 +31,10 @@ shelf-num/shelf_num.pdf
 ice_bib.bib
 *.pyc
 *~
-igs.bst
-igs.cls
-igsnatbib.sty
+igs*
+bodverif*.pdf
+plhalfar.pdf
+twoparabolas.pdf
+figure1.pdf
+verifN.pdf
 
