@@ -466,7 +466,8 @@ int main(int argc,char **argv)
   ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,-46,2,user.solnghostwidth,PETSC_NULL,&user.da);
             CHKERRQ(ierr);
   ierr = DMSetApplicationContext(user.da,&user);CHKERRQ(ierr);
-  ierr = DMDASetUniformCoordinates(user.da,0.0,user.xc,0.0,1.0,0.0,1.0);CHKERRQ(ierr);
+  ierr = DMDASetUniformCoordinates(user.da,0.0,user.xc,
+                                 PETSC_NULL,PETSC_NULL,PETSC_NULL,PETSC_NULL);CHKERRQ(ierr);
 
   ierr = DMDASetFieldName(user.da,0,"ice thickness [non-dimensional]"); CHKERRQ(ierr);
   ierr = DMDASetFieldName(user.da,1,"ice velocity [non-dimensional]"); CHKERRQ(ierr);
@@ -481,7 +482,8 @@ int main(int argc,char **argv)
 
   /* another DMDA for scalar parameters, with same length */
   ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,user.Mx,1,1,PETSC_NULL,&user.scalarda);CHKERRQ(ierr);
-  ierr = DMDASetUniformCoordinates(user.scalarda,0.0,user.xc,0.0,1.0,0.0,1.0);CHKERRQ(ierr);
+  ierr = DMDASetUniformCoordinates(user.scalarda,0.0,user.xc,
+                                 PETSC_NULL,PETSC_NULL,PETSC_NULL,PETSC_NULL);CHKERRQ(ierr);
   /* check that parallel layout of scalar DMDA is same as dof=2 DMDA */
   ierr = DMDAGetCorners(user.scalarda,&tmpxs,PETSC_NULL,PETSC_NULL,&tmpxm,PETSC_NULL,PETSC_NULL);
                    CHKERRQ(ierr);
@@ -507,15 +509,15 @@ int main(int argc,char **argv)
   ierr = VecDuplicate(user.M,&user.beta);CHKERRQ(ierr);
 
   ierr = SNESCreate(PETSC_COMM_WORLD,&snes);CHKERRQ(ierr);
-  ierr = DMSetApplicationContext(user.da,&user);CHKERRQ(ierr);
   ierr = SNESSetDM(snes,user.da);CHKERRQ(ierr);
+  ierr = SNESSetApplicationContext(snes,&user);CHKERRQ(ierr);
 
-  ierr = DMDASNESSetFunctionLocal(user.da,INSERT_VALUES,(DMDASNESFunction)scshell,&user);CHKERRQ(ierr);
-  ierr = DMDASNESSetJacobianLocal(user.da,(DMDASNESJacobian)BodJacobianMatrixLocal,&user);CHKERRQ(ierr);
+  ierr = DMDASetLocalFunction(user.da,(DMDALocalFunction1)scshell);CHKERRQ(ierr);
+  ierr = DMDASetLocalJacobian(user.da,(DMDALocalFunction1)BodJacobianMatrixLocal);CHKERRQ(ierr);
 
   ierr = SNESSetFromOptions(snes);CHKERRQ(ierr);
 
-  /* the Bodvardsson (1955) exact solution allows setting M(x), B(x), beta(x), T(xc) */
+  /* the the Bodvardsson (1955) exact solution allows setting M(x), B(x), beta(x), T(xc) */
   ierr = FillDistributedParams(&user);CHKERRQ(ierr);
 
   /* the exact thickness and exact ice velocity (user.uHexact) are known from Bodvardsson (1955) */
