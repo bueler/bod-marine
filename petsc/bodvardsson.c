@@ -15,7 +15,7 @@ static const char help[] =
 #include <petscdmda.h>
 #include <petscsnes.h>
 
-#include "../exactTestN.h"
+#include "exactTestN.h"
 
 
 /* we will use dof=2 DMDA, and at each grid point have a thickness H and a velocity u */
