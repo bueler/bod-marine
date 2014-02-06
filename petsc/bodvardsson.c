@@ -146,6 +146,8 @@ int main(int argc,char **argv)
   ierr = DMDASetFieldName(user.da,0,"ice thickness [non-dimensional]"); CHKERRQ(ierr);
   ierr = DMDASetFieldName(user.da,1,"ice velocity [non-dimensional]"); CHKERRQ(ierr);
 
+  ierr = DMSetFromOptions(user.da); CHKERRQ(ierr);
+
   ierr = DMDAGetInfo(user.da,PETSC_IGNORE,&user.Mx,PETSC_IGNORE,
                      PETSC_IGNORE,PETSC_IGNORE,PETSC_IGNORE,
                      PETSC_IGNORE,PETSC_IGNORE,PETSC_IGNORE,PETSC_IGNORE,
@@ -181,8 +183,8 @@ int main(int argc,char **argv)
   ierr = VecDuplicate(user.M,&user.Bstag);CHKERRQ(ierr);
   ierr = VecDuplicate(user.M,&user.beta);CHKERRQ(ierr);
 
+  /* set up snes */
   ierr = SNESCreate(PETSC_COMM_WORLD,&snes);CHKERRQ(ierr);
-  ierr = DMSetApplicationContext(user.da,&user);CHKERRQ(ierr);
   ierr = SNESSetDM(snes,user.da);CHKERRQ(ierr);
 
   ierr = DMDASNESSetFunctionLocal(user.da,INSERT_VALUES,(DMDASNESFunction)scshell,&user);CHKERRQ(ierr);
