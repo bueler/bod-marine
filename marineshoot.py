@@ -11,7 +11,7 @@ from scipy.integrate import odeint
 
 import exactN
 
-afloat = 100.0 * exactN.a
+afloat = -300.0 * exactN.a
 
 def ground(H):  # decide flotation criterion
   return (exactN.rho * H >= exactN.rhow * exactN.bc)
@@ -43,6 +43,15 @@ def B(x):
   else:
       _, _, _, _, Bc = exactN.exactN(exactN.xc)
       return Bc
+
+def surfaces(H):
+  hh = H
+  flot = np.logical_not(ground(H))
+  rr = exactN.rho / exactN.rhow
+  hh[flot] = exactN.bc + (1.0 - rr) * H[flot]
+  bb = np.zeros(np.shape(H))
+  bb[flot] = exactN.bc - rr * H[flot]
+  return hh, bb
 
 # the ode system is
 #
@@ -83,7 +92,7 @@ print "initial conditions:"
 print "  at xinit = %.3f km we have initial values" % xinit
 print "  u = %7.2f m a-1, H = %.2f m, T %.3e UNITS" % (uinit, Hinit, Tinit)
 
-x = np.linspace(xinit,exactN.xc,26)
+x = np.linspace(xinit,1.2 * exactN.xc,1001)
 dx = x[1] - x[0]
 
 v0 = np.array([uinit, Hinit, Tinit])  # initial values at x[0] = xinit
@@ -93,19 +102,38 @@ u = v[:,0]
 H = v[:,1]
 T = v[:,2]
 
+isgnd = (x <= exactN.xc)
+xbod = x[isgnd]
+Hbod = exactN.H0 * (1.0 - (xbod / exactN.L0)**2.0)
+Herror = abs(H[isgnd] - Hbod).max()
 print "results:"
-print "  velocity at xc is     u(L0)  = %7.2f m a-1" % (u[-1] * exactN.secpera)
-print "  slope    at xc is     h'(L0) = %7.6f" % ((H[-1] - H[-2]) / dx)
-
-Hbod = exactN.H0 * (1.0 - (x / exactN.L0)**2.0)
-Herror = abs(H - Hbod).max()
-print "  maximum error in H = %.2e m" % Herror
+print "  maximum error in H = %.2e m for grounded ice" % Herror
 
 plt.figure(1)
-subplot
-plt.plot(x/1000.0,H, x/1000.0,Hbod,'g--')
+hh, bb = surfaces(H)
+plt.plot(x/1000.0,hh,'k',lw=2.0)
+plt.plot(x/1000.0,bb,'k',lw=2.0)
+#plt.plot(xbod/1000.0,Hbod,'go',lw=3.0)
 plt.xlabel("x   [km]")
-plt.ylabel("elevation H(x)   [m]")
+plt.ylabel("elevation   [m]")
+
+plt.figure(2)
+plt.subplot(3,1,1)
+plt.plot(x/1000.0,u * exactN.secpera,'k',lw=2.0)
+plt.grid(True)
+plt.ylabel("velocity u(x)   [m]")
+plt.subplot(3,1,2)
+plt.plot(x/1000.0,T,'k',lw=2.0)
+plt.grid(True)
+plt.ylabel("T(x)")
+BB = np.zeros(np.shape(x))
+for j in range(len(x)):
+   BB[j] = B(x[j])
+plt.subplot(3,1,3)
+plt.plot(x/1000.0,BB,'k',lw=2.0)
+plt.grid(True)
+plt.ylabel("B(x)")
+plt.xlabel("x   [km]")
 
 plt.show()
 
