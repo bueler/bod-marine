@@ -12,8 +12,8 @@ plhalfar.pdf: plhalfar.py
 twoparabolas.pdf: plhalfar.py twoparabolas.py
 	./twoparabolas.py
 
-bodverifthickvel.pdf bodverifbetaB.pdf: bodverifpicture.py
-	./bodverifpicture.py
+bodverifthickvel.pdf bodverifbetaB.pdf: exactfigures.py
+	./exactfigures.py
 
 verifN.pdf: conv.txt verifNfigure.py
 	./verifNfigure.py conv.txt verifN.pdf
@@ -39,4 +39,4 @@ ph.bbl: ph.aux ice_bib.bib
 .PHONY: clean
 
 clean:
-	@rm -f *.out *.aux *.log *.bbl *.blg *~ $(figures)
+	@rm -f *.pyc *.out *.aux *.log *.bbl *.blg *~ $(figures)
