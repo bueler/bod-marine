@@ -24,8 +24,9 @@ Hela    = H0 / 1.5
 a       = 0.003 / secpera
 k       = 9.0 * Hela / (a * L0 * L0)
 
-xc      = 0.9 * L0
+xc      = 0.92 * L0
 Hc      = H0 * (1.0 - (xc / L0) * (xc / L0))
+bc      = rho * Hc / rhow
 
 def exactN(x):
   if (x < 0.0) | (x > L0):

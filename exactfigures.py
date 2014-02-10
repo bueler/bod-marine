@@ -64,13 +64,16 @@ ax1fig1, ax2fig1 = plottwo(xx/1000.0,HH,uu * exactN.secpera,
                            r"$H=$ ice thickness (m, solid)",r"$u=$ ice velocity (m a-1, dashed)",
                            y1min=0.0)
 ax1fig1.hold(True)
+# show water height as waves
 xl = linspace(exactN.xc,exactN.L0,N)
 ax1fig1.plot(xl/1000.0, (exactN.rho/exactN.rhow) * exactN.Hc - 30.0 * abs(sin(xl / 4.0e3)),'k',linewidth=0.7*lw)
 y1, y2 = ax1fig1.get_ylim()
 ax1fig1.set_ylim(0.0,y2)
 ax1fig1.set_xlim(0.0,exactN.L0/1000.0)
 ax1fig1.plot([exactN.xc/1000.0,exactN.xc/1000.0],[0.0,exactN.Hc],'k',linewidth=lw)
-ax1fig1.text((exactN.xc-10.0e3)/1000.0,-300.0,r"$x_c$",fontsize=18)
+ax1fig1.text((exactN.xc-10.0e3)/1000.0,-200.0,r"$x_c$",fontsize=18)
+ax1fig1.plot([0.0,8.0],[exactN.bc,exactN.bc],'k',linewidth=0.5*lw)
+ax1fig1.text(+12.0,0.8*exactN.bc,r"$b_c$",fontsize=18)
 ax1fig1.hold(False)
 name = 'bodverifthickvel.pdf'
 print '  generating figure %s ...' % name
