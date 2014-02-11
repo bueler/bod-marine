@@ -25,16 +25,13 @@
 *.maf
 *.mtc
 *.mtc0
-ph.pdf
-marinethoughts.pdf
-shelf-num/shelf_num.pdf
+exmarine.pdf
 ice_bib.bib
 *.pyc
 *~
 igs*
 bodverif*.pdf
-plhalfar.pdf
 twoparabolas.pdf
-figure1.pdf
 verifN.pdf
+old/*.pdf
 

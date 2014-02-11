@@ -1,24 +1,6 @@
-all: ph.pdf
+all: exmarine.pdf
 
-figures := figure1.pdf plhalfar.pdf twoparabolas.pdf bodverifbetaB.pdf \
-           bodverifthickvel.pdf verifN.pdf
-
-figure1.pdf: plhalfar.py figure1.py
-	./figure1.py
-
-plhalfar.pdf: plhalfar.py
-	./plhalfar.py
-
-twoparabolas.pdf: plhalfar.py twoparabolas.py
-	./twoparabolas.py
-
-bodverifthickvel.pdf bodverifbetaB.pdf: exactfigures.py
-	./exactfigures.py
-
-verifN.pdf: conv.txt verifNfigure.py
-	./verifNfigure.py conv.txt verifN.pdf
-
-# TO BUILD ph.pdf:
+# TO BUILD exmarine.pdf:
 # ice_bib.bib needs to be a link to the same object in pism-dev/doc/
 # also need links from files in
 #    http://www.igsoc.org/production/igs-v2_00-distrib.zip
@@ -27,14 +9,25 @@ verifN.pdf: conv.txt verifNfigure.py
 #    igs.bst
 #    igsnatbib.sty
 
-ph.pdf: ph.aux ph.bbl ph.tex $(figures)
-	pdflatex ph
+figures := twoparabolas.pdf bodverifbetaB.pdf bodverifthickvel.pdf verifN.pdf
 
-ph.aux: ph.tex $(figures)
-	pdflatex ph
+twoparabolas.pdf: twoparabolas.py
+	./twoparabolas.py
 
-ph.bbl: ph.aux ice_bib.bib
-	bibtex ph
+bodverifthickvel.pdf bodverifbetaB.pdf: exactfigures.py
+	./exactfigures.py
+
+verifN.pdf: conv.txt verifNfigure.py
+	./verifNfigure.py conv.txt verifN.pdf
+
+exmarine.pdf: exmarine.aux exmarine.bbl exmarine.tex $(figures)
+	pdflatex exmarine
+
+exmarine.aux: exmarine.tex $(figures)
+	pdflatex exmarine
+
+exmarine.bbl: exmarine.aux ice_bib.bib
+	bibtex exmarine
 
 .PHONY: clean
 

@@ -48,7 +48,7 @@
 
 \begin{document}
 
-\title{On perfect-plasticity, plug flows, and parabolic profiles}
+\title{Exact solutions for flowline marine ice sheets}
 
 \abstract{}
 
@@ -73,14 +73,8 @@ The purpose of this paper is to explain to the modern glaciologist how these two
 
 \subsection*{Continuum models}
 
-FIXME: STATE MASS CONTINUITY, GLEN LAW, SIA, SSA
+FIXME: STATE MODEL FROM Schoof (2007) (rapid sliding case)
 
-\subsection*{Perfect-plasticity and the SIA}
-
-\subsubsection*{A time-dependent approach to perfect plasticity}
-The geometry of a ice sheet or glacier formed from hypothetical perfectly-plastic ice has no time-dependence.  Indeed, the geometry of such an ice sheet does not depend on the mass balance either.  
-
-This paper will cite \citep{BLKCB,Halfar81,Halfar83}
 
 \small
 \begin{table}
@@ -108,39 +102,6 @@ $(x,z)$ & flow-line cartesian coordinates; $z$ is & m  \\
  & \quad positive upward & 
 \end{tabular}
 \end{table}
-
-\newcommand{\dezero}{\dot \eps_0}
-The flow law is converted from the classic form $D_{ij} = A |\tau|^{n-1} \tau_{ij}$ to the more effective form (for seeing the plastic limit),
-	$$D_{ij} = \dezero \frac{|\tau|^{n-1} \tau_{ij}}{\tau_0^n}$$
-by the conversion
-	$$\dezero = A \tau_0^n.$$
-
-In order to take the $n\to\infty$ limit, we must have $\tau_0 = \rho g H_0 / (2 R_0)$, exactly as expected for plasticity.  In this plastic limit it follows that
-% see equation 1.4.4 in Oer...
-	$$h(x)^2 - H_0^2 = \frac{2 \tau_0}{\rho g} (x - x_0).$$
-Such an equation appears in \cite{Nye52plastic} and in more recent texts
-\cite[equation 1.4.4]{Oerlemans2008minimal}.  FIXME: form with $L$ and $H_0$ needed for reference from Figure \ref{fig:twoparabolas}.
-
-\begin{figure}[ht]
-\onecol{figure1}
-\caption{The $t_0$ profiles of the Halfar solutions for $n=3,10,50$, and for the plastic limit ($n=\infty$).  The $n=50$ and plastic ($n\to\infty$) profiles are essentially co-incident at display resolution.} \label{fig:figure1}
-\end{figure}
-
-\begin{figure}[ht]
-\onecol{plhalfar}
-\caption{The black profiles are as in Figure \ref{fig:figure1}, but now the past profiles (period from $10^{-3} t_0$ to $t_0$) are shown as green shading and the future profiles ($t_0$ to $10^3 t_0$) as red shading.  The $n=\infty$ result would have no separation of past, present, and future, so it is not shown here.} \label{fig:plhalfar}
-\end{figure}
-
-\emph{Summary}: If $n$ is large then the ice sheet spends most of its time with geometry close to the $t_0$ shape.  This is the answer to the not-quite-absurd question, ``what is the time-evolution of the perfectly-plastic ice sheet?''
-
-In fact, in the ``high $n$'' case we can describe the life of the similarity solution as ``at time zero there is a delta-function of ice at $x=0$; an infinitesimal time later the profile is the plastic one shown in Figure 2; an eternity later the ice sheet shrinks to zero thickness.''  Such a description effectively applies to all ice sheets governed by high $n$ values.  As has been exploited a number of times, Nye's (1952b)\nocite{Nye52plastic} strategy allows us to reconstruct such an ice sheet from its margin outline, for example CITE LINGLE RECONSTRUCTION
-
-FOR THE HALFAR SOLUTION, GIVE A THEOREM THAT $H^{(2n+2)/n}$ IS CLOSE TO THE $t_0$ PROFILE FOR MOST OF ITS LIFE, AS $n\to \infty$
-
-THE \cite{BLKCB} SOLUTIONS WITH $\lam\ne 0$ ARE NOT SO SIMPLE BECAUSE DEVIATIONS FROM $t_0$ SHAPE YIELD MAJOR DIFFERENCES IN MASS BALANCE (?); ALSO HEAD FOR THE PERFECTLY-PLASTIC CASE, SHOWING LESS AND LESS DEPENDENCE ON THEIR MASS BALANCE?
-
-
-It is well-known that a perfectly-plastic ice sheet has no time-dependence.  We see here, by considering the $n\to\infty$ limit both in the flow law and in the corresponding Halfar flow (similarity) solutions, that nearly-plastic ice sheets spend almost all their lives close to the plastic geometry, with only a very brief period of flow to reach that state, and an agonizingly-slow decay from that state when the only mechanism for thinning is flow.
 
 
 \subsection*{Bodvardsson's parabola and marine ice sheets}
@@ -277,12 +238,11 @@ Figure \ref{fig:verifNresult} shows the result of using this numerical scheme to
 \end{figure}
 
 
-\subsection*{Conclusions} BLAH BLAH.  If one wanted a model that included both shapes, try \citep{BBssasliding}.
-
+\subsection*{Conclusions} BLAH BLAH
 
 \subsection*{Acknowledgements}  Thanks to Heinz Blatter and Helgi Bj\"ornsson for tracking down the original paper by Bodvardsson, in addressing an unrelated matter.
 
-\subsection*{Erratum and historical note}   \cite{BLKCB} identify the constant accumulation SIA solution as ``Bodvarsson (1955)--Vialov (1958).''  This is incorrect.  It is attributable only to Vialov.  Also, the spelling of Bodvardsson's name is ``Bodvarsson'' in many places, but the original paper in 1955 has ``Bodvardsson'' with a ``d''.  The \cite{Weertman61stability} response to Bodvardsson's work, the most significant such response, drops the ``d''.
+\subsection*{Erratum and historical note}   \cite{BLKCB} identify the constant accumulation SIA solution as ``Bodvarsson (1955)--Vialov (1958).''  This is incorrect as it is attributable only to Vialov.  Also, the spelling of Bodvardsson's name is ``Bodvarsson'' in many places, but the original paper in 1955 has ``Bodvardsson'' with a ``d''.  \cite{Weertman61stability}, an early response to Bodvardsson's work, drops the ``d''.
 
 %         References
 \bibliography{ice_bib}
@@ -339,6 +299,5 @@ Note that for the driving stress we have used a second-order one-sided approxima
 In equations \eqref{mcsteadyFD} and \eqref{SSAFD} the $2N+2$ unknowns are the $N+1$ approximate thickness values $\{H_i\}_{i=0}^N$ and the $N+1$ approximate velocities $\{u_i\}_{i=0}^N$.  The additional parameters (knowns) are the surface mass balance values $M_i = M(x_i)$, the basal sliding coefficients $\beta_i = \beta(x_i)$, and the staggered-grid values of the ice hardness $B_{i+1/2} =B(x_{i+1/2})$ where $x_{i+1/2} = x_i + \Delta x/2$.  Equations \eqref{mcsteadyFD} and \eqref{SSAFD} form a presumably-well-posed system when augmented by the given boundary conditions.
 
 Equations \eqref{mcsteadyFD}, \eqref{mcbcFD}, \eqref{SSAFD}, and \eqref{notionalFD}, along with Dirichlet boundary conditions $H_0=H_0$ and $u_0=0$ form a system of $2N+2$ equations $\mathbf{F}(\mathbf{v})=0$ in the same number of unknowns, which we denote as a vector $\mathbf{v}$.  These equations are solved by Newton's method \citep[e.g.][]{Pressetal}.  Following the paradigm sketched by \cite{KnollKeyes2004} we first implement a residual evaluation function which merely computes $\mathbf{F}(\mathbf{v}_0)$ given a guess $\mathbf{v}_0$.  The Jacobian-free Newton-Krylov method implemented in PETSc \citep{KnollKeyes2004,petsc-user-ref}, and/or the finite difference Jacobian also in PETSc, can solve the system up to sizes of about $N=1000$.  For scaling to higher resolution as shown in Figure \ref{fig:verifNresult} WE USED AN ANALYTICAL JACOBIAN.  FOR 2D CASES PERHAPS PRECONDITIONING BY AN APPROXIMATION TO THE JACOBIAN WOULD BE WISE.  FIXME: WHAT ABOUT INITIAL GUESS?
-
 
 \end{document}
