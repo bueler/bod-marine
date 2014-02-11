@@ -1,0 +1,348 @@
+\NeedsTeXFormat{LaTeX2e}
+%\documentclass[twocolumn]{igs}
+\documentclass[twocolumn,letterpaper]{igs}
+%\documentclass[review]{igs}
+
+\usepackage{igsnatbib}  % see igs2eguide.tex for example citation styles
+
+% check if we are compiling under latex or pdflatex
+\ifx\pdftexversion\undefined
+  \usepackage[dvips]{graphicx}
+\else
+  \usepackage[pdftex]{graphicx}
+\fi
+
+\usepackage{amsmath,amssymb,xspace}
+\newcommand{\onecol}[1]{\includegraphics[width=86mm]{#1}}
+\newcommand{\twocol}[1]{\includegraphics[width=178mm]{#1}}
+
+\newcommand{\url}{\texttt{}}
+
+% macros
+\newcommand{\bQ}{\mathbf{Q}}
+\newcommand{\bq}{\hat{\mathbf{q}}}
+\newcommand{\br}{\hat{\mathbf{r}}}
+\newcommand{\bU}{\mathbf{U}}
+\newcommand{\hatx}{\hat{\mathbf{x}}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\Div}{\nabla\cdot}
+\newcommand{\ddx}[1]{\frac{\partial #1}{\partial x}}
+\newcommand{\ddy}[1]{\frac{\partial #1}{\partial y}}
+\newcommand{\pp}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\ppt}[1]{\frac{\partial #1}{\partial t}}
+\newcommand{\ppT}[1]{\frac{\partial #1}{\partial T}}
+\newcommand{\ppx}[1]{\frac{\partial #1}{\partial x}}
+\newcommand{\ppy}[1]{\frac{\partial #1}{\partial y}}
+\newcommand{\ppz}[1]{\frac{\partial #1}{\partial z}}
+\newcommand{\ppzz}[1]{\frac{\partial^2 #1}{\partial z^2}}
+\newcommand{\eps}{\epsilon}
+\newcommand{\grad}{\nabla}
+\newcommand{\hh}{\hat h}
+\newcommand{\ip}[2]{\left(#1,#2\right)}
+\newcommand{\lam}{\lambda}
+\newcommand{\lap}{\triangle}
+\newcommand{\mtt}{\texttt}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\vf}{\varphi}
+
+\begin{document}
+
+\title{On perfect-plasticity, plug flows, and parabolic profiles}
+
+\abstract{}
+
+\author{Ed Bueler}
+
+\affiliation{Dept.~of Mathematics and Statistics, University of Alaska, Fairbanks AK 99775-6660, USA \\
+E-mail: \emph{\texttt{elbueler\@@alaska.edu}}}
+
+
+\maketitle
+
+\subsection*{Introduction}  At its beginning, theoretical glaciological offered-up two parabolic profiles as the shapes of steady ice sheets lying on flat beds, as in Figure \ref{fig:twoparabolas}.  One was the profile of an ice sheet with perfectly-plasticity \citep{Orowan,Nye52plastic} and the other the profile for a sliding (plug) flow investigated by \cite{Bodvardsson}.  These were among the earliest ``global'' views of the free surface flows in glaciology.  They focussed on different aspects of the global problem, and they came to very different conclusions.  These authors found parabolas which exactly solved their nonlinear flow equations, but their solutions are rarely used for modeling glacier and ice sheet flow in recent decades.\footnote{Draft date \emph{\today}.}  % <-- IS THIS TRUE HISTORICALLY
+
+The profiles, shown in Figure \ref{fig:twoparabolas}, are remarkably different curves, especially in their descriptions of the dome (the highest point of the ice sheet) and margin (where the ice thickness goes to zero) shape.   Up to scaling, one is of the form $x=1-y^2$ (perfect-plasticity) and the other is of the form $y=1-x^2$ (the plug flow).  The perfect-plasticity solution has a central peak at the highest point of the ice sheet, and a margin with unbounded surface gradient.  The plug flow solution has a smooth dome and a finite-slope, wedge-shaped margin.
+
+The purpose of this paper is to explain to the modern glaciologist how these two classic parabolas arise as limits of the physics in the standard SIA and SSA stress balance models, when coupled with the mass continuity equation.  We have identified a new connection between similarity solutions of the SIA and the perfectly-plastic model, and this connection illuminates the time-dependent behavior of nearly-plastic ice.  And it turns out that the Bodvardsson parabola directly relates to an important recent ice sheet modeling problem, the modeling of marine ice sheets in the rapidly-sliding case.
+
+\begin{figure}[ht]
+%\onecol{twoparabolas}
+SEE FIGURE IN exmarine.tex
+\caption{The parabolas offered by Orowan and Nye (1949; 1952) (solid) and by \cite{Bodvardsson} (dashed) as the profiles of steady ice sheets on flat beds.  Here each ice sheet is symmetric, so only a flow line from dome to margin is shown.  A dome thickness of $H_0=3000$ m and a total flowline distance of $L_0=500$ km (from dome to margin where $H=0$) are chosen for concreteness in this paper.} \label{fig:twoparabolas}
+\end{figure}
+
+\subsection*{Continuum models}
+
+FIXME: STATE MASS CONTINUITY, GLEN LAW, SIA, SSA
+
+\subsection*{Perfect-plasticity and the SIA}
+
+\subsubsection*{A time-dependent approach to perfect plasticity}
+The geometry of a ice sheet or glacier formed from hypothetical perfectly-plastic ice has no time-dependence.  Indeed, the geometry of such an ice sheet does not depend on the mass balance either.  
+
+This paper will cite \citep{BLKCB,Halfar81,Halfar83}
+
+\small
+\begin{table}
+\caption{Notation and units (SI).}\label{tab:notation}
+
+\medskip
+\begin{tabular}{llll}
+Symbol & Description & [Value] Units \\ \hline
+$A$ & ice softness & $\text{Pa}^{-3}\,\text{s}^{-1}$  \\
+$B$ & ice hardness; $B=A^{-1/n}$ & $\text{Pa}\,\text{s}^{1/3}$  \\
+$\beta$ & sliding coefficient & \\
+$\eps_0$ & regularizing velocity for computing & $\text{m}\,\text{s}^{-1}$ \\
+ & \quad effective viscosity &  \\
+$g$ & acceleration of gravity  & 9.81 $\text{m}\,\text{s}^{-2}$\\
+$H$ & ice thickness and ice surface elevation & m \\
+$M$ & ice-equivalent surface mass balance & $\text{m}\,\text{s}^{-1}$ \\
+$n$ & Glen exponent in ice flow law & 3 \\
+$\nu$ & vertically-averaged (effective) viscosity & Pa s \\
+ & \quad  in SSA & \\
+$\rho$ & density of ice & 910 $\text{kg}\,\text{m}^{-3}$ \\
+$\rho_w$ & density of sea water & 1028 $\text{kg}\,\text{m}^{-3}$ \\
+$\tau_{b}$ & basal shear stress applied to ice & Pa \\
+$u$ & horizontal velocity & $\text{m}\,\text{s}^{-1}$ \\
+$(x,z)$ & flow-line cartesian coordinates; $z$ is & m  \\
+ & \quad positive upward & 
+\end{tabular}
+\end{table}
+
+\newcommand{\dezero}{\dot \eps_0}
+The flow law is converted from the classic form $D_{ij} = A |\tau|^{n-1} \tau_{ij}$ to the more effective form (for seeing the plastic limit),
+	$$D_{ij} = \dezero \frac{|\tau|^{n-1} \tau_{ij}}{\tau_0^n}$$
+by the conversion
+	$$\dezero = A \tau_0^n.$$
+
+In order to take the $n\to\infty$ limit, we must have $\tau_0 = \rho g H_0 / (2 R_0)$, exactly as expected for plasticity.  In this plastic limit it follows that
+% see equation 1.4.4 in Oer...
+	$$h(x)^2 - H_0^2 = \frac{2 \tau_0}{\rho g} (x - x_0).$$
+Such an equation appears in \cite{Nye52plastic} and in more recent texts
+\cite[equation 1.4.4]{Oerlemans2008minimal}.  FIXME: form with $L$ and $H_0$ needed for reference from Figure \ref{fig:twoparabolas}.
+
+\begin{figure}[ht]
+\onecol{figure1}
+\caption{The $t_0$ profiles of the Halfar solutions for $n=3,10,50$, and for the plastic limit ($n=\infty$).  The $n=50$ and plastic ($n\to\infty$) profiles are essentially co-incident at display resolution.} \label{fig:figure1}
+\end{figure}
+
+\begin{figure}[ht]
+\onecol{plhalfar}
+\caption{The black profiles are as in Figure \ref{fig:figure1}, but now the past profiles (period from $10^{-3} t_0$ to $t_0$) are shown as green shading and the future profiles ($t_0$ to $10^3 t_0$) as red shading.  The $n=\infty$ result would have no separation of past, present, and future, so it is not shown here.} \label{fig:plhalfar}
+\end{figure}
+
+\emph{Summary}: If $n$ is large then the ice sheet spends most of its time with geometry close to the $t_0$ shape.  This is the answer to the not-quite-absurd question, ``what is the time-evolution of the perfectly-plastic ice sheet?''
+
+In fact, in the ``high $n$'' case we can describe the life of the similarity solution as ``at time zero there is a delta-function of ice at $x=0$; an infinitesimal time later the profile is the plastic one shown in Figure 2; an eternity later the ice sheet shrinks to zero thickness.''  Such a description effectively applies to all ice sheets governed by high $n$ values.  As has been exploited a number of times, Nye's (1952b)\nocite{Nye52plastic} strategy allows us to reconstruct such an ice sheet from its margin outline, for example CITE LINGLE RECONSTRUCTION
+
+FOR THE HALFAR SOLUTION, GIVE A THEOREM THAT $H^{(2n+2)/n}$ IS CLOSE TO THE $t_0$ PROFILE FOR MOST OF ITS LIFE, AS $n\to \infty$
+
+THE \cite{BLKCB} SOLUTIONS WITH $\lam\ne 0$ ARE NOT SO SIMPLE BECAUSE DEVIATIONS FROM $t_0$ SHAPE YIELD MAJOR DIFFERENCES IN MASS BALANCE (?); ALSO HEAD FOR THE PERFECTLY-PLASTIC CASE, SHOWING LESS AND LESS DEPENDENCE ON THEIR MASS BALANCE?
+
+
+It is well-known that a perfectly-plastic ice sheet has no time-dependence.  We see here, by considering the $n\to\infty$ limit both in the flow law and in the corresponding Halfar flow (similarity) solutions, that nearly-plastic ice sheets spend almost all their lives close to the plastic geometry, with only a very brief period of flow to reach that state, and an agonizingly-slow decay from that state when the only mechanism for thinning is flow.
+
+
+\subsection*{Bodvardsson's parabola and marine ice sheets}
+
+\subsubsection*{An exact solution to the SSA stress balance plus mass continuity}
+The \cite{Bodvardsson} solution is also a parabola, but this time the margin has finite slope and the dome is smooth.  The \cite{Bodvardsson} solution was analyzed by \cite{Weertman61stability}, who decides that the physics chosen by Bodvardsson should be replaced by more SIA-like deformation, though sliding is allowed as well.
+
+Bodvardsson doesn't actual solve the SIA but instead solves a plug-flow model with a basal velocity which is proportional to the glaciological driving stress.  The SIA with Glen (power) law rheology is stated in his equation (13).  The ice softness is parameterized in equation (1) by $S_0$, the ``pseudo yield stress'' for power law ice.  Thus his equation (13) has constants $n$ and $S_0$, as well as constant $k$ describing the basal sliding.  But he then says on page 4, regarding his equation (13): ``This equation is quite tedious and very difficult to handle especially because of the first term in the parentheses.  It is therefore fortunate that this term appears to be small compared to the second term.''  In the next paragraph he drops the ``first term in the parentheses,'' and thus drops the Glen law and any internal ice deformation at all, and writes down equation (14) with only the constant ``$k$'' describing the base.  He never goes back to SIA equation (13), nor are any solutions of equation (13) provided.
+
+Regarding the ``$k$'' in equation, and noting that his actual results are all on a flat bed, he says between his equation (9) and (10): ``$s_b = k v w h$''.  In modern symbols we would write the shear stress applied to the base of the ice as
+  $$\tau_b = - k u_b \rho g H$$
+This a linear sliding relation $\tau_b = - \beta u_b$ where $\beta = k (\rho g H).$.  That is, $\beta$ scales with the overburden pressure.
+
+But equations (14) and (16) and (17), for which he discusses stability, are not SIA.  The involve no ice deformation at all, nor are stresses in the ice balanced in any way.  His flows are \emph{plug flows} with a weak fluid which feels only linear basal resistance.
+
+Bodvardsson's solution (18) of (17) is exact.  It
+turns out that the simplest steady porous medium equation with linear
+right hand side and an (under-determined) one-sided Dirichlet boundary
+value problem, namely
+  $$(u u')' = Au+B, \qquad  u(0) = u_0$$
+which is his equation (17), always has an exact solution which is a
+quadratic polynomial, e.g.
+   $$u(x) = u_0 (1 + \alpha x + \beta x^2).$$
+He exploits this solution to determine $L$ from the condition $h(L)=0$.
+He use the exact solution it for its free boundary information.
+
+\emph{But} the quadratic solution (18) absolutely does not have a margin
+shape which would come from deformation and Glen's law.  Rather his
+margin is asymptotically a ``wedge'' with finite slope, because his ice
+sheet profile is merely a parabola \emph{in the horizontal variable} $x$.
+See the profile in figure 2 for the margin shape, the last 20km of
+Bruarjokull.
+
+Bodvardsson's parabola must be the opposite end of some spectrum from the
+purely-plastic, $n=\infty$ ice which gives a shape which is a parabola
+on its side, that is, a square root in $x$!  In particular, Bodvardsson's equation (23) gives an exact solution of his equation (17), and this is shown in Figure \ref{fig:twoparabolas}.  FIXME: form with $L$ and $H_0$ needed for reference from Figure \ref{fig:twoparabolas}.
+
+\citet[equation (17)]{Bodvardsson} writes 
+\begin{equation}
+a (H - H_{ela}) + (k^{-1} H H')' = 0  \label{bodsteady}
+\end{equation}
+for $k>0$ and $a>0$ and equilibrium-line altitude $H_{ela}$.  The offered solution \citep[equation (23)]{Bodvardsson} is
+\begin{equation}
+H(x) = H_0 (1 - (x/L_0)^2)  \label{bodsoln}
+\end{equation}
+where $H_0 = 1.5 H_{ela}$ and $a k L_0^2 = 9 H_{ela}$.  This is an exact solution to equation \eqref{bodsteady} with boundary condition $H(0)=H_0$, as the reader may verify.  Formula \eqref{bodsoln} defines the dashed parabola shown in Figure \ref{fig:twoparabolas}.
+
+In the Bodvardsson theory the ice velocity is
+\begin{equation}
+u = - \frac{1}{k} H' \label{bodstressbalance}
+\end{equation}
+and the surface mass balance is
+\begin{equation}
+M = a (H - H_{ela}).  \label{bodmassbalance}
+\end{equation}
+This same surface balance appears in \cite{Weertman61stability,Jouvetetal2011}, among other places, and, though realisting in its broad outlines, it is generally understood to be a source of instability for the problem of determining the steady state of an ice sheet.
+
+Bodvardsson explicitly considers solution \eqref{bodsoln} to solve a free boundary problem.  Specifically, the sense is that the single boundary condition $H(0)=H_0$, in the equation \eqref{bodsteady}, determines the quadratic solution \eqref{bodsoln}, which generates a value for $L_0$ from the hypothesis that the flux at $x=L_0$ is zero and the thickness at $x=L_0$ is also zero.  A DEEPER REASON WHY \eqref{bodsteady} SHOULD HAVE A QUADRATIC SOLUTION IS NOT OFFERED.
+
+A MODERN RE-INTERPETATION  The solution \eqref{bodsoln} exactly solves a combination of the flow-line mass-continuity equation and the SSA stress balance \citep{MacAyeal,WeisGreveHutter}, but with somewhat-contrived (``manufactured'') sliding coefficient and ice softness.
+
+We write flow-line mass-continuity equation and SSA stress balance equations together as a system describing a steady grounded flow with sliding.  The SSA is a balance of vertically-integrated longitudinal stresses, basal shear stress, and glaciological driving stress.  Specifically we assume flat bed and linear sliding $\tau_b = -\beta u$ and get:
+\begin{align}
+M - (u H)_x &= 0 \label{mcsteady} \\
+\left(2 H B |u_x|^{(1/n)-1} u_x\right)_x - \beta u &= \rho g H H_x  \label{ssasteady}
+\end{align}
+Such a model will be familiar to many readers as the steady state form of the model used in much recent work on marine ice sheet flowline models \citep[e.g.][]{SchoofMarine1}.  In equations \eqref{mcsteady} and \eqref{ssasteady} we see a non-linearly viscous constitutive relation for the ice.  A balance is required in which only the along-flow deviatoric (``longitudinal'') stress
+	$$\tau = 2 \nu u_x$$
+appears, but not the vertical shear stress.  In this isothermal case, Glen's power law for ice flow implies
+	$$\nu = B |u_x|^{(1/n)-1}$$
+where $B$ is the ice hardness.  Following \cite{SchoofStream} we define the vertically-integrated longitudinal stress
+\begin{equation}
+T = \tau H = 2 H B |u_x|^{(1/n)-1} u_x.  \label{schoofsT}
+\end{equation}
+
+We now consider equations \eqref{mcsteady}, \eqref{ssasteady} in the case of specific mass balance \eqref{bodmassbalance}.
+Furthermore let us suppose a sliding coefficient which scales with the overburden pressure,
+\begin{equation}
+\beta = \beta(x) = k \rho g H(x),\label{betadefine}
+\end{equation}
+where $k>0$ is a constant.  With these substitutions the system \eqref{ssasteady} appears as
+\begin{align}
+a(H-H_{ela}) - (u H)_x &= 0 \label{mcsteadysimpler} \\
+\left(T\right)_x - k \rho g H u &= \rho g H H_x \label{ssasteadysimpler}
+\end{align}
+
+Now suppose that we consider only solutions with constant vertically-integrated longitudinal stress, $T_x \equiv 0$.  In that case a brief calculation reduces equations \eqref{ssasteadysimpler} to Bodvardsson's model, equation \eqref{bodsteady} above.  That is, if $T_x \equiv 0$ then we recover a parabolic profile for $H(x)$, namely equation \eqref{bodsoln}.
+
+What does the condition ``$T_x\equiv 0$'' imply as a relation among the modeled quantities?  Given a thickness profile $H(x)$ and a strain rate profile $u_x(x)$, we may interpret ``$T_x\equiv 0$'' as a statement about \emph{variable ice hardness}.  Such variable hardness is physical and common to many models using the SSA \citep{BBssasliding}, so implementing such $x$-dependent hardness requires no new concepts or components in such models.  In particular, if $T=T_0$ is the constant value then equation \eqref{schoofsT} implies
+\begin{equation}
+B = B(x) = \frac{T_0}{2 H |u_x|^{(1/n)-1} u_x}. \label{hardnessdefine}
+\end{equation}
+
+We are now in the following extraordinary situation.  Given Bodvardsson's formula \eqref{bodsoln} for $H(x)$, and computing the horizontal velocity $u(x)$ by the simple rule from \cite{Bodvardsson},
+	$$u = -\frac{1}{k} H',$$
+we can construct a nontrivial solution to the steady SSA-plus-mass continuity system \eqref{ssasteady}.  Namely, we define the linear friction coefficient $\beta$ by equation \eqref{betadefine} and the ice hardness $B$ by equation \eqref{hardnessdefine}, and regard these as the fixed functions of $x$ shown in Figure \ref{fig:bodverifbetaB}.  The resulting profiles of elevation and horizontal velocity solve a nontrivial problem with a flat base and a surface mass balance function depending linearly on elevation, namely system \eqref{ssasteadysimpler}.  These profiles are shown in Figure \ref{fig:bodverifthickvel}.
+
+The surface mass balance is, in this Test N case, a fixed function of $x$ also, in which we have incorporated solution \eqref{bodsoln},
+	$$M = M(x) = a(H-H_{ela}) = a(H_0(1 - (x/L_0)^2 - H_{ela}).$$
+By using this simple parabolic surface mass balance we remove one instability from the continuum problem, namely the accumulation-altitude feedback which was Bodavardsson's original purpose.  But we can put it back when needed.
+
+\begin{figure}[ht]
+%\onecol{bodverifthickvel}
+SEE FIGURE IN exmarine.tex
+\caption{Thickness $H(x)$ and horizontal velocity $u(x)$ in verification case of the Bodvardsson solution (Test N).  The calving-front stress boundary conditions is imposed at $x=x_c$ where the ice exactly reaches flotation.  The ice surface elevation satisfies $h=H-500$, and th elevation $h=0$ of the sea is shown.} \label{fig:bodverifthickvel}
+\end{figure}
+
+\begin{figure}[ht]
+%\onecol{bodverifbetaB}
+SEE FIGURE IN exmarine.tex
+\caption{Sliding law parameter $\beta(x)$, equation \eqref{betadefine}, and ice hardness $B(x)$, equation \eqref{hardnessdefine}, for the Bodvarssson verification case (Test N).} \label{fig:bodverifbetaB}
+\end{figure}
+
+\subsubsection*{An exact solution to the flowline marine ice sheet problem}  YOU CAN GLUE THE \cite{vanderVeen85} (\& SANDERSON?) STEADY ICE SHELF ON THE END AND IT IS THEN AN EXACT MARINE ICE SHEET; SHOW
+
+\subsubsection*{Stability}
+WHAT IS Bodvardsson's ACTUAL STABILITY RESULT?:  Bodvardsson treats the stability problem for equation (16) by showing that his free boundary solution (18) is linearly-UNstable.
+
+FOR VERIFICATION PURPOSES WE CAN FIX $M(x)$ TO ITS BODVARDSSON VALUE, AND REMOVE ANY ISSUES WITH INSTABILITY.
+
+FOR THE SOLUTION FROM THE PREVIOUS SUBSECTION WE HAVE BOTH THE ELEVATION-ALTITUDE AND THE MARINE ICE SHEET INSTABILITY, IF WE ADD TIME-DEPENDENCE.
+
+
+
+\subsection*{Numerical results}
+
+This re-interpreted Bodvardsson exact solution is a verification test (``Test N'') in the open source code of the Parallel Ice Sheet Model \citep[PISM; ][]{pism-user-manual}.  A special-purpose, stand-alone C code implementing a second-order finite difference scheme is described in the appendix.  It is also available as part of the PISM source code.  It has a parallel implementation using the PETSc \citep{petsc-user-ref} library and it uses a Newton scheme to achieve observed quadratic convergence of the iteration.
+
+Figure \ref{fig:verifNresult} shows the result of using this numerical scheme to approximate the exact solution.  Both the maximum numerical thickness error and the maximum numerical velocity error are observed to converge at essentially an $O(\Delta x^2)$ error as the grid spacing $\Delta x$ refines to zero.  
+
+\begin{figure}[ht]
+% add symbolic link to
+%    pism-dev/src/verif/tests/verifN/verifN.pdf
+%\onecol{verifN}
+SEE FIGURE IN exmarine.tex
+\caption{Verification result from Test N.  The ice thickness error decays at rate $O(\Delta x^{1.95})$ (dotted).} \label{fig:verifNresult}
+\end{figure}
+
+
+\subsection*{Conclusions} BLAH BLAH.  If one wanted a model that included both shapes, try \citep{BBssasliding}.
+
+
+\subsection*{Acknowledgements}  Thanks to Heinz Blatter and Helgi Bj\"ornsson for tracking down the original paper by Bodvardsson, in addressing an unrelated matter.
+
+\subsection*{Erratum and historical note}   \cite{BLKCB} identify the constant accumulation SIA solution as ``Bodvarsson (1955)--Vialov (1958).''  This is incorrect.  It is attributable only to Vialov.  Also, the spelling of Bodvardsson's name is ``Bodvarsson'' in many places, but the original paper in 1955 has ``Bodvardsson'' with a ``d''.  The \cite{Weertman61stability} response to Bodvardsson's work, the most significant such response, drops the ``d''.
+
+%         References
+\bibliography{ice_bib}
+\bibliographystyle{igs}
+
+\appendix
+
+\subsection{Appendix: Finite difference scheme for coupled Equations \eqref{mcsteady} and \eqref{ssasteady}}  The coupled, steady-state equations for mass continuity and the SSA stress balance form a continuum system that is solved exactly by the Bodvardsson solution (Test N), as explained in the main text.  Here we detail a numerical scheme for these equations.  The scheme uses centered, second-order finite differences for the SSA equation and a second-order upwind finite difference scheme for the mass continuity equation.  Figure \ref{fig:verifNresult} gives clear evidence that the scheme computes convergent ice thickness and ice velocity as the grid spacing decreases.
+
+Let $N$ be the number of equal-length subintervals of the domain $[0,x_c]$, where $x_c$ is the horizontal location of the calving front.  Let $\Delta x = x_c/N$ and $x_i = i \Delta x$ for $i=0,1,\dots,N$.  % note for code:  N = Mx-1
+Denote the numerical approximations $H_i\approx H(x_i)$ and $u_i \approx u(x_i)$.
+
+The mass continuity equation \eqref{mcsteady} is approximated by second-order upwinding.  In our application the velocity is positive ($u_i\ge 0$), thus
+\begin{equation}
+M_i - \frac{3 u_i H_i - 4 u_{i-1} H_{i-1} + u_{i-2} H_{i-2}}{2 \Delta x} = 0 \label{mcsteadyFD}
+\end{equation}
+approximates \eqref{mcsteady} for $i=2,\dots,N$.
+
+The Dirichlet boundary conditions in Test N are $H(0)=H_0$ and $u(0)=u_0=0$.  Thus the flux $uH$ is zero at $x=0$.  The mass continuity equation \eqref{mcsteady} additionally implies $(uH)'\big|_{x=0}=M(0)=M_0$.  To build a special second-order rule for the $i=1$ case (i.e.~at $x_1 = \Delta x$) from this information, we construct interpolating quadratic $Q(x) = c_0 + c_1 x + c_2 x^2$ which approximates the flux, $Q(x) \approx u(x)H(x)$, on $0 \le x \le x_1$.  Specifically, we require $Q(0)=0$, $Q'(0)=M_0$, and $Q(x_1) = u_1 H_1$.  Then $Q'(x_1) = M_0 - (2 u_1 H_1/  \Delta x)$ so
+\begin{equation}
+M_1 - M_0 + \frac{2 u_1 H_1}{\Delta x} = 0 \label{mcbcFD}
+\end{equation}
+is the second-order upwind condition at $x_1$, as equation \eqref{mcsteadyFD} has no $i=1$ case.
+
+In order to solve the SSA stress balance equation \eqref{ssasteady} we avoid infinite viscosity by choosing a regularization constant $\eps=x_c^{-1}$ per year, a strain rate of 1 m$/$a over the full horizontal span $x_c$.  Let $q = (1-n)/n$, and define
+\begin{equation}
+F(u_l,u_r) = \left(\left(\frac{u_r-u_l}{\Delta x}\right)^2 + \eps^2\right)^{q/2} \frac{u_r-u_l}{\Delta x}.  \label{viscregFD}
+\end{equation}
+
+Also let $H_{i+1/2} = (H_i+H_{i+1})/2$.  With this notation the SSA stress balance equation in \eqref{ssasteady} is approximated by this centered-difference, second-order scheme
+\begin{align}
+&\frac{2 H_{i+1/2} B_{i+1/2} F(u_i,u_{i+1}) - 2 H_{i-1/2} B_{i-1/2} F(u_{i-1},u_i)}{\Delta x} \notag \\
+&\qquad - \beta_i u_i - \rho g H_i \frac{H_{i+1}-H_{i-1}}{2\Delta x} = 0  \label{SSAFD}
+\end{align}
+for $i=1,\dots,N-1$.
+
+At $x=x_c$ the calving-front stress balance condition is applied.  Recall that $x_c$ is chosen so that the ice calves exactly when it reaches flotation, so the vertically-integrated longitudinal stress $T$ (equation \eqref{schoofsT}) has a specific value,
+\begin{align}
+T(x_c) &= \frac{1}{2} \left(1 - \frac{\rho}{\rho_w}\right) \rho g H(x_c)^2 \notag \\
+   &\approx \frac{1}{2} \left(1 - \frac{\rho}{\rho_w}\right) \rho g H_N^2. \label{calvingstressFD}
+\end{align}
+The resulting boundary condition is handled as are many such Neumann boundary conditions in finite difference and finite volume schemes, namely by introducing and then removing a notional unknown $u_{N+1}$ at a notional node $x_{N+1}$ which is a distance $\Delta x$ beyond $x_N=x_c$ \citep{MortonMayers}.  Recalling equation \eqref{schoofsT}, we approximate $T(x_c)$ by the average
+\begin{align}
+T(x_c) &\approx H_{N+1/2} B_{N+1/2} F(u_N,u_{N+1}) \notag \\
+  &\qquad+ H_{N-1/2} B_{N-1/2} F(u_{N-1},u_{N}),\label{notionalFD}
+\end{align}
+which also involves a notional thickness $H_{N+1}$.  Combining equations \eqref{calvingstressFD}, \eqref{notionalFD}, and the $i=N$ case of \eqref{SSAFD} allows us to eliminate all reference to the notional unknowns $u_{N+1}$ and $H_{N+1}$.  We derive this special replacement for \eqref{SSAFD} at $x_N$:
+\begin{align*}
+&\frac{\left(1 - \frac{\rho}{\rho_w}\right) \rho g H_N^2 - 4 H_{N-1/2} B_{N-1/2} F(u_{N-1},u_N)}{\Delta x} \\
+&\qquad - \beta_N u_N - \rho g H_N \frac{3 H_N - 4H_{N-1} + H_{N-2}}{2\Delta x} = 0.
+\end{align*}
+Note that for the driving stress we have used a second-order one-sided approximation of the surface slope $H'$.
+
+In equations \eqref{mcsteadyFD} and \eqref{SSAFD} the $2N+2$ unknowns are the $N+1$ approximate thickness values $\{H_i\}_{i=0}^N$ and the $N+1$ approximate velocities $\{u_i\}_{i=0}^N$.  The additional parameters (knowns) are the surface mass balance values $M_i = M(x_i)$, the basal sliding coefficients $\beta_i = \beta(x_i)$, and the staggered-grid values of the ice hardness $B_{i+1/2} =B(x_{i+1/2})$ where $x_{i+1/2} = x_i + \Delta x/2$.  Equations \eqref{mcsteadyFD} and \eqref{SSAFD} form a presumably-well-posed system when augmented by the given boundary conditions.
+
+Equations \eqref{mcsteadyFD}, \eqref{mcbcFD}, \eqref{SSAFD}, and \eqref{notionalFD}, along with Dirichlet boundary conditions $H_0=H_0$ and $u_0=0$ form a system of $2N+2$ equations $\mathbf{F}(\mathbf{v})=0$ in the same number of unknowns, which we denote as a vector $\mathbf{v}$.  These equations are solved by Newton's method \citep[e.g.][]{Pressetal}.  Following the paradigm sketched by \cite{KnollKeyes2004} we first implement a residual evaluation function which merely computes $\mathbf{F}(\mathbf{v}_0)$ given a guess $\mathbf{v}_0$.  The Jacobian-free Newton-Krylov method implemented in PETSc \citep{KnollKeyes2004,petsc-user-ref}, and/or the finite difference Jacobian also in PETSc, can solve the system up to sizes of about $N=1000$.  For scaling to higher resolution as shown in Figure \ref{fig:verifNresult} WE USED AN ANALYTICAL JACOBIAN.  FOR 2D CASES PERHAPS PRECONDITIONING BY AN APPROXIMATION TO THE JACOBIAN WOULD BE WISE.  FIXME: WHAT ABOUT INITIAL GUESS?
+
+
+\end{document}
