@@ -49,12 +49,9 @@ def plottwo(x, y1, y2, label1, label2, y1min=-inf, y1max=inf, y2min=-inf, y2max=
 
 N = 1001
 xx = linspace(0.0,exactN.xc,N)
-HH = xx.copy()
-uu = xx.copy()
-MM = xx.copy()
-BB = xx.copy()
-for j in range(N):
-  HH[j], hx, uu[j], MM[j], BB[j] = exactN.exactN(xx[j])
+
+HH, hx, uu, MM = exactN.exactN(xx)
+_, BB = exactN.exactNbueler(xx)
 
 # surface elevation is so that ice reaches flotation exactly at xc
 hh = HH - (exactN.rho/exactN.rhow) * exactN.Hc

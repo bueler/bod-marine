@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-## the Bodvardsson (1955) problem thought of as a
-## verification test for a marine ice sheet
+## the Bodvardsson (1955) problem rethought, as an exact SSA solution
+## for a marine ice sheet
 
 from sys import exit
-from pylab import *
+import numpy as np
 
 ## the following code defining the Test N form of the Bodvardsson solution
 ## represents complete code duplication from
@@ -14,7 +14,6 @@ from pylab import *
 secpera = 31556926.0
 g       = 9.81
 rho     = 910.0
-rhow    = 1028.0
 n       = 3.0
 
 H0      = 3000.0
@@ -25,22 +24,36 @@ a       = 0.003 / secpera
 Hela    = H0 / 1.5
 k       = 9.0 * Hela / (a * L0 * L0)
 
-xc      = 0.9 * L0
-Hc      = H0 * (1.0 - (xc / L0) * (xc / L0))
-bc      = rho * Hc / rhow
-
 def exactN(x):
-  if (x < 0.0) | (x > L0):
-    print "ERROR in exactN()"
+  # Bodvardsson: get geometry and velocity from mass continuity and
+  #   T_x = 0  and assumption  beta = k rho g H
+  if np.any((x < 0.0) | (x > L0)):
+    print "ERROR in exactN(): x out of range [0,L0]"
     return 1
   hxx = - 2.0 * H0 / (L0 * L0)
   q   = (1.0 / n) - 1.0
   ux  = - hxx / k
-  T0  = 0.5 * (1.0 - rho / rhow) * rho * g * Hc * Hc
   H   = H0 * (1.0 - (x / L0) * (x / L0))
   hx  = hxx * x
   u   = - hx / k
   M   = a * (H - Hela)
-  B   = T0 / ( 2.0 * H * (abs(ux)**q) * ux )
-  return H, hx, u, M, B
+  return H, hx, u, M
 
+rhow    = 1028.0
+xc      = 0.9 * L0
+Hc      = H0 * (1.0 - (xc / L0) * (xc / L0))
+bc      = rho * Hc / rhow
+
+def exactNbueler(x):
+  # Bueler:
+  #   (1) additionally set constant vertically-integrated longitudinal stress T
+  #       to the value it would have at marine calving front at flotation
+  #   (2) additionally determine ice hardness B from T so that Bodvardsson's
+  #       plug flow is "actually" grounded SSA
+  hxx = - 2.0 * H0 / (L0 * L0)
+  q   = (1.0 / n) - 1.0
+  ux  = - hxx / k
+  H, _, _, _ = exactN(x)
+  T = 0.5 * (1.0 - rho / rhow) * rho * g * Hc**2
+  B = T / ( 2.0 * H * (abs(ux)**q) * ux )
+  return T, B
