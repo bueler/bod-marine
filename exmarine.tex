@@ -60,15 +60,20 @@ E-mail: \emph{\texttt{elbueler\@@alaska.edu}}}
 
 \maketitle
 
-\subsection*{Introduction}  At its beginning, theoretical glaciological offered-up two parabolic profiles as the shapes of steady ice sheets lying on flat beds, as in Figure \ref{fig:twoparabolas}.  One was the profile of an ice sheet with perfectly-plasticity \citep{Orowan,Nye52plastic} and the other the profile for a sliding (plug) flow investigated by \cite{Bodvardsson}.  These were among the earliest ``global'' views of the free surface flows in glaciology.  They focussed on different aspects of the global problem, and they came to very different conclusions.  These authors found parabolas which exactly solved their nonlinear flow equations, but their solutions are rarely used for modeling glacier and ice sheet flow in recent decades.\footnote{Draft date \emph{\today}.}  % <-- IS THIS TRUE HISTORICALLY
-
-The profiles, shown in Figure \ref{fig:twoparabolas}, are remarkably different curves, especially in their descriptions of the dome (the highest point of the ice sheet) and margin (where the ice thickness goes to zero) shape.   Up to scaling, one is of the form $x=1-y^2$ (perfect-plasticity) and the other is of the form $y=1-x^2$ (the plug flow).  The perfect-plasticity solution has a central peak at the highest point of the ice sheet, and a margin with unbounded surface gradient.  The plug flow solution has a smooth dome and a finite-slope, wedge-shaped margin.
-
-The purpose of this paper is to explain to the modern glaciologist how these two classic parabolas arise as limits of the physics in the standard SIA and SSA stress balance models, when coupled with the mass continuity equation.  We have identified a new connection between similarity solutions of the SIA and the perfectly-plastic model, and this connection illuminates the time-dependent behavior of nearly-plastic ice.  And it turns out that the Bodvardsson parabola directly relates to an important recent ice sheet modeling problem, the modeling of marine ice sheets in the rapidly-sliding case.
+\subsection*{Introduction}  At its beginning, theoretical glaciological created two parabolic profiles as the shapes of steady flow-line ice sheets lying on flat beds, as in Figure \ref{fig:twoparabolas}.  One was the profile of an ice sheet with perfectly-plasticity \citep{Orowan,Nye52plastic} and the other the profile for a sliding (plug) flow investigated by \cite{Bodvardsson}.  These were the earliest precise ``global'' views of the free surface flows in glaciology.  They focussed on different aspects of the global problem, and they came to very different conclusions.  These authors found parabolas which exactly solved the nonlinear flow equations for geometry, but their solutions are infrequently used for modelling glacier and ice sheet flow in recent decades.\footnote{Draft date \emph{\today}.}
 
 \begin{figure}[ht]
 \onecol{twoparabolas}
-\caption{The parabolas offered by Orowan and Nye (1949; 1952) (solid) and by \cite{Bodvardsson} (dashed) as the profiles of steady ice sheets on flat beds.  Here each ice sheet is symmetric, so only a flow line from dome to margin is shown.  A dome thickness of $H_0=3000$ m and a total flowline distance of $L_0=500$ km (from dome to margin where $H=0$) are chosen for concreteness in this paper.} \label{fig:twoparabolas}
+\caption{The parabolas by Orowan and Nye (1949, 1952; dotted) and by Bodvardsson (1955; solid) for steady, flowline ice sheets on flat beds.  A dome thickness of $H_0=3000$ m and a total flowline distance of $L_0=500$ km (from dome to margin where $H=0$) are chosen for concreteness in this figure.} \label{fig:twoparabolas}
+\end{figure}
+
+The profiles, shown in Figure \ref{fig:twoparabolas}, are remarkably different curves in their descriptions of the dome (the highest point of the ice sheet) and margin shape (where the ice thickness goes to zero).   Up to scaling, one is of the form $x=1-y^2$ (Orowan-Nye perfect-plasticity)\nocite{Nye52plastic,Orowan} and the other is of the form $y=1-x^2$ (Bodvardsson plug flow).  The perfect-plasticity solution has a central peak at the highest point of the ice sheet, and a margin with unbounded surface gradient.  The plug flow solution has a smooth dome and a finite-slope, wedge-shaped margin.
+
+This paper combines Bodvardsson's solution with the well-known exact solution for an ice shelf \cite{vanderVeen83,vanderVeen} to generate an exact solution for a flowline, steady marine ice sheet.  The result, shown in Figure \ref{fig:exactmarine}, is an exact solution of the steady equations for the rapidly-sliding marine ice sheet case addressed by the well-known paper \cite{SchoofMarine1} and by the MISMIP intercomparison \cite{MISMIP2012}.  This exact solution simultaneously solves the steady mass continuity equation and the so-called shallow shelf approximation (``SSA''; see \cite{BBssasliding,MacAyeal,WeisGreveHutter}).  This sliding-ice stress balance was the model considered by most participants in MISMIP.
+
+\begin{figure}[ht]
+\onecol{exactmarine-geometry}
+\caption{The geometry (solid) and velocity (dashed) of an exact solution of the simultaneous steady mass continuity and SSA stress balance equations on the domain shown, on both sides of the grounding line.} \label{fig:exactmarine}
 \end{figure}
 
 \subsection*{Continuum models}
@@ -83,23 +88,24 @@ FIXME: STATE MODEL FROM Schoof (2007) (rapid sliding case)
 \medskip
 \begin{tabular}{llll}
 Symbol & Description & [Value] Units \\ \hline
-$A$ & ice softness & $\text{Pa}^{-3}\,\text{s}^{-1}$  \\
-$B$ & ice hardness; $B=A^{-1/n}$ & $\text{Pa}\,\text{s}^{1/3}$  \\
+$B$ & ice hardness & $\text{Pa}\,\text{s}^{1/3}$  \\
 $\beta$ & sliding coefficient & \\
 $\eps_0$ & regularizing velocity for computing & $\text{m}\,\text{s}^{-1}$ \\
  & \quad effective viscosity &  \\
 $g$ & acceleration of gravity  & 9.81 $\text{m}\,\text{s}^{-2}$\\
-$H$ & ice thickness and ice surface elevation & m \\
+$H$ & ice thickness & m \\
 $M$ & ice-equivalent surface mass balance & $\text{m}\,\text{s}^{-1}$ \\
 $n$ & Glen exponent in ice flow law & 3 \\
-$\nu$ & vertically-averaged (effective) viscosity & Pa s \\
- & \quad  in SSA & \\
+$\nu$ & vertically-averaged effective & Pa s \\
+ & \quad  viscosity in SSA & \\
 $\rho$ & density of ice & 910 $\text{kg}\,\text{m}^{-3}$ \\
 $\rho_w$ & density of sea water & 1028 $\text{kg}\,\text{m}^{-3}$ \\
 $\tau_{b}$ & basal shear stress applied to ice & Pa \\
 $u$ & horizontal velocity & $\text{m}\,\text{s}^{-1}$ \\
 $(x,z)$ & flow-line cartesian coordinates; $z$ is & m  \\
- & \quad positive upward & 
+ & \quad positive upward & \\
+$z_b$ & ice base elevation & m \\
+$z_s$ & ice surface elevation & m
 \end{tabular}
 \end{table}
 

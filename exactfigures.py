@@ -19,7 +19,7 @@ _, BB = exactN.exactNbueler(xx)
 hh = HH - (exactN.rho/exactN.rhow) * exactN.Hc
 
 # figure 1: profile and velocity (two-axis)
-fig = plt.figure(figsize=(6,3))
+fig = plt.figure(figsize=(6,4))
 ax1fig1, ax2fig1 = plottwo(fig, xx/1000.0,HH,uu * exactN.secpera,
                            r"$H=$ ice thickness (m, solid)",r"$u=$ ice velocity (m a-1, dashed)",
                            y1min=0.0)

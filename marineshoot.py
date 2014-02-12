@@ -10,25 +10,27 @@ from scipy.linalg import solve
 from scipy.integrate import odeint
 
 import exactN
+from plottool import lw, plottwo
 
 desc='''Solve ODE system for marine ice sheet, for which an exact solution is known.
-Either draws a particular case (if '-save foo.png' option given)
-or does shooting to solve for the right value.'''
+By default, does shooting to solve for the right value.
+If option '-noshoot -saveroot NAME' is given then generates plots.'''
 
 parser = argparse.ArgumentParser(description=desc)
 
 Tmultdefault = 1.0
-parser.add_argument('-Tmult', default=Tmultdefault,
-                   help='when plotting, multiple of exact value of T to use as initial value (default = %.2f)' % Tmultdefault)
-parser.add_argument('-save', metavar='FILENAME', dest='outfile',
-                   help='if given, save plot in image file; if not given, do shooting with bisection')
+parser.add_argument('--Tmult', default=Tmultdefault,
+                    help='when plotting, multiple of exact value of T to use as initial value')
+parser.add_argument('--saveroot', metavar='NAME',
+                    help='if given, save plots in NAME-geometry.pdf and NAME-other.pdf')
+parser.add_argument('--noshoot', action='store_true',
+                    help='do not do shooting with bisection')
 
 args = parser.parse_args()
 Tmult = float(args.Tmult)
-
-doshoot = (args.outfile==None)
+doshoot = not(bool(args.noshoot))
 if not doshoot:
-    imagename = str(args.outfile)
+    nameroot = str(args.saveroot)
 
 afloat = 0.0 * exactN.a   # FIXME: what do I want?
 
@@ -145,7 +147,8 @@ print "initial conditions:"
 print "  at xinit = %.3f km we have initial values" % (xinit/1000.0)
 print "  u = %7.2f m a-1, H = %.2f m" % (uinit*exactN.secpera, Hinit)
 
-x = np.linspace(xinit,1.5 * exactN.xc,1001)
+xb = 1.5 * exactN.xc
+x = np.linspace(xinit,xb,1001)
 dx = x[1] - x[0]
 
 Tinit = Tmult * Tcheat
@@ -174,13 +177,31 @@ print "  u = %7.2f m a-1, H = %.2f m, T = %.6e Pa m" % (u[-1]*exactN.secpera, H[
 Tcalvc = 0.5 * exactN.rho * exactN.g * (1.0 - rr) * H[-1]**2
 print "COMPARE Tcalvc = %.6e Pa m" % Tcalvc
 
-plt.figure(1)
+# geometry and velocity in figure 1 (two-axis)
 hh, bb = surfaces(H)
-plt.plot(x/1000.0,hh,'k',lw=2.0)
-plt.plot(x/1000.0,bb,'k',lw=2.0)
-#plt.plot(xbod/1000.0,Hbod,'go',lw=3.0)
-plt.xlabel("x   [km]")
-plt.ylabel("elevation   [m]")
+fig = plt.figure(figsize=(6,4))
+ax1fig1, ax2fig1 = plottwo(fig,x/1000.0,hh,u * exactN.secpera,
+                           "elevation (m, solid)","ice velocity (m a-1, dashed)",
+                           y1min=0.0)
+ax1fig1.hold(True)
+ax1fig1.plot(x/1000.0,bb,'k',lw=2.0)
+ax1fig1.plot([xb/1000.0,xb/1000.0],[bb[-1],hh[-1]],'k',linewidth=lw)
+# show water height as waves
+xl = np.linspace(xb,1.1*xb,101)
+ax1fig1.plot(xl/1000.0, exactN.bc - 30.0 * abs(np.sin(xl / 4.0e3)),'k',linewidth=0.7*lw)
+y1, y2 = ax1fig1.get_ylim()
+ax1fig1.set_ylim(0.0,3000.0)
+ax1fig1.set_yticks([0.0,500.0,1000.0,1500.0,2000.0,2500.0,3000.0])
+#ax1fig1.set_xlim(0.0,1.1*xb/1000.0)
+ax1fig1.hold(False)
+y1, y2 = ax2fig1.get_ylim()
+ax2fig1.set_ylim(0.0,y2)
+imagename = nameroot + '-geometry.pdf'
+plt.savefig(imagename)
+print '  image file %s saved' % imagename
+#plt.show()
+
+exit(0)
 
 plt.figure(2)
 plt.subplot(4,1,1)
@@ -208,6 +229,4 @@ plt.ylabel(r"$\beta$(x)   [Pa s m-1]")
 plt.xlabel("x   [km]")
 
 plt.show()
-#plt.savefig(imagename)
-#print '  image file %s saved' % imagename
 

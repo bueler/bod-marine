@@ -19,14 +19,14 @@ Hela = H0 / 1.5
 Hb = 1.5 * Hela * ( 1.0 - (x / L0)**2.0 )
 Hb[x > L0] = 0.0
 
-figure(figsize=(6.0,2.0))
-plot(xx,Hw/1000.0,'k',linewidth=1.5)
+figure(figsize=(6,3.5))
+plot(xx,Hw,'k:',linewidth=1.5)
 hold(True)
-plot(xx,Hb/1000.0,'k--',linewidth=1.5)
+plot(xx,Hb,'k',linewidth=1.5)
 hold(False)
 axis([min(xx),max(xx),0.0,3.5])
-setp(gca(),yticks=[0.0,1.0,2.0,3.0])
-ylabel('H   (km)')
+setp(gca(),yticks=[0.0,500.0,1000.0,1500.0,2000.0,2500.0,3000.0])
+ylabel('H   (m)')
 xlabel('x   (km)')
 savefig('twoparabolas.pdf',bbox_inches='tight')
 
