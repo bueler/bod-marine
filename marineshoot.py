@@ -11,7 +11,7 @@ from scipy.integrate import odeint
 
 import exactN
 
-afloat = 0.0 * exactN.a   # FIXME
+afloat = 0.0 * exactN.a   # FIXME: what do I want?
 
 def ground(H):  # decide flotation criterion
   return (exactN.rho * H >= exactN.rhow * exactN.bc)
@@ -86,22 +86,27 @@ ux = (1.0/exactN.k) * (2.0 * exactN.H0 / exactN.L0**2)
 uinit = ux * xinit
 Hinit = exactN.H0 * (1.0 - (xinit / exactN.L0)**2.0)
 
-Tinit = 2.0 * Hinit * B(xinit) * ux**(1.0/exactN.n)  # FIXME: a cheat to avoid shoot; the cheat is to use B()
+Tcheat = 2.0 * Hinit * B(xinit) * ux**(1.0/exactN.n)  # FIXME: a cheat to avoid shoot; the cheat is to use B()
 
 rr = exactN.rho / exactN.rhow
 Tcalvg = 0.5 * exactN.rho * exactN.g * (1.0 - rr) * exactN.Hc**2
 
 print "initial conditions:"
 print "  at xinit = %.3f km we have initial values" % (xinit/1000.0)
-# FIXME: add correct units
-print "  u = %7.2f m a-1, H = %.2f m, T = %.16e UNITS" % (uinit*exactN.secpera, Hinit, Tinit)
-print "COMPARE Tcalvg = %.16e" % Tcalvg
+print "  u = %7.2f m a-1, H = %.2f m" % (uinit*exactN.secpera, Hinit)
+
+#print "TRYING T = %.6e Pa m" % Tcheat
+#print "COMPARE Tcalvg = %.6e Pa m" % Tcalvg
 
 x = np.linspace(xinit,1.5 * exactN.xc,1001)
 dx = x[1] - x[0]
 
-v0 = np.array([uinit, Hinit, Tinit])  # initial values at x[0] = xinit
-v = odeint(f,v0,x)          # solve ODE system
+for Tinit in [0.3*Tcheat, 0.5*Tcheat, 1.0*Tcheat, 1.5*Tcheat, 3.0*Tcheat]:
+  v0 = np.array([uinit, Hinit, Tinit])  # initial values at x[0] = xinit
+  v = odeint(f,v0,x)          # solve ODE system
+  Tcalvc = 0.5 * exactN.rho * exactN.g * (1.0 - rr) * v[-1,1]**2
+  print "Tinit = %.6e,  (Tfinal - Tcalvc)/Tcalvc = %.6e" % ( Tinit, (v[-1,2]-Tcalvc)/Tcalvc )
+exit(0)
 
 u = v[:,0]
 H = v[:,1]
@@ -116,10 +121,9 @@ print "  maximum error in H = %.2e m for grounded ice" % Herror
 
 print "calving front results:"
 print "  at %.3f km we have values" % (x[-1]/1000.0)
-# FIXME: add correct units
-print "  u = %7.2f m a-1, H = %.2f m, T = %.16e UNITS" % (u[-1]*exactN.secpera, H[-1], T[-1])
+print "  u = %7.2f m a-1, H = %.2f m, T = %.6e Pa m" % (u[-1]*exactN.secpera, H[-1], T[-1])
 Tcalvc = 0.5 * exactN.rho * exactN.g * (1.0 - rr) * H[-1]**2
-print "COMPARE Tcalvc = %.16e" % Tcalvc
+print "COMPARE Tcalvc = %.6e Pa m" % Tcalvc
 
 plt.figure(1)
 hh, bb = surfaces(H)
@@ -137,24 +141,21 @@ plt.ylabel("velocity u(x)   [m a-1]")
 plt.subplot(4,1,2)
 plt.plot(x/1000.0,T,'k',lw=2.0)
 plt.grid(True)
-# FIXME: add correct units
-plt.ylabel("T(x)")
+plt.ylabel("T(x)   [Pa m]")
 BB = np.zeros(np.shape(x))
 for j in range(len(x)):
    BB[j] = B(x[j])
 plt.subplot(4,1,3)
 plt.plot(x/1000.0,BB,'k',lw=2.0)
 plt.grid(True)
-# FIXME: add correct units
-plt.ylabel("B(x)")
+plt.ylabel("B(x)   [Pa s-(1/n)]")
 bbeta = np.zeros(np.shape(H))
 for j in range(len(H)):
    bbeta[j] = beta(H[j])
 plt.subplot(4,1,4)
 plt.plot(x/1000.0,bbeta,'k',lw=2.0)
 plt.grid(True)
-# FIXME: add correct units
-plt.ylabel(r"$\beta(x)$")
+plt.ylabel(r"$\beta$(x)   [Pa s m-1]")
 plt.xlabel("x   [km]")
 
 plt.show()
