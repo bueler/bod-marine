@@ -118,16 +118,7 @@ This a linear sliding relation $\tau_b = - \beta u_b$ where $\beta = k (\rho g H
 
 But equations (14) and (16) and (17), for which he discusses stability, are not SIA.  The involve no ice deformation at all, nor are stresses in the ice balanced in any way.  His flows are \emph{plug flows} with a weak fluid which feels only linear basal resistance.
 
-Bodvardsson's solution (18) of (17) is exact.  It
-turns out that the simplest steady porous medium equation with linear
-right hand side and an (under-determined) one-sided Dirichlet boundary
-value problem, namely
-  $$(u u')' = Au+B, \qquad  u(0) = u_0$$
-which is his equation (17), always has an exact solution which is a
-quadratic polynomial, e.g.
-   $$u(x) = u_0 (1 + \alpha x + \beta x^2).$$
-He exploits this solution to determine $L$ from the condition $h(L)=0$.
-He use the exact solution it for its free boundary information.
+Bodvardsson's solution (18) of (17) is exact.
 
 \emph{But} the quadratic solution (18) absolutely does not have a margin
 shape which would come from deformation and Glen's law.  Rather his
@@ -269,6 +260,18 @@ Figure \ref{fig:verifNresult} shows the result of using this numerical scheme to
 \bibliographystyle{igs}
 
 \appendix
+
+\subsection{Appendix A: Bodvardsson's little theorem}  \cite{Bodvardsson} does not identify the source of the exact parabolic solution to the plug flow equations, and it seems likely that he derived the solution from scratch.  In abstract terms we can describe his result as the theorem that there is a unique polynomial solution to the second-order differential equation
+  $$(u u')' = Au+B$$
+if $u(0) = u_0$.  FIXME: $y(x)$ etc.
+
+which is his equation (17), always has an exact solution which is a
+quadratic polynomial, e.g.
+   $$u(x) = u_0 (1 + \alpha x + \beta x^2).$$
+He exploits this solution to determine $L$ from the condition $h(L)=0$.
+He use the exact solution it for its free boundary information.
+
+FIXME: show $\alpha,\beta$ and talk free boundary
 
 \subsection{Appendix: Finite difference scheme for coupled Equations \eqref{mcsteady} and \eqref{ssasteady}}  The coupled, steady-state equations for mass continuity and the SSA stress balance form a continuum system that is solved exactly by the Bodvardsson solution (Test N), as explained in the main text.  Here we detail a numerical scheme for these equations.  The scheme uses centered, second-order finite differences for the SSA equation and a second-order upwind finite difference scheme for the mass continuity equation.  Figure \ref{fig:verifNresult} gives clear evidence that the scheme computes convergent ice thickness and ice velocity as the grid spacing decreases.
 
