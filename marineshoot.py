@@ -50,9 +50,10 @@ def F(H):       # compute driving stress coefficient:  tau_d = F(H) H_x
   else:
       return - (1.0 - exactN.rho/exactN.rhow) * gover
 
-def beta(H):    # compute basal resistance coefficient:  tau_b = beta(H) u
-  if ground(H):
-      gover = exactN.rho * exactN.g * H  # grounded overburden pressure
+def beta(x,H):    # compute basal resistance coefficient:  tau_b = beta(x,H) u
+  if ground(H) & (x >= 0.0) & (x <= exactN.L0):
+      Hexact, _, _, _ = exactN.exactN(x)
+      gover = exactN.rho * exactN.g * Hexact  # grounded overburden pressure
       return exactN.k * gover
   else:
       return 0.0
@@ -98,7 +99,7 @@ def f(v,x):
                 [ 0.0,                           F(v[1]),            1.0 ]  ]);
   g = np.array([[ v[2]**exactN.n    ],
                 [ M(v[1])           ],
-                [ beta(v[1]) * v[0] ]]);
+                [ beta(x,v[1]) * v[0] ]]);
   vp = solve(A,g)
   return vp.flatten()
 
@@ -221,7 +222,7 @@ plt.grid(True)
 plt.ylabel("B(x)   [Pa s-(1/n)]")
 bbeta = np.zeros(np.shape(H))
 for j in range(len(H)):
-   bbeta[j] = beta(H[j])
+   bbeta[j] = beta(x[j],H[j])
 plt.subplot(4,1,4)
 plt.plot(x/1000.0,bbeta,'k',lw=2.0)
 plt.grid(True)
