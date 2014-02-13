@@ -69,7 +69,7 @@ E-mail: \emph{\texttt{elbueler\@@alaska.edu}}}
 
 The profiles, shown in Figure \ref{fig:twoparabolas}, are remarkably different curves in their descriptions of the dome (the highest point of the ice sheet) and margin shape (where the ice thickness goes to zero).   Up to scaling, one is of the form $x=1-y^2$ (Orowan-Nye perfect-plasticity)\nocite{Nye52plastic,Orowan} and the other is of the form $y=1-x^2$ (Bodvardsson plug flow).  The perfect-plasticity solution has a central peak at the highest point of the ice sheet, and a margin with unbounded surface gradient.  The plug flow solution has a smooth dome and a finite-slope, wedge-shaped margin.
 
-This paper combines Bodvardsson's solution with the well-known exact solution for an ice shelf \cite{vanderVeen83,vanderVeen} to generate an exact solution for a flowline, steady marine ice sheet.  The result, shown in Figure \ref{fig:exactmarine}, is an exact solution of the steady equations for the rapidly-sliding marine ice sheet case addressed by the well-known paper \cite{SchoofMarine1} and by the MISMIP intercomparison \cite{MISMIP2012}.  This exact solution simultaneously solves the steady mass continuity equation and the so-called shallow shelf approximation (``SSA''; see \cite{BBssasliding,MacAyeal,WeisGreveHutter}).  This sliding-ice stress balance was the model considered by most participants in MISMIP.
+This paper combines Bodvardsson's solution with the well-known exact solution for an ice shelf \citep{vanderVeen83,vanderVeen} to generate an exact solution for a flowline, steady marine ice sheet.  The result, shown in Figure \ref{fig:exactmarine}, is an exact solution of the steady equations for the rapidly-sliding marine ice sheet case addressed by the well-known paper \cite{SchoofMarine1} and by the MISMIP intercomparison \citep{MISMIP2012}.  This exact solution simultaneously solves the steady mass continuity equation and the so-called shallow shelf approximation (``SSA''; \citep{BBssasliding,MacAyeal,WeisGreveHutter}).  This sliding-ice stress balance was the model considered by most participants in MISMIP.
 
 \begin{figure}[ht]
 \onecol{exactmarine-geometry}
@@ -79,32 +79,33 @@ This paper combines Bodvardsson's solution with the well-known exact solution fo
 
 \subsection*{Continuum model}
 
-The continuum model we consider is the steady-state form of the flowline, rapid-sliding model of \cite[equations (2.1)--(2.5)]{SchoofMarine1}.  This includes the mass continuity equation and the SSA stress balance equation.  We restrict to the linear sliding case, but with a reasonably general sliding coefficient.  We use the notation in Table \ref{tab:notation}.
+The continuum model we consider is the steady-state form of the flowline, rapid-sliding model of \citep[equations (2.1)--(2.5)]{SchoofMarine1}.  This includes the mass continuity equation and the SSA stress balance equation.  We restrict to the linear sliding case, but with a reasonably general sliding coefficient.  We use the notation in Table \ref{tab:notation}.
 
 The equations are then
 \begin{gather}
-(uH)_x - M = 0  \quad \text{ on } x_a < x < x_c, \label{eq:steadymass} \\
-\left(2 B H |u_x|^{\frac{1}{n}-1} u_x\right)_x - \beta u - \rho g H h_x = 0  \quad \text{ on } x_a < x < x_c, \label{eq:steadySSA} \\
+(uH)_x - M = 0, \label{eq:steadymass} \\
+T_x - \beta u - \rho g H h_x = 0, \label{eq:steadySSA} \\
+T = 2 B H |u_x|^{\frac{1}{n}-1} u_x, \label{eq:Tstress} \\
 h = \begin{cases} H+b, & \rho H \ge \rho_w (z_o - b) \\
-                  \omega H + z_o, & \rho H < \rho_w (z_o - b) \end{cases}  \quad \text{ on } x_a < x < x_c, \label{eq:surface}
+                  \omega H + z_o, & \rho H < \rho_w (z_o - b) \end{cases}, \label{eq:surface}
 \end{gather}
-where $M = M(h)$ is the surface plus basal mass balance, which may depend on surface elevation, $B = B(x)$ is the ice hardness, which may on location, $\beta = \beta(x,H)$ is the sliding coefficient, which may on location and thickness.  Also
-    $$\omega = 1 - \frac{\rho}{\rho_w}$$  
-is a frequently appearing ``Archimedean factor'' relating ice surface elevation and thickness for floating ice and $z=z_o$ is the elevation of the sea surface.  Equation \eqref{eq:surface} says that the ice surface $z=h$ is at elevation $H$ (the ice thickness) plus the bedrock elevation $z=b$ when the ice is grounded, and otherwise the ice surface $z=h$ is found from the Archimedean principle.
+on an interval $x_a < x < x_c$.  Here $M = M(h)$ is the surface plus basal mass balance, which may depend on surface elevation, $B = B(x)$ is the ice hardness, which may on location, $\beta = \beta(x,H)$ is the sliding coefficient, which may on location and thickness.  Note $z=z_o$ is the elevation of the sea surface, and also $\omega = 1 - \rho/\rho_w$ is a frequently-appearing ``Archimedean factor'' relating ice surface elevation and thickness for floating ice.  
 
-In this paper equations \eqref{eq:steadymass}--\eqref{eq:surface} are augmented by boundary conditions at locations $x_a$ and $x_c$:
+Equations \eqref{eq:steadymass} and \eqref{eq:steadySSA} are the mass-continuity and SSA stress balance equations, respectively, where \eqref{eq:Tstress} defines the vertically-integrated longitudinal stress $T$ \citep{SchoofStream}.  Equation \eqref{eq:surface} says that the ice surface $z=h$ is at elevation $H$ (the ice thickness) plus the bedrock elevation $z=b$ when the ice is grounded, and otherwise the ice surface $z=h$ is found from the Archimedean principle.
+
+For the exact and numerical solutions in this paper, equations \eqref{eq:steadymass}--\eqref{eq:surface} are augmented by boundary conditions:
 \begin{gather}
 u(x_a) = u_a > 0, \quad H(x_a) = H_a > 0, \label{eq:leftbc} \\
-2 B(x_c) H(x_c) |u_x(x_c)|^{\frac{1}{n}-1} u_x(c) = \frac{1}{2} \omega \rho g H(x_c)^2,  \label{eq:rightbc} \\
+T(x_c) = \frac{1}{2} \omega \rho g H(x_c)^2,  \label{eq:rightbc} \\
 H, u, u_x \quad \text{ continuous at } x = x_g.  \label{eq:xgregularity}
 \end{gather}
-Thus $x_a$ is the upstream location where a Dirichlet boundary condition is applied to the problem of determining velocity and thickness, while at the (non-moving) calving front $x_c$ we have the standard hydrostatic pressure ``imbalance'' condition \cite{SchoofMarine1}.  Note \eqref{eq:xgregularity} is a regularity requirement, equivalently the matching conditions between the grounded and floating parts.
+Thus $x_a$ is an upstream location where a Dirichlet boundary condition is applied to the (coupled) problem of determining velocity and thickness, while at the (non-moving) calving front $x_c$ we have the standard hydrostatic pressure ``imbalance'' condition \citep{SchoofMarine1}.  In between, at $x_g$, fact \eqref{eq:xgregularity} is a regularity requirement giving matching conditions between the grounded and floating parts.
 
 Given data $M$, $B$, $\beta$, and of course physical constants $g,n,\rho,\rho_w$, we expect the problem consisting of equations \eqref{eq:steadymass}--\eqref{eq:xgregularity} to be well-posed. 
 
 \subsection*{Bodvardsson's parabola and marine ice sheets}
 
-
+FIXME
 
 \subsubsection*{An exact solution to the SSA stress balance plus mass continuity}
 The \cite{Bodvardsson} solution is also a parabola, but this time the margin has finite slope and the dome is smooth.  The \cite{Bodvardsson} solution was analyzed by \cite{Weertman61stability}, who decides that the physics chosen by Bodvardsson should be replaced by more SIA-like deformation, though sliding is allowed as well.
@@ -137,14 +138,14 @@ Bruarjokull.
 
 \small
 \begin{table}
-\caption{Notation and units (SI).}\label{tab:notation}
+\caption{Notation and SI units, with values for physical constants.}\label{tab:notation}
 
 \medskip
 \begin{tabular}{llll}
-Symbol & Description & [Value] Units \\ \hline
+Symbol & Description & Units \\ \hline
 $B$ & ice hardness; $=A^{-1/n}$ & $\text{Pa}\,\text{s}^{1/3}$  \\
 $b$ & bedrock elevation & m \\
-$\beta$ & sliding coefficient & \\
+$\beta$ & sliding coefficient & $\text{Pa}\,\text{s}\,\text{m}^{-1}$ \\
 $g$ & acceleration of gravity  & 9.81 $\text{m}\,\text{s}^{-2}$\\
 $H$ & ice thickness & m \\
 $h$ & ice surface elevation & m \\
@@ -152,12 +153,12 @@ $M$ & mass balance & $\text{m}\,\text{s}^{-1}$ \\
 $n$ & Glen exponent in ice flow law & 3 \\
 $\rho$ & density of ice & 910 $\text{kg}\,\text{m}^{-3}$ \\
 $\rho_w$ & density of sea water & 1028 $\text{kg}\,\text{m}^{-3}$ \\
+$T$ & vertically-integrated longitudinal stress & $\text{Pa}\,\text{m}$ \\
 $\tau_{b}$ & basal shear stress applied to ice & Pa \\
 $u$ & horizontal velocity & $\text{m}\,\text{s}^{-1}$ \\
-$(x,z)$ & flow-line cartesian coordinates; $z$ is & m  \\
- & \quad positive upward & \\
+$(x,z)$ & flow-line cartesian coordinates & m  \\
 $z_o$ & ocean surface elevation & m \\
-$\omega$ & Archimedean factor; $=1 - \rho/\rho_w$ & 
+$\omega$ & Archimedean factor; $=1 - \rho/\rho_w$ & $0.115$
 \end{tabular}
 \end{table}
 
@@ -298,10 +299,9 @@ Also let $H_{i+1/2} = (H_i+H_{i+1})/2$.  With this notation the SSA stress balan
 \end{align}
 for $i=1,\dots,N-1$.
 
-At $x=x_c$ the calving-front stress balance condition is applied.  Recall that $x_c$ is chosen so that the ice calves exactly when it reaches flotation, so the vertically-integrated longitudinal stress $T$ (equation \eqref{schoofsT}) has a specific value,
+At $x=x_c$ the calving-front stress balance condition is applied, so the vertically-integrated longitudinal stress $T$ (equation \eqref{schoofsT}) has a specific value
 \begin{align}
-T(x_c) &= \frac{1}{2} \left(1 - \frac{\rho}{\rho_w}\right) \rho g H(x_c)^2 \notag \\
-   &\approx \frac{1}{2} \left(1 - \frac{\rho}{\rho_w}\right) \rho g H_N^2. \label{calvingstressFD}
+T(x_c) &= \frac{1}{2} \omega \rho g H_N^2. \label{calvingstressFD}
 \end{align}
 The resulting boundary condition is handled as are many such Neumann boundary conditions in finite difference and finite volume schemes, namely by introducing and then removing a notional unknown $u_{N+1}$ at a notional node $x_{N+1}$ which is a distance $\Delta x$ beyond $x_N=x_c$ \citep{MortonMayers}.  Recalling equation \eqref{schoofsT}, we approximate $T(x_c)$ by the average
 \begin{align}
@@ -310,7 +310,7 @@ T(x_c) &\approx H_{N+1/2} B_{N+1/2} F(u_N,u_{N+1}) \notag \\
 \end{align}
 which also involves a notional thickness $H_{N+1}$.  Combining equations \eqref{calvingstressFD}, \eqref{notionalFD}, and the $i=N$ case of \eqref{SSAFD} allows us to eliminate all reference to the notional unknowns $u_{N+1}$ and $H_{N+1}$.  We derive this special replacement for \eqref{SSAFD} at $x_N$:
 \begin{align*}
-&\frac{\left(1 - \frac{\rho}{\rho_w}\right) \rho g H_N^2 - 4 H_{N-1/2} B_{N-1/2} F(u_{N-1},u_N)}{\Delta x} \\
+&\frac{\omega \rho g H_N^2 - 4 H_{N-1/2} B_{N-1/2} F(u_{N-1},u_N)}{\Delta x} \\
 &\qquad - \beta_N u_N - \rho g H_N \frac{3 H_N - 4H_{N-1} + H_{N-2}}{2\Delta x} = 0.
 \end{align*}
 Note that for the driving stress we have used a second-order one-sided approximation of the surface slope $H'$.

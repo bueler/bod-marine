@@ -35,4 +35,4 @@ exmarine.bbl: exmarine.aux ice_bib.bib
 .PHONY: clean
 
 clean:
-	@rm -f *.pyc *.out *.aux *.log *.bbl *.blg *~ $(figures)
+	@rm -f *.pyc *.out *.aux *.log *.bbl *.blg *.synctex.gz *~ $(figures)
