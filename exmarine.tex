@@ -76,41 +76,35 @@ This paper combines Bodvardsson's solution with the well-known exact solution fo
 \caption{The geometry (solid) and velocity (dashed) of an exact solution of the simultaneous steady mass continuity and SSA stress balance equations on the domain shown, on both sides of the grounding line.} \label{fig:exactmarine}
 \end{figure}
 
-\subsection*{Continuum models}
 
-FIXME: STATE MODEL FROM Schoof (2007) (rapid sliding case)
+\subsection*{Continuum model}
 
+The continuum model we consider is the steady-state form of the flowline, rapid-sliding model of \cite[equations (2.1)--(2.5)]{SchoofMarine1}.  This includes the mass continuity equation and the SSA stress balance equation.  We restrict to the linear sliding case, but with a reasonably general sliding coefficient.  We use the notation in Table \ref{tab:notation}.
 
-\small
-\begin{table}
-\caption{Notation and units (SI).}\label{tab:notation}
+The equations are then
+\begin{gather}
+(uH)_x - M = 0  \quad \text{ on } x_a < x < x_c, \label{eq:steadymass} \\
+\left(2 B H |u_x|^{\frac{1}{n}-1} u_x\right)_x - \beta u - \rho g H h_x = 0  \quad \text{ on } x_a < x < x_c, \label{eq:steadySSA} \\
+h = \begin{cases} H+b, & \rho H \ge \rho_w (z_o - b) \\
+                  \omega H + z_o, & \rho H < \rho_w (z_o - b) \end{cases}  \quad \text{ on } x_a < x < x_c, \label{eq:surface}
+\end{gather}
+where $M = M(h)$ is the surface plus basal mass balance, which may depend on surface elevation, $B = B(x)$ is the ice hardness, which may on location, $\beta = \beta(x,H)$ is the sliding coefficient, which may on location and thickness.  Also
+    $$\omega = 1 - \frac{\rho}{\rho_w}$$  
+is a frequently appearing ``Archimedean factor'' relating ice surface elevation and thickness for floating ice and $z=z_o$ is the elevation of the sea surface.  Equation \eqref{eq:surface} says that the ice surface $z=h$ is at elevation $H$ (the ice thickness) plus the bedrock elevation $z=b$ when the ice is grounded, and otherwise the ice surface $z=h$ is found from the Archimedean principle.
 
-\medskip
-\begin{tabular}{llll}
-Symbol & Description & [Value] Units \\ \hline
-$B$ & ice hardness & $\text{Pa}\,\text{s}^{1/3}$  \\
-$\beta$ & sliding coefficient & \\
-$\eps_0$ & regularizing velocity for computing & $\text{m}\,\text{s}^{-1}$ \\
- & \quad effective viscosity &  \\
-$g$ & acceleration of gravity  & 9.81 $\text{m}\,\text{s}^{-2}$\\
-$H$ & ice thickness & m \\
-$M$ & ice-equivalent surface mass balance & $\text{m}\,\text{s}^{-1}$ \\
-$n$ & Glen exponent in ice flow law & 3 \\
-$\nu$ & vertically-averaged effective & Pa s \\
- & \quad  viscosity in SSA & \\
-$\rho$ & density of ice & 910 $\text{kg}\,\text{m}^{-3}$ \\
-$\rho_w$ & density of sea water & 1028 $\text{kg}\,\text{m}^{-3}$ \\
-$\tau_{b}$ & basal shear stress applied to ice & Pa \\
-$u$ & horizontal velocity & $\text{m}\,\text{s}^{-1}$ \\
-$(x,z)$ & flow-line cartesian coordinates; $z$ is & m  \\
- & \quad positive upward & \\
-$z_b$ & ice base elevation & m \\
-$z_s$ & ice surface elevation & m
-\end{tabular}
-\end{table}
+In this paper equations \eqref{eq:steadymass}--\eqref{eq:surface} are augmented by boundary conditions at locations $x_a$ and $x_c$:
+\begin{gather}
+u(x_a) = u_a > 0, \quad H(x_a) = H_a > 0, \label{eq:leftbc} \\
+2 B(x_c) H(x_c) |u_x(x_c)|^{\frac{1}{n}-1} u_x(c) = \frac{1}{2} \omega \rho g H(x_c)^2,  \label{eq:rightbc} \\
+H, u, u_x \quad \text{ continuous at } x = x_g.  \label{eq:xgregularity}
+\end{gather}
+Thus $x_a$ is the upstream location where a Dirichlet boundary condition is applied to the problem of determining velocity and thickness, while at the (non-moving) calving front $x_c$ we have the standard hydrostatic pressure ``imbalance'' condition \cite{SchoofMarine1}.  Note \eqref{eq:xgregularity} is a regularity requirement, equivalently the matching conditions between the grounded and floating parts.
 
+Given data $M$, $B$, $\beta$, and of course physical constants $g,n,\rho,\rho_w$, we expect the problem consisting of equations \eqref{eq:steadymass}--\eqref{eq:xgregularity} to be well-posed. 
 
 \subsection*{Bodvardsson's parabola and marine ice sheets}
+
+
 
 \subsubsection*{An exact solution to the SSA stress balance plus mass continuity}
 The \cite{Bodvardsson} solution is also a parabola, but this time the margin has finite slope and the dome is smooth.  The \cite{Bodvardsson} solution was analyzed by \cite{Weertman61stability}, who decides that the physics chosen by Bodvardsson should be replaced by more SIA-like deformation, though sliding is allowed as well.
@@ -140,6 +134,32 @@ margin is asymptotically a ``wedge'' with finite slope, because his ice
 sheet profile is merely a parabola \emph{in the horizontal variable} $x$.
 See the profile in figure 2 for the margin shape, the last 20km of
 Bruarjokull.
+
+\small
+\begin{table}
+\caption{Notation and units (SI).}\label{tab:notation}
+
+\medskip
+\begin{tabular}{llll}
+Symbol & Description & [Value] Units \\ \hline
+$B$ & ice hardness; $=A^{-1/n}$ & $\text{Pa}\,\text{s}^{1/3}$  \\
+$b$ & bedrock elevation & m \\
+$\beta$ & sliding coefficient & \\
+$g$ & acceleration of gravity  & 9.81 $\text{m}\,\text{s}^{-2}$\\
+$H$ & ice thickness & m \\
+$h$ & ice surface elevation & m \\
+$M$ & mass balance & $\text{m}\,\text{s}^{-1}$ \\
+$n$ & Glen exponent in ice flow law & 3 \\
+$\rho$ & density of ice & 910 $\text{kg}\,\text{m}^{-3}$ \\
+$\rho_w$ & density of sea water & 1028 $\text{kg}\,\text{m}^{-3}$ \\
+$\tau_{b}$ & basal shear stress applied to ice & Pa \\
+$u$ & horizontal velocity & $\text{m}\,\text{s}^{-1}$ \\
+$(x,z)$ & flow-line cartesian coordinates; $z$ is & m  \\
+ & \quad positive upward & \\
+$z_o$ & ocean surface elevation & m \\
+$\omega$ & Archimedean factor; $=1 - \rho/\rho_w$ & 
+\end{tabular}
+\end{table}
 
 Bodvardsson's parabola must be the opposite end of some spectrum from the
 purely-plastic, $n=\infty$ ice which gives a shape which is a parabola

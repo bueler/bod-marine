@@ -17,7 +17,7 @@ def plottwo(fig, x, y1, y2, label1, label2, y1min=-inf, y1max=inf, y2min=-inf, y
   ax1.plot(x,y1,'k',linewidth=lw)
   ax2.plot(x,y2,'k--',linewidth=lw)
 
-  ax1.set_xlabel("x  (km)")
+  ax1.set_xlabel("x   (km)")
 
   if y1min == -inf:
     y1min = y1.min()

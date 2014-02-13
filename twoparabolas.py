@@ -26,7 +26,7 @@ plot(xx,Hb,'k',linewidth=1.5)
 hold(False)
 axis([min(xx),max(xx),0.0,3.5])
 setp(gca(),yticks=[0.0,500.0,1000.0,1500.0,2000.0,2500.0,3000.0])
-ylabel('H   (m)')
+ylabel('z   (m)')
 xlabel('x   (km)')
 savefig('twoparabolas.pdf',bbox_inches='tight')
 

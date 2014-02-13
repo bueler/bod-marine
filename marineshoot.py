@@ -12,19 +12,19 @@ from scipy.integrate import odeint
 import exactN
 from plottool import lw, plottwo
 
-desc='''Solve ODE system for marine ice sheet, for which an exact solution is known.
-By default, does shooting to solve for the right value.
-If option '-noshoot -saveroot NAME' is given then generates plots.'''
+desc='''Solve ODE system for marine ice sheet, for which an exact solution
+is known.  By default, does shooting to solve for the right value.
+If options '--noshoot --saveroot NAME' are given then generates plots.'''
 
 parser = argparse.ArgumentParser(description=desc)
 
 Tmultdefault = 1.0
 parser.add_argument('--Tmult', default=Tmultdefault,
-                    help='when plotting, multiple of exact value of T to use as initial value')
+                    help='when plotting, multiply exact value of T to use as initial value')
 parser.add_argument('--saveroot', metavar='NAME',
                     help='if given, save plots in NAME-geometry.pdf and NAME-other.pdf')
 parser.add_argument('--noshoot', action='store_true',
-                    help='do not do shooting with bisection')
+                    help='do not do shooting with bisection and instead plot one case')
 
 args = parser.parse_args()
 Tmult = float(args.Tmult)
@@ -35,7 +35,7 @@ if not doshoot:
 afloat = 0.0 * exactN.a   # FIXME: what do I want?
 
 def ground(H):  # decide flotation criterion
-  return (exactN.rho * H >= exactN.rhow * exactN.bc)
+  return (exactN.rho * H >= exactN.rhow * exactN.bg)
 
 def M(H):       # compute accumulation
   if ground(H):
@@ -51,7 +51,7 @@ def F(H):       # compute driving stress coefficient:  tau_d = F(H) H_x
       return - (1.0 - exactN.rho/exactN.rhow) * gover
 
 def beta(x,H):    # compute basal resistance coefficient:  tau_b = beta(x,H) u
-  if ground(H) & (x >= 0.0) & (x <= exactN.L0):
+  if ground(H) & (x <= exactN.L0):
       Hexact, _, _, _ = exactN.exactN(x)
       gover = exactN.rho * exactN.g * Hexact  # grounded overburden pressure
       return exactN.k * gover
@@ -59,20 +59,20 @@ def beta(x,H):    # compute basal resistance coefficient:  tau_b = beta(x,H) u
       return 0.0
 
 def B(x):       # get contrived ice hardness
-  if x <= exactN.xc:
+  if x <= exactN.xg:
       _, B = exactN.exactNbueler(x)
       return B
   else:
-      _, Bc = exactN.exactNbueler(exactN.xc)
+      _, Bc = exactN.exactNbueler(exactN.xg)
       return Bc
 
 def surfaces(H):
   hh = H.copy()
   flot = np.logical_not(ground(H))
   rr = exactN.rho / exactN.rhow
-  hh[flot] = exactN.bc + (1.0 - rr) * H[flot]
+  hh[flot] = exactN.bg + (1.0 - rr) * H[flot]
   bb = np.zeros(np.shape(H))
-  bb[flot] = exactN.bc - rr * H[flot]
+  bb[flot] = exactN.bg - rr * H[flot]
   return hh, bb
 
 # the ode system is
@@ -109,9 +109,11 @@ ux = (1.0/exactN.k) * (2.0 * exactN.H0 / exactN.L0**2)
 uinit = ux * xinit
 Hinit = exactN.H0 * (1.0 - (xinit / exactN.L0)**2.0)
 
+xc = 1.4 * exactN.L0
+
 def objective(Tinit):
     v0 = np.array([uinit, Hinit, Tinit])  # initial values at x[0] = xinit
-    x = np.linspace(xinit,1.5 * exactN.xc,2)
+    x = np.linspace(xinit,xc,2)
     v = odeint(f,v0,x)                    # solve ODE system to determine v[1,2] = T
     Tcalvc = 0.5 * exactN.rho * exactN.g * (1.0 - rr) * v[1,1]**2
     #print "Tinit = %.6e,  (Tfinal - Tcalvc)/Tcalvc = %.6e" % ( Tinit, (v[-1,2]-Tcalvc)/Tcalvc )
@@ -142,14 +144,11 @@ if doshoot:  # run bisection
 
 # proceed to make figure if not doshoot
 
-Tcalvg = 0.5 * exactN.rho * exactN.g * (1.0 - rr) * exactN.Hc**2
-
 print "initial conditions:"
 print "  at xinit = %.3f km we have initial values" % (xinit/1000.0)
 print "  u = %7.2f m a-1, H = %.2f m" % (uinit*exactN.secpera, Hinit)
 
-xb = 1.5 * exactN.xc
-x = np.linspace(xinit,xb,1001)
+x = np.linspace(xinit,xc,1001)
 dx = x[1] - x[0]
 
 Tinit = Tmult * Tcheat
@@ -165,7 +164,7 @@ u = v[:,0]
 H = v[:,1]
 T = v[:,2]
 
-isgnd = (x <= exactN.xc)
+isgnd = (x <= exactN.xg)
 xbod = x[isgnd]
 Hbod, _, _, _ = exactN.exactN(xbod)
 Herror = abs(H[isgnd] - Hbod).max()
@@ -182,18 +181,17 @@ print "COMPARE Tcalvc = %.6e Pa m" % Tcalvc
 hh, bb = surfaces(H)
 fig = plt.figure(figsize=(6,4))
 ax1fig1, ax2fig1 = plottwo(fig,x/1000.0,hh,u * exactN.secpera,
-                           "elevation (m, solid)","ice velocity (m a-1, dashed)",
+                           "z   (m, solid)","ice velocity   (m a-1, dashed)",
                            y1min=0.0)
 ax1fig1.hold(True)
 ax1fig1.plot(x/1000.0,bb,'k',lw=2.0)
-ax1fig1.plot([xb/1000.0,xb/1000.0],[bb[-1],hh[-1]],'k',linewidth=lw)
+ax1fig1.plot([xc/1000.0,xc/1000.0],[bb[-1],hh[-1]],'k',linewidth=lw)
 # show water height as waves
-xl = np.linspace(xb,1.1*xb,101)
-ax1fig1.plot(xl/1000.0, exactN.bc - 30.0 * abs(np.sin(xl / 4.0e3)),'k',linewidth=0.7*lw)
+xl = np.linspace(xc,1.14*xc,101)
+ax1fig1.plot(xl/1000.0, exactN.bg - 30.0 * abs(np.sin(xl / 4.0e3)),'k',linewidth=0.7*lw)
 y1, y2 = ax1fig1.get_ylim()
 ax1fig1.set_ylim(0.0,3000.0)
 ax1fig1.set_yticks([0.0,500.0,1000.0,1500.0,2000.0,2500.0,3000.0])
-#ax1fig1.set_xlim(0.0,1.1*xb/1000.0)
 ax1fig1.hold(False)
 y1, y2 = ax2fig1.get_ylim()
 ax2fig1.set_ylim(0.0,y2)

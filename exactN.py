@@ -24,6 +24,8 @@ a       = 0.003 / secpera
 Hela    = H0 / 1.5
 k       = 9.0 * Hela / (a * L0 * L0)
 
+# Bodvardsson (1955) solution is purely grounded
+
 def exactN(x):
   # Bodvardsson: get geometry and velocity from mass continuity and
   #   T_x = 0  and assumption  beta = k rho g H
@@ -39,10 +41,15 @@ def exactN(x):
   M   = a * (H - Hela)
   return H, hx, u, M
 
+
+# now build marine ice sheet by deciding where the grounding line is
+# and setting the ocean depth bg accordingly
+
 rhow    = 1028.0
-xc      = 0.9 * L0
-Hc      = H0 * (1.0 - (xc / L0) * (xc / L0))
-bc      = rho * Hc / rhow
+xg      = 0.9 * L0
+
+Hg, _, _, _ = exactN(xg)
+bg      = rho * Hg / rhow
 
 def exactNbueler(x):
   # Bueler:
@@ -54,6 +61,6 @@ def exactNbueler(x):
   q   = (1.0 / n) - 1.0
   ux  = - hxx / k
   H, _, _, _ = exactN(x)
-  T = 0.5 * (1.0 - rho / rhow) * rho * g * Hc**2
+  T = 0.5 * (1.0 - rho / rhow) * rho * g * Hg**2
   B = T / ( 2.0 * H * (abs(ux)**q) * ux )
   return T, B
