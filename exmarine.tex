@@ -261,17 +261,26 @@ Figure \ref{fig:verifNresult} shows the result of using this numerical scheme to
 
 \appendix
 
-\subsection{Appendix A: Bodvardsson's little theorem}  \cite{Bodvardsson} does not identify the source of the exact parabolic solution to the plug flow equations, and it seems likely that he derived the solution from scratch.  In abstract terms we can describe his result as the theorem that there is a unique polynomial solution to the second-order differential equation
-  $$(u u')' = Au+B$$
-if $u(0) = u_0$.  FIXME: $y(x)$ etc.
+\subsection{Appendix A: Bodvardsson's little theorem}  \cite{Bodvardsson} does not identify the source of the exact parabolic thickness solution to his plug flow equations, and it seems likely that he derived the solution from scratch.  We summarize his result as the theorem that if $A$ and $B$ are constant then there is a unique polynomial solution $y(x)$ to the nonlinear second-order differential equation
+\begin{equation}
+  (y y')' = Ay+B  \label{eq:abstractode}
+\end{equation}
+satisfying the single boundary condition $y(0) = y_0 > 0$ and additional technical conditions $y'(0) \le 0$ and $2A y_0 + 3 B \ge 0$.  Equation \eqref{eq:abstractode} is Bodvarssson's equation ``(17).''  The additional technical conditions are unstated other than the claim that his problem ``define[s] one and only one solution which is admittable from the physical point of view'' \citep{Bodvardsson}.  Here we justify the theorem and find the relations among parameters for the solution.
 
-which is his equation (17), always has an exact solution which is a
-quadratic polynomial, e.g.
-   $$u(x) = u_0 (1 + \alpha x + \beta x^2).$$
-He exploits this solution to determine $L$ from the condition $h(L)=0$.
-He use the exact solution it for its free boundary information.
+There is no claim this nonlinear problem is well-posed.  Rather, the existence of the unique polynomial solution allows an interpretation of the problem as a free boundary problem which determines the first positive zero $x_0>0$ of $y(x)$.  In Bodvardsson's context $x_0=L_0$ is the length of the glacier, equivalently the location of the ice sheet margin in the ``dry'' case where flotation does not occur.
 
-FIXME: show $\alpha,\beta$ and talk free boundary
+It is easy to see by substitution into \eqref{eq:abstractode} that nontrivial solutions of degree $d$, i.e.~of the form $y(x) = \gamma x^d + (\text{lower degree})$ with $\gamma\ne 0$, exist only if $d=2$.  In that case we seek solutions which satisfy the boundary conditions, so
+\begin{equation}
+y(x) = y_0(1 - \alpha x + \beta x^2)  \label{eq:abstractsoln}
+\end{equation}
+for some $\alpha\ge 0$ and $\beta$ which are to be determined from $A,B$; this is Bodvarssson's solution ``(18).''  Substitution gives the two equations
+\begin{equation}
+3 y_0^2 \alpha^2 = 2 A y_0 + 3 B \quad \text{ and } \quad 6 y_0 \beta = A.  \label{eq:abstractrelations}
+\end{equation}
+These two relations determine $\alpha,\beta$ from $A,B$.  The first relation explains a technical condition as ensuring that $\alpha$ is real.
+
+In the main text, Bodvardsson's problem relates the initial (upstream) ice thickness $y_0=H_0$, an ablation gradient $a>0$, the equilibrium-line altitude $H_{ela}$, and a sliding constant $k>0$ to the glacier thickness $y(x) = H(x)$.  He has $A=-ka$ and $B=k a H_{ela}$ in \eqref{eq:abstractode} so the technical condition $2A y_0 + 3 B \ge 0$ says $3 H_{ela} \ge 2 H_0$ after simplification.  This causes the equilibrium line altitude to be relatively high on the glacier.
+
 
 \subsection{Appendix: Finite difference scheme for coupled Equations \eqref{mcsteady} and \eqref{ssasteady}}  The coupled, steady-state equations for mass continuity and the SSA stress balance form a continuum system that is solved exactly by the Bodvardsson solution (Test N), as explained in the main text.  Here we detail a numerical scheme for these equations.  The scheme uses centered, second-order finite differences for the SSA equation and a second-order upwind finite difference scheme for the mass continuity equation.  Figure \ref{fig:verifNresult} gives clear evidence that the scheme computes convergent ice thickness and ice velocity as the grid spacing decreases.
 
