@@ -5,7 +5,7 @@ include ${PETSC_DIR}/conf/variables
 
 exactsolns.o : exactsolns.c
 
-bodvardsson : bodvardsson.o exactTestN.o chkopts
+bodvardsson : bodvardsson.o exactsolns.o chkopts
 	-${CLINKER} -o $@ $< ${PETSC_SNES_LIB} exactsolns.o
 
 marine : marine.o exactsolns.o chkopts

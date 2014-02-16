@@ -1,83 +1,77 @@
 BODVARDSSON solves for thickness and velocity in 1D, steady ice stream
   [run with -help for info and options]
   using approximate Jacobian; finite-differencing using coloring
-  Mx = 16 points, dx = 30000.000 m
-  H0 = 3000.00 m, xc = 450.00 km, Txc = 1.66463e+08 Pa m
-  using exact solution as initial guess
-  0 SNES Function norm 8.153836085670e-01 
-  1 SNES Function norm 1.448754525767e-02 
-  2 SNES Function norm 2.035636666598e-06 
-  3 SNES Function norm 9.109592118434e-13 
-  CONVERGED_FNORM_RELATIVE Number of Newton iterations = 3
-(dx,errHinf,erruinf) 30000.000 1.7982e+01 6.2224e+00
-BODVARDSSON solves for thickness and velocity in 1D, steady ice stream
-  [run with -help for info and options]
-  using approximate Jacobian; finite-differencing using coloring
   Mx = 46 points, dx = 10000.000 m
-  H0 = 3000.00 m, xc = 450.00 km, Txc = 1.66463e+08 Pa m
+  H0 = 3000.00 m, xc = 450.00 km, Txc = 9.72359e-317 Pa m
   using exact solution as initial guess
   0 SNES Function norm 5.321996511084e-02 
-  1 SNES Function norm 1.033826066704e-04 
-  2 SNES Function norm 1.195963533734e-10 
+  1 SNES Function norm 1.033713399237e-04 
+  2 SNES Function norm 7.636600311665e-11 
   CONVERGED_FNORM_RELATIVE Number of Newton iterations = 2
 (dx,errHinf,erruinf) 10000.000 2.2529e+00 7.1132e-01
 BODVARDSSON solves for thickness and velocity in 1D, steady ice stream
   [run with -help for info and options]
   using approximate Jacobian; finite-differencing using coloring
   Mx = 91 points, dx = 5000.000 m
-  H0 = 3000.00 m, xc = 450.00 km, Txc = 1.66463e+08 Pa m
+  H0 = 3000.00 m, xc = 450.00 km, Txc = 1.14255e-316 Pa m
   using exact solution as initial guess
   0 SNES Function norm 9.452557151487e-03 
-  1 SNES Function norm 4.879792222167e-06 
-  2 SNES Function norm 1.351366475901e-10 
-  3 SNES Function norm 5.674261467624e-13 
-  CONVERGED_FNORM_RELATIVE Number of Newton iterations = 3
+  1 SNES Function norm 4.589990033294e-06 
+  2 SNES Function norm 6.147003118392e-12 
+  CONVERGED_FNORM_RELATIVE Number of Newton iterations = 2
 (dx,errHinf,erruinf) 5000.000 5.8056e-01 1.7846e-01
 BODVARDSSON solves for thickness and velocity in 1D, steady ice stream
   [run with -help for info and options]
   using approximate Jacobian; finite-differencing using coloring
-  Mx = 151 points, dx = 3000.000 m
-  H0 = 3000.00 m, xc = 450.00 km, Txc = 1.66463e+08 Pa m
-  using exact solution as initial guess
-  0 SNES Function norm 2.646251082825e-03 
-  1 SNES Function norm 2.959840945124e-06 
-  2 SNES Function norm 1.592113806989e-09 
-  3 SNES Function norm 1.193459854331e-12 
-  CONVERGED_FNORM_RELATIVE Number of Newton iterations = 3
-(dx,errHinf,erruinf) 3000.000 2.1154e-01 6.4454e-02
-BODVARDSSON solves for thickness and velocity in 1D, steady ice stream
-  [run with -help for info and options]
-  using approximate Jacobian; finite-differencing using coloring
   Mx = 226 points, dx = 2000.000 m
-  H0 = 3000.00 m, xc = 450.00 km, Txc = 1.66463e+08 Pa m
+  H0 = 3000.00 m, xc = 450.00 km, Txc = 6.34605e-317 Pa m
   using exact solution as initial guess
   0 SNES Function norm 9.684013933894e-04 
-  1 SNES Function norm 5.218117046377e-06 
-  2 SNES Function norm 8.530336038726e-09 
-  3 SNES Function norm 1.231011383141e-11 
-  CONVERGED_PNORM_RELATIVE Number of Newton iterations = 3
+  1 SNES Function norm 8.236492297865e-07 
+  2 SNES Function norm 1.808031779893e-10 
+  CONVERGED_SNORM_RELATIVE Number of Newton iterations = 2
 (dx,errHinf,erruinf) 2000.000 9.4591e-02 2.8663e-02
 BODVARDSSON solves for thickness and velocity in 1D, steady ice stream
   [run with -help for info and options]
   using approximate Jacobian; finite-differencing using coloring
   Mx = 451 points, dx = 1000.000 m
-  H0 = 3000.00 m, xc = 450.00 km, Txc = 1.66463e+08 Pa m
+  H0 = 3000.00 m, xc = 450.00 km, Txc = 6.55854e-317 Pa m
   using exact solution as initial guess
   0 SNES Function norm 1.898165857775e-04 
-  1 SNES Function norm 1.473501246610e-05 
-  2 SNES Function norm 1.399872665714e-07 
-  3 SNES Function norm 1.130375934060e-09 
-  CONVERGED_PNORM_RELATIVE Number of Newton iterations = 3
-(dx,errHinf,erruinf) 1000.000 2.3800e-02 7.1103e-03
+  1 SNES Function norm 2.183598456805e-06 
+  2 SNES Function norm 3.093738933864e-09 
+  CONVERGED_SNORM_RELATIVE Number of Newton iterations = 2
+(dx,errHinf,erruinf) 1000.000 2.3800e-02 7.1102e-03
 BODVARDSSON solves for thickness and velocity in 1D, steady ice stream
   [run with -help for info and options]
   using approximate Jacobian; finite-differencing using coloring
   Mx = 901 points, dx = 500.000 m
-  H0 = 3000.00 m, xc = 450.00 km, Txc = 1.66463e+08 Pa m
+  H0 = 3000.00 m, xc = 450.00 km, Txc = 1.86157e-316 Pa m
   using exact solution as initial guess
   0 SNES Function norm 7.937373955275e-05 
-  1 SNES Function norm 4.182365923612e-05 
-  2 SNES Function norm 2.339614760647e-06 
-  3 SNES Function norm 1.101549415600e-07 
-  CONVERGED_PNORM_RELATIVE Number of Newton iterations = 3
-(dx,errHinf,erruinf) 500.000 5.9777e-03 1.7053e-03
+  1 SNES Function norm 5.947845435905e-06 
+  2 SNES Function norm 4.806659127756e-08 
+  CONVERGED_SNORM_RELATIVE Number of Newton iterations = 2
+(dx,errHinf,erruinf) 500.000 5.9777e-03 1.7050e-03
+BODVARDSSON solves for thickness and velocity in 1D, steady ice stream
+  [run with -help for info and options]
+  using approximate Jacobian; finite-differencing using coloring
+  Mx = 2251 points, dx = 200.000 m
+  H0 = 3000.00 m, xc = 450.00 km, Txc = 1.29838e-316 Pa m
+  using exact solution as initial guess
+  0 SNES Function norm 1.154160543528e-04 
+  1 SNES Function norm 1.762041967767e-05 
+  2 SNES Function norm 1.573377949068e-06 
+  CONVERGED_SNORM_RELATIVE Number of Newton iterations = 2
+(dx,errHinf,erruinf) 200.000 9.6921e-04 1.9522e-04
+BODVARDSSON solves for thickness and velocity in 1D, steady ice stream
+  [run with -help for info and options]
+  using approximate Jacobian; finite-differencing using coloring
+  Mx = 4501 points, dx = 100.000 m
+  H0 = 3000.00 m, xc = 450.00 km, Txc = 1.38722e-316 Pa m
+  using exact solution as initial guess
+  0 SNES Function norm 2.111674315838e-04 
+  1 SNES Function norm 3.433806836711e-05 
+  2 SNES Function norm 1.141813430799e-05 
+  CONVERGED_SNORM_RELATIVE Number of Newton iterations = 2
+(dx,errHinf,erruinf) 100.000 2.7022e-04 2.5433e-05

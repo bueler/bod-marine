@@ -59,8 +59,8 @@ dims = axis('tight')
 axis((0.9*dx.min(),1.1*dx.max(),0.9*miny,1.1*maxy))
 legend(loc='upper left')
 xlabel(r'$\Delta x$  [m]')
-xticks(array([300.0, 500.0, 1000.0, 2000.0, 3000.0, 5000.0, 10000.0, 30000.0]),
-       ('300m','500m','1km','2km','3km','5km','10km','30km') )
+xticks(array([100.0,200.0, 500.0, 1000.0, 2000.0, 5000.0, 10000.0]),
+       ('100m','200m','500m','1km','2km','5km','10km') )
 grid(True)
 
 if len(figname) == 0:

@@ -16,7 +16,7 @@ static const char help[] =
 #include <petscdmda.h>
 #include <petscsnes.h>
 
-#include "exactTestN.h"
+#include "exactsolns.h"
 
 
 /* we will use dof=2 DMDA, and at each grid point have a thickness H and a velocity u */
@@ -63,7 +63,7 @@ int main(int argc,char **argv)
   Vec                    Hu,r;                 /* solution, residual vectors */
   AppCtx                 user;                 /* user-defined work context */
   PetscInt               its, i, tmpxs, tmpxm; /* iteration count, index, etc. */
-  PetscReal              tmp1, tmp2, tmp3, tmp4, tmp5,
+  PetscReal              tmp1, tmp2, tmp3, tmp4,
                          errnorms[2], descaleNode[2];
   PetscBool              eps_set = PETSC_FALSE,
                          dump = PETSC_FALSE,
@@ -84,9 +84,8 @@ int main(int argc,char **argv)
   user.rhow    = 1028.0;       /* kg m^-3 */
   user.g       = 9.81;         /* m s^-2 */
 
-  /* ask Test N for its parameters, but only those we need to solve */
-  ierr = params_exactN(&(user.H0), &tmp1, &(user.xc), &tmp2, &tmp3, &tmp4, &tmp5, 
-                       &(user.Txc)); CHKERRQ(ierr);
+  /* ask Bodvardsson soln for its parameters, but only those we need to solve */
+  ierr = params_exactBod(&(user.H0), &tmp1, &(user.xc), &tmp2, &tmp3, &tmp4); CHKERRQ(ierr);
   /* regularize using strain rate of 1/xc per year */
   user.epsilon = (1.0 / user.secpera) / user.xc;
   /* tools for non-dimensionalizing to improve equation scaling */
@@ -260,7 +259,7 @@ PetscErrorCode FillExactSoln(AppCtx *user)
 {
   PetscErrorCode ierr;
   PetscInt       i;
-  PetscReal      x, dum1, dum2, dum3, dum4;
+  PetscReal      x, dum;
   Node           *Hu;
 
   PetscFunctionBegin;
@@ -269,7 +268,7 @@ PetscErrorCode FillExactSoln(AppCtx *user)
   ierr = DMDAVecGetArray(user->da,user->Huexact,&Hu);CHKERRQ(ierr);
   for (i = user->xs; i < user->xs + user->xm; i++) {
     x = user->dx * (PetscReal)i;  /* = x_i = distance from dome */
-    ierr = exactN(x, &(Hu[i].H), &dum1, &(Hu[i].u), &dum2, &dum3, &dum4); CHKERRQ(ierr);
+    ierr = exactBod(x, &(Hu[i].H), &(Hu[i].u), &dum); CHKERRQ(ierr);
   }
   ierr = DMDAVecRestoreArray(user->da,user->Huexact,&Hu);CHKERRQ(ierr);
   PetscFunctionReturn(0);
@@ -298,10 +297,11 @@ PetscErrorCode FillInitial(AppCtx *user, Vec *vHu)
 PetscErrorCode FillDistributedParams(AppCtx *user)
 {
   PetscErrorCode ierr;
-  PetscInt       i,Mx=user->Mx;
-  PetscReal      x, dum1, dum2, dum3, dum4, dum5, *M, *Bstag, *beta;
+  PetscInt       i, Mx=user->Mx;
+  PetscReal      x, H, k, dum1, dum2, dum3, dum4, dum5, *M, *Bstag, *beta;
 
   PetscFunctionBegin;
+  ierr = params_exactBod(&dum1, &dum2, &dum3, &dum4, &dum5, &k); CHKERRQ(ierr);
   /* Compute regular grid exact soln and staggered-grid thickness over the
      locally-owned part of the grid */
   ierr = DMDAVecGetArray(user->scalarda,user->M,&M);CHKERRQ(ierr);
@@ -309,10 +309,11 @@ PetscErrorCode FillDistributedParams(AppCtx *user)
   ierr = DMDAVecGetArray(user->scalarda,user->beta,&beta);CHKERRQ(ierr);
   for (i = user->xs; i < user->xs + user->xm; i++) {
     x = user->dx * (PetscReal)i;  /* = x_i = distance from dome; regular grid point */
-    ierr = exactN(x, &dum1, &dum2, &dum3, &(M[i]), &dum4, &(beta[i])); CHKERRQ(ierr);
+    ierr = exactBod(x, &H, &dum1, &(M[i])); CHKERRQ(ierr);
+    beta[i] = k * user->rho * user->g * H; 
     x = x + (user->dx/2.0);       /* = x_{i+1/2}; staggered grid point */
     if (i < Mx-1) {
-      ierr = exactN(x, &dum1, &dum2, &dum3, &dum4, &(Bstag[i]), &dum5); CHKERRQ(ierr);
+      ierr = exactBodBueler(x, &dum1, &(Bstag[i])); CHKERRQ(ierr);
     } else {
       Bstag[i] = -9999.9999;  /* never accessed, and we don't have the value anyway */
     }
