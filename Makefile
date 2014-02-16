@@ -9,16 +9,14 @@ all: exmarine.pdf
 #    igs.bst
 #    igsnatbib.sty
 
-figures := twoparabolas.pdf bodverifbetaB.pdf verifN.pdf exactmarine-geometry.pdf
+figures := twoparabolas.pdf verifN.pdf exactmarine-geometry.pdf
 
 twoparabolas.pdf: twoparabolas.py
 	./twoparabolas.py
 
 exactmarine-geometry.pdf: marineshoot.py
 	./marineshoot.py --saveroot exactmarine --noshoot
-
-bodverifbetaB.pdf: exactfigures.py
-	./exactfigures.py
+	# also generates exactmarine-M-B.pdf, exactmarine-beta.pdf
 
 verifN.pdf: conv.txt verifNfigure.py
 	./verifNfigure.py conv.txt verifN.pdf

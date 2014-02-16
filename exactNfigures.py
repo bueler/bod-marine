@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-## generate figure showing the Bodvardsson solution
+## generate figure showing the Bodvardsson solution (= only the grounded part)
 
 from sys import exit
 from pylab import *
