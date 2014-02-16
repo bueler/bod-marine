@@ -39,7 +39,7 @@ def exactBod(x):
   hx  = hxx * x
   u   = - hx / k
   M   = a * (H - Hela)
-  return H, hx, u, M
+  return H, u, M
 
 # now build marine ice sheet by deciding where the grounding line is
 # and setting the ocean depth bg accordingly
@@ -48,7 +48,7 @@ rhow    = 1028.0
 omega   = 1.0 - rho / rhow
 xg      = 0.9 * L0
 
-Hg, _, ug, Mg = exactBod(xg)
+Hg, ug, Mg = exactBod(xg)
 bedg    = rho * Hg / rhow
 
 def exactBodBueler(x):
@@ -60,7 +60,7 @@ def exactBodBueler(x):
   hxx = - 2.0 * H0 / (L0 * L0)
   q   = (1.0 / n) - 1.0
   ux  = - hxx / k
-  H, _, _, _ = exactBod(x)
+  H, _, _ = exactBod(x)
   T = 0.5 * omega * rho * g * Hg**2
   B = T / ( 2.0 * H * (abs(ux)**q) * ux )
   return T, B

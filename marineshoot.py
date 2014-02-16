@@ -42,7 +42,7 @@ def ground(H):  # decide flotation criterion given thickness
 
 def M(x):       # compute mass balance for location
   if x <= exactsolns.xg:
-      _, _, _, Mexact = exactsolns.exactBod(x)
+      _, _, Mexact = exactsolns.exactBod(x)
       return Mexact
   else:
       return M0
@@ -63,7 +63,7 @@ def F(H):       # compute driving stress coefficient:    tau_d = - F(H) H_x
 
 def beta(x,H):  # compute basal resistance coefficient:  tau_b = - beta(x,H) u
   if ground(H) & (x <= exactsolns.L0):
-      Hexact, _, _, _ = exactsolns.exactBod(x)
+      Hexact, _, _ = exactsolns.exactBod(x)
       gover = exactsolns.rho * exactsolns.g * Hexact  # grounded overburden pressure
       return exactsolns.k * gover
   else:
@@ -112,7 +112,7 @@ xa = 0.1 * exactsolns.L0
 xc = 1.4 * exactsolns.L0
 
 rr = exactsolns.rho / exactsolns.rhow
-Ha, _, ua, _ = exactsolns.exactBod(xa)
+Ha, ua, _ = exactsolns.exactBod(xa)
 
 def objective(Tinit):
     v0 = np.array([ua, Ha, Tinit])  # initial values at x[0] = xa
@@ -169,7 +169,7 @@ T = v[:,2]
 
 # compute and report errors
 xgnd = x[(x <= exactsolns.xg)]
-Hbod, _, ubod, _ = exactsolns.exactBod(xgnd)
+Hbod, ubod, _ = exactsolns.exactBod(xgnd)
 Hboderror = abs(H[(x <= exactsolns.xg)] - Hbod).max()
 uboderror = abs(u[(x <= exactsolns.xg)] - ubod).max()
 xveen = x[(x > exactsolns.xg)]
@@ -238,7 +238,7 @@ fig = plt.figure(figsize=(6,4))
 bbeta = np.zeros(np.shape(H))
 for j in range(len(H)):
    if x[j] <= exactsolns.L0:
-       Hexact, _, _, _ = exactsolns.exactBod(x[j])
+       Hexact, _, _ = exactsolns.exactBod(x[j])
        bbeta[j] = exactsolns.k * exactsolns.rho * exactsolns.g * Hexact
    else:
        bbeta[j] = 0.0
