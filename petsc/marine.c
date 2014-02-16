@@ -24,7 +24,6 @@ typedef struct {
   PetscReal   L0;  /* free boundary length in Bodvardsson solution */
   Vec         Hu;  /* exact thickness (Hu[i][0]) and exact velocity (Hu[i][1]) on regular grid */
   PetscReal   xg;  /* exact grounding line location */
-  PetscReal   Tg;  /* vertically-integrated longitudinal stress at xgexact */
 } ExactCtx;
 
 /* User-defined application context.  Filled by Fill...() and used by
@@ -86,8 +85,7 @@ int main(int argc,char **argv)
   user.g       = 9.81;         /* m s^-2 */
 
   /* get parameters of exact solution */
-  ierr = params_exactBod(&tmp1, &(exact.L0), &(exact.xg), &tmp2, &tmp3, &tmp4, &tmp5, 
-                         &(exact.Tg)); CHKERRQ(ierr);
+  ierr = params_exactBod(&tmp1, &(exact.L0), &(exact.xg), &tmp2, &tmp3, &tmp4); CHKERRQ(ierr);
 
   /* define interval [xa,xc] and get Dirichlet initial conditions */
   user.xa = 0.1 * exact.L0;
