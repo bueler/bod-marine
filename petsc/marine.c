@@ -11,7 +11,7 @@ static const char help[] =
 #include <petscdmda.h>
 #include <petscsnes.h>
 
-#include "exactTestN.h"
+#include "exactsolns.h"
 
 
 /* we will use dof=2 DMDA, and at each grid point have a thickness H and a velocity u */
@@ -86,13 +86,13 @@ int main(int argc,char **argv)
   user.g       = 9.81;         /* m s^-2 */
 
   /* get parameters of exact solution */
-  ierr = params_exactN(&tmp1, &(exact.L0), &(exact.xg), &tmp2, &tmp3, &tmp4, &tmp5, 
-                       &(exact.Tg)); CHKERRQ(ierr);
+  ierr = params_exactBod(&tmp1, &(exact.L0), &(exact.xg), &tmp2, &tmp3, &tmp4, &tmp5, 
+                         &(exact.Tg)); CHKERRQ(ierr);
 
   /* define interval [xa,xc] and get Dirichlet initial conditions */
   user.xa = 0.1 * exact.L0;
   user.xc = 1.4 * exact.L0;
-  ierr = exactN(user.xa, &(user.Ha), &tmp1, &(user.ua), &tmp2, &tmp3, &tmp4); CHKERRQ(ierr);
+  ierr = exactBod(user.xa, &(user.Ha), &tmp1, &(user.ua), &tmp2, &tmp3, &tmp4); CHKERRQ(ierr);
 
   /* regularize using strain rate of 1/(length) per year */
   user.epsilon = (1.0 / user.secpera) / (user.xc - user.xa);
@@ -279,7 +279,7 @@ PetscErrorCode FillExactSoln(ExactCtx *exact, AppCtx *user)
       if (x[i] < user->xa)
         SETERRQ2(PETSC_COMM_SELF,1,"ERROR on rank %d: x[i] = %f less than xa!",
                  user->rank,x[i]);
-      ierr = exactN(x[i], &(Hu[i].H), &dum1, &(Hu[i].u), &dum2, &dum3, &dum4); CHKERRQ(ierr);
+      ierr = exactBod(x[i], &(Hu[i].H), &dum1, &(Hu[i].u), &dum2, &dum3, &dum4); CHKERRQ(ierr);
     } else {
       /* floating part: van der Veen formula */
       FIXME;
@@ -326,10 +326,10 @@ PetscErrorCode FillDistributedParams(AppCtx *user)
   for (i = user->xs; i < user->xs + user->xm; i++) {
     /* FIXME: both sides of grounding line */
     x = user->dx * (PetscReal)i;  /* = x_i = distance from dome; regular grid point */
-    ierr = exactN(x, &dum1, &dum2, &dum3, &(M[i]), &dum4, &(beta[i])); CHKERRQ(ierr);
+    ierr = exactBod(x, &dum1, &dum2, &dum3, &(M[i]), &dum4, &(beta[i])); CHKERRQ(ierr);
     x = x + (user->dx/2.0);       /* = x_{i+1/2}; staggered grid point */
     if (i < Mx-1) {
-      ierr = exactN(x, &dum1, &dum2, &dum3, &dum4, &(Bstag[i]), &dum5); CHKERRQ(ierr);
+      ierr = exactBod(x, &dum1, &dum2, &dum3, &dum4, &(Bstag[i]), &dum5); CHKERRQ(ierr);
     } else {
       Bstag[i] = -9999.9999;  /* never accessed, and we don't have the value anyway */
     }

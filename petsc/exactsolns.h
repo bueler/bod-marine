@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2010 Ed Bueler
+   Copyright (C) 2010-2014 Ed Bueler
   
    This file is part of PISM.
   
@@ -18,8 +18,8 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef __exactTestN_h
-#define __exactTestN_h 1
+#ifndef __exactsolns_h
+#define __exactsolns_h 1
 
 #ifdef __cplusplus
 extern "C"
@@ -28,15 +28,15 @@ extern "C"
 
 /*
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! exactTestN is a C implementation of the parabolic solution in 
+! exactsolns is a C implementation of the parabolic solution in 
 ! Bodvardsson (1955), treated here as a manufactured exact solution to
 ! a steady-state SSA flow problem, including the mass continuity equation.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 */
 
-int params_exactN(double *H0, double *L0, double *xc,
-                  double *a, double *Hela, double *k,
-                  double *H_xc, double *T_xc);
+int params_exactBod(double *H0, double *L0, double *xc,
+                    double *a, double *Hela, double *k,
+                    double *H_xc, double *T_xc);
    /* outputs: H0   = dome thickness (m)
                L0   = full flow-line length from dome to margin where H->0 (m)
                xc   = in Bueler interpretation, the location of the calving front (m)
@@ -46,7 +46,7 @@ int params_exactN(double *H0, double *L0, double *xc,
                H_xc = thickness at calving front
                T_xc = vertically-integrated longitudinal stress at calving front */
 
-int exactN(double x, double *H, double *hx, double *u, double *M, double *B, double *beta);
+int exactBod(double x, double *H, double *hx, double *u, double *M, double *B, double *beta);
    /* input    : x                   (m; 0.0 <= x <= L0)
 
       output   : H = H(x)            (m; ice thickness)
@@ -103,5 +103,5 @@ int exactN(double x, double *H, double *hx, double *u, double *M, double *B, dou
 }
 #endif
 
-#endif  /* __exactTestN_h */
+#endif  /* __exactsolns_h */
 

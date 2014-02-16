@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2010 Ed Bueler
+   Copyright (C) 2010-2014 Ed Bueler
   
    This file is part of PISM.
   
@@ -19,7 +19,7 @@
 */
 
 #include <math.h>
-#include "exactTestN.h"
+#include "exactsolns.h"
 
 #define secpera  31556926.0    /* seconds per year; 365.2422 days */
 #define g        9.81
@@ -27,9 +27,9 @@
 #define rhow     1028.0        /* sea water density; kg m-3 */
 #define n        3.0           /* Glen power */
 
-int params_exactN(double *H0, double *L0, double *xc,
-                  double *a, double *Hela, double *k,
-                  double *H_xc, double *T_xc) {
+int params_exactBod(double *H0, double *L0, double *xc,
+                    double *a, double *Hela, double *k,
+                    double *H_xc, double *T_xc) {
   double s;
 
   /* geometry */
@@ -55,12 +55,12 @@ int params_exactN(double *H0, double *L0, double *xc,
 }
 
 
-int exactN(double x, double *H, double *hx, double *u, double *M, double *B, double *beta) {
+int exactBod(double x, double *H, double *hx, double *u, double *M, double *B, double *beta) {
 
   double H0, L0, xc, a, Hela, k, Hc, Tc;
   double q, hxx, ux;
   
-  params_exactN(&H0, &L0, &xc, &a, &Hela, &k, &Hc, &Tc);
+  params_exactBod(&H0, &L0, &xc, &a, &Hela, &k, &Hc, &Tc);
 
   if (x < 0.0) { return 1; }
   if (x > L0) { return 2; }
