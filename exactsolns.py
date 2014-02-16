@@ -26,7 +26,7 @@ k       = 9.0 * Hela / (a * L0 * L0)
 
 # Bodvardsson (1955) solution is purely grounded
 
-def exactN(x):
+def exactBod(x):
   # Bodvardsson: get geometry and velocity from mass continuity and
   #   T_x = 0  and assumption  beta = k rho g H
   if np.any((x < 0.0) | (x > L0)):
@@ -48,10 +48,10 @@ def exactN(x):
 rhow    = 1028.0
 xg      = 0.9 * L0
 
-Hg, _, ug, Mg = exactN(xg)
+Hg, _, ug, Mg = exactBod(xg)
 bedg    = rho * Hg / rhow
 
-def exactNbueler(x):
+def exactBodBueler(x):
   # Bueler:
   #   (1) additionally set constant vertically-integrated longitudinal stress T
   #       to the value it would have at marine calving front at flotation
@@ -60,9 +60,13 @@ def exactNbueler(x):
   hxx = - 2.0 * H0 / (L0 * L0)
   q   = (1.0 / n) - 1.0
   ux  = - hxx / k
-  H, _, _, _ = exactN(x)
+  H, _, _, _ = exactBod(x)
   T = 0.5 * (1.0 - rho / rhow) * rho * g * Hg**2
   B = T / ( 2.0 * H * (abs(ux)**q) * ux )
   return T, B
 
-_, Bg   = exactNbueler(xg)
+_, Bg   = exactBodBueler(xg)
+
+def exactVeen(x):
+  # van der Veen:
+  FIXME

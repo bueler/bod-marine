@@ -9,7 +9,7 @@ import argparse
 from scipy.linalg import solve
 from scipy.integrate import odeint
 
-import exactN
+import exactsolns
 from plottool import lw, plottwo
 
 desc='''Solve ODE system for marine ice sheet, for which an exact solution
@@ -38,44 +38,44 @@ if not doshoot:
 # define the model
 
 def ground(H):  # decide flotation criterion given thickness
-  return (exactN.rho * H >= exactN.rhow * exactN.bedg)
+  return (exactsolns.rho * H >= exactsolns.rhow * exactsolns.bedg)
 
 def M(x):       # compute mass balance for location
-  if x <= exactN.xg:
-      _, _, _, Mexact = exactN.exactN(x)
+  if x <= exactsolns.xg:
+      _, _, _, Mexact = exactsolns.exactBod(x)
       return Mexact
   else:
-      return Mdrop * exactN.Mg
+      return Mdrop * exactsolns.Mg
 
 def B(x):       # get contrived ice hardness for location
-  if x <= exactN.xg:
-      _, Bexact = exactN.exactNbueler(x)
+  if x <= exactsolns.xg:
+      _, Bexact = exactsolns.exactBodBueler(x)
       return Bexact
   else:
-      return exactN.Bg
+      return exactsolns.Bg
 
 def F(H):       # compute driving stress coefficient:    tau_d = - F(H) H_x
-  gover = exactN.rho * exactN.g * H  # grounded overburden pressure
+  gover = exactsolns.rho * exactsolns.g * H  # grounded overburden pressure
   if ground(H):
       return - gover
   else:
-      return - (1.0 - exactN.rho/exactN.rhow) * gover
+      return - (1.0 - exactsolns.rho/exactsolns.rhow) * gover
 
 def beta(x,H):  # compute basal resistance coefficient:  tau_b = - beta(x,H) u
-  if ground(H) & (x <= exactN.L0):
-      Hexact, _, _, _ = exactN.exactN(x)
-      gover = exactN.rho * exactN.g * Hexact  # grounded overburden pressure
-      return exactN.k * gover
+  if ground(H) & (x <= exactsolns.L0):
+      Hexact, _, _, _ = exactsolns.exactBod(x)
+      gover = exactsolns.rho * exactsolns.g * Hexact  # grounded overburden pressure
+      return exactsolns.k * gover
   else:
       return 0.0
 
 def surfaces(H):
   hh = H.copy()
   flot = np.logical_not(ground(H))
-  rr = exactN.rho / exactN.rhow
-  hh[flot] = exactN.bedg + (1.0 - rr) * H[flot]
+  rr = exactsolns.rho / exactsolns.rhow
+  hh[flot] = exactsolns.bedg + (1.0 - rr) * H[flot]
   bb = np.zeros(np.shape(H))
-  bb[flot] = exactN.bedg - rr * H[flot]
+  bb[flot] = exactsolns.bedg - rr * H[flot]
   return hh, bb
 
 # the ode system is
@@ -99,34 +99,34 @@ def f(v,x):
   """Defines the function for the ODE system, which is in form
   A(v) v' = g(v)  so  f(v,x) = A(v) \ g(v)."""
   # dependent var order:  v = [u, H, T]'
-  A = np.array([[ (2.0 * B(x) * v[1])**exactN.n, 0.0,                0.0 ],
+  A = np.array([[ (2.0 * B(x) * v[1])**exactsolns.n, 0.0,                0.0 ],
                 [ v[1],                          v[0],               0.0 ],
                 [ 0.0,                           F(v[1]),            1.0 ]  ]);
-  g = np.array([[ v[2]**exactN.n    ],
+  g = np.array([[ v[2]**exactsolns.n    ],
                 [ M(x)              ],
                 [ beta(x,v[1]) * v[0] ]]);
   vp = solve(A,g)
   return vp.flatten()
 
-xa = 0.1 * exactN.L0
-xc = 1.4 * exactN.L0
+xa = 0.1 * exactsolns.L0
+xc = 1.4 * exactsolns.L0
 
-rr = exactN.rho / exactN.rhow
-Ha, _, ua, _ = exactN.exactN(xa)
+rr = exactsolns.rho / exactsolns.rhow
+Ha, _, ua, _ = exactsolns.exactBod(xa)
 
 def objective(Tinit):
     v0 = np.array([ua, Ha, Tinit])  # initial values at x[0] = xa
     x = np.linspace(xa,xc,2)
     v = odeint(f,v0,x)              # solve ODE system to determine v[1,2] = T
-    Tcalvc = 0.5 * exactN.rho * exactN.g * (1.0 - rr) * v[1,1]**2
+    Tcalvc = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * v[1,1]**2
     return (v[1,2] - Tcalvc) / Tcalvc
 
-uxcheat = (1.0/exactN.k) * (2.0 * exactN.H0 / exactN.L0**2)
-Tcheat = 2.0 * Ha * B(xa) * uxcheat**(1.0/exactN.n)  # the cheat is to use B()
+uxcheat = (1.0/exactsolns.k) * (2.0 * exactsolns.H0 / exactsolns.L0**2)
+Tcheat = 2.0 * Ha * B(xa) * uxcheat**(1.0/exactsolns.n)  # the cheat is to use B()
 
 if doshoot:  # run bisection
-    Tlow = 0.5 * exactN.rho * exactN.g * (1.0 - rr) * 100.0**2
-    Thigh = 0.5 * exactN.rho * exactN.g * (1.0 - rr) * 600.0**2
+    Tlow = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * 100.0**2
+    Thigh = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * 600.0**2
     olow = objective(Tlow)
     ohigh = objective(Thigh)
     "  [Tlow,Thigh] = [%.7e,%.7e]  gives  [%2.3e,%2.3e]" % (Tlow,Thigh,olow,ohigh)
@@ -149,7 +149,7 @@ if doshoot:  # run bisection
 
 print "initial conditions:"
 print "  at xa = %.3f km we have initial values" % (xa/1000.0)
-print "  u = %7.2f m a-1, H = %.2f m" % (ua*exactN.secpera, Ha)
+print "  u = %7.2f m a-1, H = %.2f m" % (ua*exactsolns.secpera, Ha)
 
 x = np.linspace(xa,xc,1001)
 dx = x[1] - x[0]
@@ -160,30 +160,30 @@ print "  and  Tinit = %.6e Pa m = %f * Tcheat  where Tcheat = %.6e" % (Tinit, Tm
 v0 = np.array([ua, Ha, Tinit])  # initial values at x[0] = xa
 #v, info = odeint(f,v0,x,full_output=True)          # solve ODE system
 v = odeint(f,v0,x)          # solve ODE system
-#Tcalvc = 0.5 * exactN.rho * exactN.g * (1.0 - rr) * v[-1,1]**2
+#Tcalvc = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * v[-1,1]**2
 #print "Tinit = %.6e,  (Tfinal - Tcalvc)/Tcalvc = %.6e" % ( Tinit, (v[-1,2]-Tcalvc)/Tcalvc )
 
 u = v[:,0]
 H = v[:,1]
 T = v[:,2]
 
-isgnd = (x <= exactN.xg)
+isgnd = (x <= exactsolns.xg)
 xbod = x[isgnd]
-Hbod, _, _, _ = exactN.exactN(xbod)
+Hbod, _, _, _ = exactsolns.exactBod(xbod)
 Herror = abs(H[isgnd] - Hbod).max()
 print "results:"
 print "  maximum error in H = %.2e m for grounded ice" % Herror
 
 print "calving front results:"
 print "  at %.3f km we have values" % (x[-1]/1000.0)
-print "  u = %7.2f m a-1, H = %.2f m, T = %.6e Pa m" % (u[-1]*exactN.secpera, H[-1], T[-1])
-Tcalvc = 0.5 * exactN.rho * exactN.g * (1.0 - rr) * H[-1]**2
+print "  u = %7.2f m a-1, H = %.2f m, T = %.6e Pa m" % (u[-1]*exactsolns.secpera, H[-1], T[-1])
+Tcalvc = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * H[-1]**2
 print "COMPARE Tcalvc = %.6e Pa m" % Tcalvc
 
 # geometry and velocity in figure 1 (two-axis)
 hh, bb = surfaces(H)
 fig = plt.figure(figsize=(6,4))
-ax1fig1, ax2fig1 = plottwo(fig,x/1000.0,hh,u * exactN.secpera,
+ax1fig1, ax2fig1 = plottwo(fig,x/1000.0,hh,u * exactsolns.secpera,
                            "z   (m, solid)",
                            "ice velocity   (m a-1, dashed)",
                            y1min=0.0)
@@ -192,7 +192,7 @@ ax1fig1.plot(x/1000.0,bb,'k',lw=2.0)
 ax1fig1.plot([xc/1000.0,xc/1000.0],[bb[-1],hh[-1]],'k',linewidth=lw)
 # show water height as waves
 xl = np.linspace(xc,1.14*xc,101)
-ax1fig1.plot(xl/1000.0, exactN.bedg - 30.0 * abs(np.sin(xl / 4.0e3)),'k',linewidth=0.7*lw)
+ax1fig1.plot(xl/1000.0, exactsolns.bedg - 30.0 * abs(np.sin(xl / 4.0e3)),'k',linewidth=0.7*lw)
 y1, y2 = ax1fig1.get_ylim()
 ax1fig1.set_ylim(0.0,3000.0)
 ax1fig1.set_yticks([0.0,500.0,1000.0,1500.0,2000.0,2500.0,3000.0])
@@ -214,7 +214,7 @@ BB = np.zeros(np.shape(x))
 for j in range(len(x)):
    BB[j] = B(x[j])
 fig = plt.figure(figsize=(6,4))
-ax1fig2, ax2fig2 = plottwo(fig,x/1000.0,MM * exactN.secpera,BB/1.0e8,
+ax1fig2, ax2fig2 = plottwo(fig,x/1000.0,MM * exactsolns.secpera,BB/1.0e8,
                            "M(x)   (m a-1, solid)",
                            r"B(x)   ($10^8$ Pa s-1/3, dashed)")
 ax1fig2.set_xlim(0.0,800.0)
@@ -231,9 +231,9 @@ print '  image file %s saved' % imagename
 fig = plt.figure(figsize=(6,4))
 bbeta = np.zeros(np.shape(H))
 for j in range(len(H)):
-   if x[j] <= exactN.L0:
-       Hexact, _, _, _ = exactN.exactN(x[j])
-       bbeta[j] = exactN.k * exactN.rho * exactN.g * Hexact
+   if x[j] <= exactsolns.L0:
+       Hexact, _, _, _ = exactsolns.exactBod(x[j])
+       bbeta[j] = exactsolns.k * exactsolns.rho * exactsolns.g * Hexact
    else:
        bbeta[j] = 0.0
 plt.plot(x/1000.0,bbeta/1.0e10,'k',lw=2.0)
