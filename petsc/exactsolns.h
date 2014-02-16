@@ -28,76 +28,68 @@ extern "C"
 
 /*
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! exactsolns is a C implementation of the parabolic solution in 
+! exactBod() is a C implementation of the parabolic solution in 
 ! Bodvardsson (1955), treated here as a manufactured exact solution to
 ! a steady-state SSA flow problem, including the mass continuity equation.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-*/
 
-int params_exactBod(double *H0, double *L0, double *xc,
-                    double *a, double *Hela, double *k,
-                    double *H_xc, double *T_xc);
-   /* outputs: H0   = dome thickness (m)
-               L0   = full flow-line length from dome to margin where H->0 (m)
-               xc   = in Bueler interpretation, the location of the calving front (m)
-               a    = surface mass balance lapse rate, with elevation (s-1)
-               Hela = elevation of equilibrium line (m)
-               k    = coefficient for sliding
-               H_xc = thickness at calving front
-               T_xc = vertically-integrated longitudinal stress at calving front */
-
-int exactBod(double x, double *H, double *hx, double *u, double *M, double *B, double *beta);
-   /* input    : x                   (m; 0.0 <= x <= L0)
-
-      output   : H = H(x)            (m; ice thickness)
-                 hx = h_x(x)         (; surface slope)
-                 u = u(x)            (m s-1; ice horizontal velocity)
-                 M = M(x)            (m s-1; surface mass balance)
-                 B = B(x)            (Pa s^(1/3); ice hardness)
-                 beta = beta(x)      (Pa s m-1; linear sliding coefficient)
-
-      Assumes n = 3.
-      
-      In Bueler interpretation, M(x) and A(x) are constructed so that the
-      solution in Bodvardsson (1955) can be thought of as solving mass continuity
+      The Bodvardsson (1955) can be thought of as solving mass continuity
       and SSA stress balance simultaneously:
 
          M(x) - (u H)_x = 0
 
-         ( 2 H B(x) |u_x|^((1/n)-1) u_x )_x - beta(x) u = rho g H h_x
+         ( 2 H B(x) |u_x|^((1/n)-1) u_x )_x - beta0(x) u = rho g H h_x
          
-      Here H = H(x) is ice thickness and u = u(x) is ice velocity.  Also
-      h(x) = H(x), up to a constant the user may choose, because the bed is flat.
-      Following Bodvardsson, here is the equilibrium line altitude, surface
-      mass balance, and the sliding coefficient:
-         
+      Here H = H(x) is ice thickness and u = u(x) is ice velocity.  Following
+      Bodvardsson, the equilibrium line altitude, surface mass balance, and
+      sliding coefficient are:
+
          Hela = H0 / 1.5
          M(x) = a (h(x) - Hela)
-         beta(x) = k rho g H(x)
+         beta0(x) = k rho g H(x)
       
-      The boundary conditions are
-      
-         H(0) = H0
-
-      and
-      
-         T(xc) = 0.5 (1 - rho/rhow) rho g H(xc)^2
-
-      where T(x) is the vertically-integrated viscous stress,
-      
-         T(x) = 2 H(x) B(x) |u_x|^((1/n)-1) u_x.
-
-      But B(x) is chosen so that this quantity is constant:  T(x) = T0.
-
-      The boundary condition at x = xc implies that the calving front is
+      The boundary condition at x = xg implies that the calving front is
       exactly at the location where the ice sheet reaches flotation.
+
+*/
+
+
+int params_exactBod(double *H0, double *L0, double *xg,
+                    double *a, double *Hela, double *k);
+   /* outputs: H0   = dome thickness (m)
+               L0   = full flow-line length from dome to margin where H->0 (m)
+               xg   = in Bueler interpretation, the location of the calving front (m)
+               a    = surface mass balance lapse rate, with elevation (s-1)
+               Hela = elevation of equilibrium line (m)
+               k    = coefficient for sliding                               */
+
+int exactBod(double x, double *H, double *u, double *M);
+   /* input    : x                   (m; 0.0 <= x <= L0)
+
+      output   : H = H(x)            (m; ice thickness)
+                 u = u(x)            (m s-1; ice horizontal velocity)
+                 M = M(x)            (m s-1; surface mass balance)
+
+      Assumes n = 3.
 
       return value =
          0 if successful
          1 if x < 0
-         2 if x > L0
+         2 if x > L0                                                        */
+
+
+int exactBodBueler(double x, double *T, double *B);
+   /* input    : x                   (m; 0.0 <= x <= L0)
+
+      output   : T = T(x)
+                 B = B(x)            (Pa s^(1/3); ice hardness)
       
-   */
+      In Bueler interpretation, T(x) and B(x) are constructed.
+
+      return value =
+         0 if successful
+         1 if x < 0
+         2 if x > L0                                                        */
 
 #ifdef __cplusplus
 }

@@ -27,60 +27,60 @@
 #define rhow     1028.0        /* sea water density; kg m-3 */
 #define n        3.0           /* Glen power */
 
-int params_exactBod(double *H0, double *L0, double *xc,
-                    double *a, double *Hela, double *k,
-                    double *H_xc, double *T_xc) {
+int params_exactBod(double *H0, double *L0, double *xg,
+                    double *a, double *Hela, double *k) {
   double s;
-
   /* geometry */
   *H0   = 3000.0;
   *L0   = 500.0e3;
-  *xc   = 0.9 * (*L0);
-
+  *xg   = 0.9 * (*L0);
   /* mass balance */
   *a    = 0.003 / secpera;   /* s-1; mass balance gradient with elevation */
   *Hela = (*H0) / 1.5;       /* m;  H0 = 1.5 Hela  exactly */
-
   /* sliding */
   *k    = 9.0 * (*Hela) / ((*a) * (*L0) * (*L0)); /* s m-1; choose k so that eqn (24) gives our L0 */
-
-  /* grounded calving front boundary condition, imposed at xc = .9 L0, determines
-     constant vertically-integrated longitudinal stress T; see (2.12) in Schoof (2006);
-     treats Hc = H(xc) as exactly at flotation */
-  s = (*xc) / (*L0);
-  *H_xc = (*H0) * (1.0 - s * s);
-  *T_xc = 0.5 * (1.0 - rho / rhow) * rho * g * (*H_xc) * (*H_xc);
-
   return 0;
 }
 
 
-int exactBod(double x, double *H, double *hx, double *u, double *M, double *B, double *beta) {
+int exactBod(double x, double *H, double *u, double *M) {
 
-  double H0, L0, xc, a, Hela, k, Hc, Tc;
-  double q, hxx, ux;
-  
-  params_exactBod(&H0, &L0, &xc, &a, &Hela, &k, &Hc, &Tc);
+  const double omega = 1.0 - rho / rhow;
+  double H0, L0, xg, a, Hela, k;
+  double hx, hxx;
+  params_exactBod(&H0, &L0, &xg, &a, &Hela, &k);
 
   if (x < 0.0) { return 1; }
   if (x > L0) { return 2; }
 
+  hxx = - 2.0 * H0 / (L0 * L0);    /* constant concavity of h(x) */
+  hx  = hxx * x;
+
+  *H = H0 * (1.0 - (x / L0) * (x / L0));  /* eqn (23) in Bodvardsson */
+  *u = - (hx) / k;                        /* eqn (10) in Bodvardson, once SIA is dropped */
+  *M = a * ((*H) - Hela);                 /* page 6 in Bodvardsson, just before eqn (23) */
+  return 0;
+}
+
+
+int exactBodBueler(double x, double *T, double *B) {
+
+  const double omega = 1.0 - rho / rhow;
+  double H0, L0, xg, a, Hela, k;
+  double Hg, ug, Mg, H, u, M;
+  double q, hxx, ux;
+  params_exactBod(&H0, &L0, &xg, &a, &Hela, &k);
+  exactBod(xg, &Hg, &ug, &Mg);
+
+  if (x < 0.0) { return 1; }
+  if (x > L0) { return 2; }
+  exactBod(x, &H, &u, &M);
+
   q   = (1.0 / n) - 1.0;           /* a useful power */
   hxx = - 2.0 * H0 / (L0 * L0);    /* constant concavity of h(x) */
   ux  = - hxx / k;                 /* constant strain rate */
-
-  *H = H0 * (1.0 - (x / L0) * (x / L0));  /* eqn (23) in Bodvardsson */
-
-  *hx = hxx * x;
-  
-  *u = - (*hx) / k;                       /* eqn (10) in Bodvardson, once SIA is dropped */
-  
-  *M = a * ((*H) - Hela);                 /* page 6 in Bodvardsson, just before eqn (23) */
-
-  *B = Tc / ( 2.0 * (*H) * pow(fabs(ux),q) * ux ); /* Bueler interpretation */
-
-  *beta = k * rho * g * (*H);
-
+  *T  = 0.5 * omega * rho * g * Hg * Hg;
+  *B  = *T / ( 2.0 * H * pow(fabs(ux),q) * ux );
   return 0;
 }
 
