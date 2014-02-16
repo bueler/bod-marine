@@ -26,6 +26,7 @@ exmarine.pdf: exmarine.aux exmarine.bbl exmarine.tex $(figures)
 
 exmarine.aux: exmarine.tex $(figures)
 	pdflatex exmarine
+	bibtex exmarine
 
 exmarine.bbl: exmarine.aux ice_bib.bib
 	bibtex exmarine
