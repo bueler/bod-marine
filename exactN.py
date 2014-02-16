@@ -48,8 +48,8 @@ def exactN(x):
 rhow    = 1028.0
 xg      = 0.9 * L0
 
-Hg, _, _, _ = exactN(xg)
-bg      = rho * Hg / rhow
+Hg, _, ug, Mg = exactN(xg)
+bedg    = rho * Hg / rhow
 
 def exactNbueler(x):
   # Bueler:
@@ -64,3 +64,5 @@ def exactNbueler(x):
   T = 0.5 * (1.0 - rho / rhow) * rho * g * Hg**2
   B = T / ( 2.0 * H * (abs(ux)**q) * ux )
   return T, B
+
+_, Bg   = exactNbueler(xg)
