@@ -30,7 +30,7 @@ parser.add_argument('--noshoot', action='store_true',
                     help='do not do shooting with bisection and instead plot one case')
 args = parser.parse_args()
 Tmult = float(args.Tmult)
-Mdrop = float(args.Mdrop)
+M0 = float(args.Mdrop) * exactsolns.Mg
 doshoot = not(bool(args.noshoot))
 if not doshoot:
     nameroot = str(args.saveroot)
@@ -45,7 +45,7 @@ def M(x):       # compute mass balance for location
       _, _, _, Mexact = exactsolns.exactBod(x)
       return Mexact
   else:
-      return Mdrop * exactsolns.Mg
+      return M0
 
 def B(x):       # get contrived ice hardness for location
   if x <= exactsolns.xg:
@@ -167,12 +167,20 @@ u = v[:,0]
 H = v[:,1]
 T = v[:,2]
 
-isgnd = (x <= exactsolns.xg)
-xbod = x[isgnd]
-Hbod, _, _, _ = exactsolns.exactBod(xbod)
-Herror = abs(H[isgnd] - Hbod).max()
+# compute and report errors
+xgnd = x[(x <= exactsolns.xg)]
+Hbod, _, ubod, _ = exactsolns.exactBod(xgnd)
+Hboderror = abs(H[(x <= exactsolns.xg)] - Hbod).max()
+uboderror = abs(u[(x <= exactsolns.xg)] - ubod).max()
+xveen = x[(x > exactsolns.xg)]
+Hveen, uveen = exactsolns.exactVeen(xveen,M0)
+Hveenerror = abs(H[(x > exactsolns.xg)] - Hveen).max()
+uveenerror = abs(u[(x > exactsolns.xg)] - uveen).max()
 print "results:"
-print "  maximum error in H = %.2e m for grounded ice" % Herror
+print "  max |H-Hexact| = %.2e m      for grounded ice" % Hboderror
+print "  max |u-uexact| = %.2e m a-1  for grounded ice" % (uboderror * exactsolns.secpera)
+print "  max |H-Hexact| = %.2e m      for floating ice" % Hveenerror
+print "  max |u-uexact| = %.2e m a-1  for floating ice" % (uveenerror * exactsolns.secpera)
 
 print "calving front results:"
 print "  at %.3f km we have values" % (x[-1]/1000.0)
@@ -203,7 +211,6 @@ imagename = nameroot + '-geometry.pdf'
 plt.savefig(imagename)
 print '  image file %s saved' % imagename
 #plt.show()
-
 #exit(0)
 
 # mass balance and ice hardness in figure 2 (two-axis)
@@ -225,7 +232,6 @@ imagename = nameroot + '-M-B.pdf'
 plt.savefig(imagename)
 print '  image file %s saved' % imagename
 #plt.show()
-
 #exit(0)
 
 fig = plt.figure(figsize=(6,4))

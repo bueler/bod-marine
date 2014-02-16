@@ -41,32 +41,41 @@ def exactBod(x):
   M   = a * (H - Hela)
   return H, hx, u, M
 
-
 # now build marine ice sheet by deciding where the grounding line is
 # and setting the ocean depth bg accordingly
 
 rhow    = 1028.0
+omega   = 1.0 - rho / rhow
 xg      = 0.9 * L0
 
 Hg, _, ug, Mg = exactBod(xg)
 bedg    = rho * Hg / rhow
 
 def exactBodBueler(x):
-  # Bueler:
-  #   (1) additionally set constant vertically-integrated longitudinal stress T
+  # Bueler: additionally ...
+  #   (1) set constant vertically-integrated longitudinal stress T
   #       to the value it would have at marine calving front at flotation
-  #   (2) additionally determine ice hardness B from T so that Bodvardsson's
-  #       plug flow is "actually" grounded SSA
+  #   (2) determine ice hardness B from T so that Bodvardsson's
+  #       plug flow is actually grounded SSA
   hxx = - 2.0 * H0 / (L0 * L0)
   q   = (1.0 / n) - 1.0
   ux  = - hxx / k
   H, _, _, _ = exactBod(x)
-  T = 0.5 * (1.0 - rho / rhow) * rho * g * Hg**2
+  T = 0.5 * omega * rho * g * Hg**2
   B = T / ( 2.0 * H * (abs(ux)**q) * ux )
   return T, B
 
 _, Bg   = exactBodBueler(xg)
 
-def exactVeen(x):
-  # van der Veen:
-  FIXME
+def exactVeen(x,M0):
+  # van der Veen: get thickness and velocity for floating ice shelf, given
+  #   Mg, Bg, xg, Hg, ug computed above from Bodvardsson
+  C = (rho * g * omega / (4.0 * Bg))**n
+  tmp = ug * Hg + M0 * (x - xg)
+  u = ( ug**(n+1) + (C / M0) * ( tmp**(n+1) - (ug * Hg)**(n+1) ) )**(1.0/(n+1))
+  if np.any(u <= 0):
+    print "ERROR:  non-positive u detected in exactVeen()" 
+    exit(1)
+  H = tmp / u
+  return H, u
+
