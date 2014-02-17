@@ -3,9 +3,11 @@ static const char help[] =
 "holding both thickness H and velocity u, and a 2nd-order finite difference\n"
 "scheme to approximate the coupled mass continuity and SSA stress balance PDEs.\n"
 "\n"
-"This run shows success with finite-difference-Jacobian:\n"
+"TEST RUN DOES NOT WORK YET:\n"
+"  ./marine -snes_fd -snes_monitor -snes_monitor_solution -draw_pause 1 -exact_init -ksp_diagonal_scale -snes_linesearch_monitor\n"
+"FIXME This run shows success with finite-difference-Jacobian:\n"
 "  ./marine -snes_fd -da_grid_x 181 -snes_monitor\n"
-"Visualization:\n"
+"FIXME Visualization:\n"
 "  ./marine -snes_fd -da_grid_x 201 -snes_monitor -snes_monitor_solution -draw_pause 1\n\n";
 
 #include <petscdmda.h>
@@ -24,7 +26,9 @@ typedef struct {
   PetscReal   L0;  /* free boundary length in Bodvardsson solution */
   Vec         Hu;  /* exact thickness (Hu[i][0]) and exact velocity (Hu[i][1]) on regular grid */
   PetscReal   xg;  /* exact grounding line location */
+  PetscReal   Hg;  /* exact thickness at grounding line location */
   PetscReal   Mg;  /* exact mass balance at grounding line location */
+  PetscReal   Bg;  /* exact ice hardness at grounding line location */
 } ExactCtx;
 
 /* User-defined application context.  Filled by Fill...() and used by
@@ -40,16 +44,17 @@ typedef struct {
   PetscReal   xc;      /* calving front location at which stress (Neumann) condition applied to SSA eqn */
   PetscReal   Ha;      /* thickness at x=xa, for Dirichlet condition on mass cont */
   PetscReal   ua;      /* velocity at x=xa, for Dirichlet condition on mass cont */
+  PetscReal   zocean;  /* surface elevation of ocean; bedrock is at zero elevation */
+  PetscReal   k;       /* sliding parameter */
   PetscReal   epsilon; /* regularization of viscosity, a strain rate */
   Vec         M;       /* surface mass balance on regular grid */
-  Vec         beta;    /* sliding coefficient on regular grid */
   Vec         Bstag;   /* ice hardness on staggered grid*/
 } AppCtx;
 
 
 extern PetscErrorCode FillExactSoln(ExactCtx*,AppCtx*);
 extern PetscErrorCode FillInitial(AppCtx*,Vec*);
-extern PetscErrorCode FillDistributedParams(AppCtx*);
+extern PetscErrorCode FillDistributedParams(ExactCtx*,AppCtx*);
 extern PetscErrorCode FunctionLocal(DMDALocalInfo*,Node*,Node*,AppCtx*);
 /* extern PetscErrorCode JacobianMatrixLocal(DMDALocalInfo*,Node*,Mat,AppCtx*); */
 
@@ -63,7 +68,7 @@ int main(int argc,char **argv)
   AppCtx                 user;                 /* user-defined work context */
   ExactCtx               exact;
   PetscInt               its, tmpxs, tmpxm; /* iteration count, index, etc. */
-  PetscReal              tmp1, tmp2, tmp3, tmp4,
+  PetscReal              tmp1, tmp2, tmp3,
                          errnorms[2];
   PetscBool              eps_set = PETSC_FALSE,
                          dump = PETSC_FALSE,
@@ -86,8 +91,10 @@ int main(int argc,char **argv)
   user.g       = 9.81;         /* m s^-2 */
 
   /* get parameters of exact solution */
-  ierr = params_exactBod(&tmp1, &(exact.L0), &(exact.xg), &tmp2, &tmp3, &tmp4); CHKERRQ(ierr);
-  ierr = exactBod(exact.xg,&tmp1,&tmp2,&(exact.Mg)); CHKERRQ(ierr);
+  ierr = params_exactBod(&tmp1, &(exact.L0), &(exact.xg), &tmp2, &tmp3, &(user.k)); CHKERRQ(ierr);
+  ierr = exactBod(exact.xg,&(exact.Hg),&tmp2,&(exact.Mg)); CHKERRQ(ierr);
+  ierr = exactBodBueler(exact.xg,&tmp1,&(exact.Bg)); CHKERRQ(ierr);
+  user.zocean = user.rho * exact.Hg / user.rhow;
 
   /* define interval [xa,xc] and get Dirichlet initial conditions */
   user.xa = 0.1 * exact.L0;
@@ -95,7 +102,8 @@ int main(int argc,char **argv)
   ierr = exactBod(user.xa, &(user.Ha), &(user.ua), &tmp1); CHKERRQ(ierr);
 
   /* regularize using strain rate of 1/(length) per year */
-  user.epsilon = (1.0 / user.secpera) / (user.xc - user.xa);
+  /*user.epsilon = (1.0 / user.secpera) / (user.xc - user.xa);*/
+  user.epsilon = 0.0;
 
   ierr = PetscOptionsBegin(PETSC_COMM_WORLD,
            "","options to marine (steady marine ice sheet solver)","");CHKERRQ(ierr);
@@ -141,7 +149,7 @@ int main(int argc,char **argv)
      dx=10 km.  Also degrees of freedom = 2 (thickness and velocity
      at each point) and stencil radius = ghost width = 2 for 2nd-order upwinding.  */
   user.solnghostwidth = 2;
-  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,-46,2,user.solnghostwidth,PETSC_NULL,&user.da);
+  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,-66,2,user.solnghostwidth,PETSC_NULL,&user.da);
             CHKERRQ(ierr);
   ierr = DMSetApplicationContext(user.da,&user);CHKERRQ(ierr);
   ierr = DMDASetUniformCoordinates(user.da,user.xa,user.xc,0.0,1.0,0.0,1.0);CHKERRQ(ierr);
@@ -174,7 +182,7 @@ int main(int argc,char **argv)
 
   /* report on current grid */
   ierr = PetscPrintf(PETSC_COMM_WORLD,
-      "  grid:  Mx = %D points, dx = %.3f m\n  xa = %.2f km, xc = %.2f km\n",
+      "  grid:  Mx = %D points,  dx = %.3f m,  xa = %.2f km,  xc = %.2f km\n",
       user.Mx, user.dx, user.xa/1000.0, user.xc/1000.0);CHKERRQ(ierr);
 
   /* Extract/allocate global vectors from DMDAs and duplicate for remaining same types */
@@ -185,7 +193,6 @@ int main(int argc,char **argv)
 
   ierr = DMCreateGlobalVector(user.scalarda,&user.M);CHKERRQ(ierr);
   ierr = VecDuplicate(user.M,&user.Bstag);CHKERRQ(ierr);
-  ierr = VecDuplicate(user.M,&user.beta);CHKERRQ(ierr);
 
   /* set up snes */
   ierr = SNESCreate(PETSC_COMM_WORLD,&snes);CHKERRQ(ierr);
@@ -196,11 +203,10 @@ int main(int argc,char **argv)
 
   ierr = SNESSetFromOptions(snes);CHKERRQ(ierr);
 
-  /* the exact solution allows setting M(x), B(x), beta(x) */
-  ierr = FillDistributedParams(&user);CHKERRQ(ierr);
-
   /* the exact thickness and exact ice velocity (user.uHexact) are known */
   ierr = FillExactSoln(&exact, &user); CHKERRQ(ierr);
+  /* the exact solution allows setting M(x), B(x) */
+  ierr = FillDistributedParams(&exact, &user);CHKERRQ(ierr);
 
   if (exactinitial) {
     ierr = PetscPrintf(PETSC_COMM_WORLD,"  using exact solution as initial guess\n");
@@ -208,6 +214,7 @@ int main(int argc,char **argv)
     /* the initial guess is the exact continuum solution */
     ierr = VecCopy(exact.Hu,Hu); CHKERRQ(ierr);
   } else {
+    /* the initial guess is a linear solution */
     ierr = FillInitial(&user, &Hu); CHKERRQ(ierr);
   }
 
@@ -246,7 +253,6 @@ int main(int argc,char **argv)
   ierr = VecDestroy(&(exact.Hu));CHKERRQ(ierr);
   ierr = VecDestroy(&(user.M));CHKERRQ(ierr);
   ierr = VecDestroy(&(user.Bstag));CHKERRQ(ierr);
-  ierr = VecDestroy(&(user.beta));CHKERRQ(ierr);
 
   ierr = SNESDestroy(&snes);CHKERRQ(ierr);
 
@@ -264,14 +270,16 @@ PetscErrorCode FillExactSoln(ExactCtx *exact, AppCtx *user)
 {
   PetscErrorCode ierr;
   PetscInt       i;
-  PetscReal      M0, dum1;
-  PetscReal      *x;
+  PetscReal      M0, dum1, *x;
   Node           *Hu;
+  DM             coord_da;
   Vec            coord_x;
 
   PetscFunctionBegin;
-  ierr = DMGetCoordinates(user->da,&coord_x); CHKERRQ(ierr);
-  ierr = DMDAVecGetArray(user->da,coord_x,&x);CHKERRQ(ierr);
+  ierr = DMGetCoordinateDM(user->da, &coord_da); CHKERRQ(ierr);
+  ierr = DMGetCoordinates(user->da, &coord_x); CHKERRQ(ierr);
+
+  ierr = DMDAVecGetArray(coord_da,coord_x,&x);CHKERRQ(ierr);
   ierr = DMDAVecGetArray(user->da,exact->Hu,&Hu);CHKERRQ(ierr);
   for (i = user->xs; i < user->xs + user->xm; i++) {
     if (x[i] < user->xa)
@@ -289,7 +297,7 @@ PetscErrorCode FillExactSoln(ExactCtx *exact, AppCtx *user)
       ierr = exactVeen(x[i], M0, &(Hu[i].H), &(Hu[i].u)); CHKERRQ(ierr);
     }
   }
-  ierr = DMDAVecRestoreArray(user->da,coord_x,&x);CHKERRQ(ierr);
+  ierr = DMDAVecRestoreArray(coord_da,coord_x,&x);CHKERRQ(ierr);
   ierr = DMDAVecRestoreArray(user->da,exact->Hu,&Hu);CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
@@ -300,50 +308,73 @@ PetscErrorCode FillInitial(AppCtx *user, Vec *vHu)
 {
   PetscErrorCode ierr;
   PetscInt       i;
+  PetscReal      *x;
   Node           *Hu;
+  const PetscReal
+      Hcguess = 300.0,
+      ucguess = (100.0/user->secpera),
+      Hslope  = (Hcguess - user->Ha) / (user->xc - user->xa),
+      uslope  = (ucguess - user->ua) / (user->xc - user->xa);
+
+  DM             coord_da;
+  Vec            coord_x;
 
   PetscFunctionBegin;
+  ierr = DMGetCoordinateDM(user->da, &coord_da); CHKERRQ(ierr);
+  ierr = DMGetCoordinates(user->da, &coord_x); CHKERRQ(ierr);
+
+  ierr = DMDAVecGetArray(coord_da,coord_x,&x);CHKERRQ(ierr);
   ierr = DMDAVecGetArray(user->da,*vHu,&Hu);CHKERRQ(ierr);
   for (i = user->xs; i < user->xs + user->xm; i++) {
-    /* FIXME: use linear function? */
-    Hu[i].H = 1000.0;
-    Hu[i].u = 100.0 / user->secpera;
+    /* use linear function which uses upstream Dirichlet b.c. but guesses
+       at calving-front values */
+    Hu[i].H = user->Ha + Hslope * (x[i] - user->xa);
+    Hu[i].u = user->ua + uslope * (x[i] - user->xa);
   }
+  ierr = DMDAVecRestoreArray(coord_da,coord_x,&x);CHKERRQ(ierr);
   ierr = DMDAVecRestoreArray(user->da,*vHu,&Hu);CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
 
 
-/*  Compute the values of the surface mass balance, ice hardness, and sliding coeff. */
-PetscErrorCode FillDistributedParams(AppCtx *user)
+/*  Compute the values of the surface mass balance and ice hardness. */
+PetscErrorCode FillDistributedParams(ExactCtx *exact, AppCtx *user)
 {
   PetscErrorCode ierr;
-  PetscInt       i,Mx=user->Mx;
-  PetscReal      x, H, k, dum1, dum2, dum3, dum4, dum5,
-                 *M, *Bstag, *beta;
+  PetscInt       i;
+  PetscReal      dum1, dum2, xstag, *x, *M, *Bstag;
+  DM             coord_da;
+  Vec            coord_x;
 
   PetscFunctionBegin;
-  ierr = params_exactBod(&dum1, &dum2, &dum3, &dum4, &dum5, &k); CHKERRQ(ierr);
-  /* Compute regular grid exact soln and staggered-grid thickness over the
-     locally-owned part of the grid */
+  ierr = DMGetCoordinateDM(user->da, &coord_da); CHKERRQ(ierr);
+  ierr = DMGetCoordinates(user->da, &coord_x); CHKERRQ(ierr);
+
+  ierr = DMDAVecGetArray(coord_da,coord_x,&x);CHKERRQ(ierr);
   ierr = DMDAVecGetArray(user->scalarda,user->M,&M);CHKERRQ(ierr);
   ierr = DMDAVecGetArray(user->scalarda,user->Bstag,&Bstag);CHKERRQ(ierr);
-  ierr = DMDAVecGetArray(user->scalarda,user->beta,&beta);CHKERRQ(ierr);
   for (i = user->xs; i < user->xs + user->xm; i++) {
-    /* FIXME: both sides of grounding line */
-    x = user->dx * (PetscReal)i;  /* = x_i = distance from dome; regular grid point */
-    ierr = exactBod(x, &H, &dum1, &(M[i])); CHKERRQ(ierr);
-    beta[i] = k * user->rho * user->g * H;
-    x = x + (user->dx/2.0);       /* = x_{i+1/2}; staggered grid point */
-    if (i < Mx-1) {
-      ierr = exactBodBueler(x, &dum1, &(Bstag[i])); CHKERRQ(ierr);
-    } else {
-      Bstag[i] = -9999.9999;  /* never accessed, and we don't have the value anyway */
+    if (x[i] < user->xa)
+      SETERRQ2(PETSC_COMM_SELF,1,"ERROR on rank %d: x[i] = %f less than xa!",
+               user->rank,x[i]);
+    if (x[i] > user->xc)
+      SETERRQ2(PETSC_COMM_SELF,2,"ERROR on rank %d: x[i] = %f greater than xc!",
+               user->rank,x[i]);
+    if (x[i] < exact->xg) {
+      ierr = exactBod(x[i], &dum1, &dum2, &(M[i])); CHKERRQ(ierr);
+    } else  {
+      M[i] = 0.1 * exact->Mg;
+    }
+    xstag = x[i] + (user->dx/2.0);
+    if (xstag < exact->xg) {
+      ierr = exactBodBueler(xstag, &dum1, &(Bstag[i])); CHKERRQ(ierr);
+    } else  {
+      Bstag[i] = exact->Bg;
     }
   }
+  ierr = DMDAVecRestoreArray(coord_da,coord_x,&x);CHKERRQ(ierr);
   ierr = DMDAVecRestoreArray(user->scalarda,user->M,&M);CHKERRQ(ierr);
   ierr = DMDAVecRestoreArray(user->scalarda,user->Bstag,&Bstag);CHKERRQ(ierr);
-  ierr = DMDAVecRestoreArray(user->scalarda,user->beta,&beta);CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
 
@@ -353,11 +384,143 @@ PetscErrorCode FillDistributedParams(AppCtx *user)
 static inline PetscReal GetFSR(PetscReal dx, PetscReal eps, PetscReal n,
                                  PetscReal ul, PetscReal ur) {
   PetscReal dudx = (ur - ul) / dx,
-              q    = (1.0 / n) - 1.0;
+            q    = (1.0 / n) - 1.0;
   return PetscPowScalar(dudx * dudx + eps * eps, q / 2.0) * dudx;
 }
 
 
+/* Evaluate residual f at current iterate Hu.
+For mass-continuity equation, note centered difference IS UNSTABLE:
+   duH = Hu[i+1].u * Hu[i+1].H - ( (i == 1) ? 0.0 : Hu[i-1].u * Hu[i-1].H );
+   duH *= 0.5;
+*/
+PetscErrorCode FunctionLocal(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
+{
+  PetscErrorCode ierr;
+  PetscReal      rg = user->rho * user->g, dx = user->dx;
+  PetscReal      *M, *Bstag,
+                 duH, ul, Fl, Fr, Tl, Tr, dhdx,
+                 hleft2, hleft, hhere, hright, beta;
+  PetscInt       i, Mx = info->mx;
+  PetscBool      grounded, groundedleft, groundedleft2;
+  Vec            locBstag;
+
+  PetscFunctionBegin;
+
+  /* we need stencil width on Bstag (but not for M, beta) */
+  ierr = DMGetLocalVector(user->scalarda,&locBstag);CHKERRQ(ierr);  /* do NOT destroy it */
+  ierr = DMGlobalToLocalBegin(user->scalarda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
+  ierr = DMGlobalToLocalEnd(user->scalarda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
+
+  ierr = DMDAVecGetArray(user->scalarda,locBstag,&Bstag);CHKERRQ(ierr);
+  ierr = DMDAVecGetArray(user->scalarda,user->M,&M);CHKERRQ(ierr);
+  for (i = info->xs; i < info->xs + info->xm; i++) {
+
+    /* MASS CONT */
+    if (i == 0) {
+      /* residual at left-most point is Dirichlet cond. */
+      f[0].H = user->ua * (Hu[0].H - user->Ha);  /* scale with u */
+    } else {
+      if (user->upwind1) {
+        /* 1st-order upwind; leftward difference because u > 0 (because dH/dx < 0) */
+        if (i == 1) {
+          duH = Hu[i].u * Hu[i].H - user->ua * user->Ha;
+        } else {
+          duH = Hu[i].u * Hu[i].H - Hu[i-1].u * Hu[i-1].H;
+        }
+      } else {
+        /* 2nd-order upwind; see Beam-Warming discussion in R. LeVeque, "Finite Volume ..." */
+        if (i == 1) { /* first-order in this case */
+          duH = Hu[i].u * Hu[i].H - user->ua * user->Ha;
+        } else {
+          if (i == 2) {
+            duH = 3.0 * Hu[i].u * Hu[i].H - 4.0 * Hu[i-1].u * Hu[i-1].H + user->ua * user->Ha;
+            duH *= 0.5;
+          } else {
+            duH = 3.0 * Hu[i].u * Hu[i].H - 4.0 * Hu[i-1].u * Hu[i-1].H + Hu[i-2].u * Hu[i-2].H;
+            duH *= 0.5;
+          }
+        }
+      }
+      /**** residual for mass continuity ****/
+      f[i].H = duH - dx * M[i];
+    }
+
+    /* SSA */
+    if (i == 0) {
+      /* residual at left-most point is Dirichlet cond. */
+      f[0].u = Hu[0].u - user->ua;
+    } else {
+      /* residual: SSA eqn */
+      /**** vertically-integrated longitudinal stress ****/
+      ul = (i == 1) ? user->ua : Hu[i-1].u;
+      Fl = GetFSR(dx,user->epsilon,user->n, ul,Hu[i].u);
+      Tl = Bstag[i-1] * (Hu[i-1].H + Hu[i].H) * Fl;
+      if (i == Mx-1) {
+        /* here "staggered" T comes from calving-front boundary condition
+           and introduced-point argument */
+        Tr = 0.5 * user->omega * rg * Hu[i].H * Hu[i].H;
+      } else {
+        Fr = GetFSR(dx,user->epsilon,user->n, Hu[i].u,Hu[i+1].u);
+        Tr = Bstag[i] * (Hu[i].H + Hu[i+1].H) * Fr;
+      }
+      /**** surface slope ****/
+      grounded = (user->rho * Hu[i].H >= user->rhow * user->zocean);
+      if (grounded) {
+        if (i == 1) {
+          dhdx  = (Hu[i+1].H - user->Ha) / (2.0 * dx);
+        } else if (i == Mx-1) {
+          /* nearly 2nd-order global convergence seems to occur even with this:
+               dhdx  = (Hu[i].H - Hu[i-1].H) / dx; */
+          dhdx  = (3.0*Hu[i].H - 4.0*Hu[i-1].H + Hu[i-2].H) / (2.0 * dx);
+        } else { /* generic case */
+          dhdx  = (Hu[i+1].H - Hu[i-1].H) / (2.0 * dx);
+        }
+      } else {
+        if (i == 1) SETERRQ1(PETSC_COMM_SELF,1,"ERROR on rank %d: i==1 case says not floating!",
+                             user->rank);
+        groundedleft = (user->rho * Hu[i-1].H >= user->rhow * user->zocean);
+        if (groundedleft)
+          hleft = Hu[i-1].H;
+        else
+          hleft  = user->zocean + user->omega * Hu[i-1].H;
+        if (i == Mx-1) {
+          groundedleft2 = (user->rho * Hu[i-2].H >= user->rhow * user->zocean);
+          if (groundedleft2)
+            hleft2 = Hu[i-2].H;
+          else
+            hleft2 = user->zocean + user->omega * Hu[i-2].H;
+          hhere = user->zocean + user->omega * Hu[i].H;
+          dhdx  = (3.0*hhere - 4.0*hleft + hleft2) / (2.0 * dx);
+        } else { /* generic case */
+          hright = user->zocean + user->omega * Hu[i+1].H;
+          dhdx  = (hright - hleft) / (2.0 * dx);
+        }
+      }
+      /**** sliding coefficient ****/
+      if (grounded)
+        beta = user->k * rg * Hu[i].H;
+      else
+        beta = 0.0;
+      /* beta = user->k * rg * Hu[i].H; for test */
+      /*beta = user->k * rg * 1000.0;*/
+      /**** residual for SSA ****/
+      if (i == Mx-1) {
+        f[i].u = (2.0*Tr - 2.0*Tl) / dx - beta * Hu[i].u - rg * Hu[i].H * dhdx;
+        /*f[i].u = Tr - Tl;*/
+      } else {
+        f[i].u = (Tr - Tl) / dx - beta * Hu[i].u - rg * Hu[i].H * dhdx;
+      }
+    }
+  }
+  ierr = DMDAVecRestoreArray(user->scalarda,locBstag,&Bstag);CHKERRQ(ierr);
+  ierr = DMDAVecRestoreArray(user->scalarda,user->M,&M);CHKERRQ(ierr);
+  ierr = DMRestoreLocalVector(user->scalarda,&locBstag);CHKERRQ(ierr);
+  PetscFunctionReturn(0);
+}
+
+
+#if 0
 static inline PetscReal dFSRdleft(PetscReal dx, PetscReal eps, PetscReal n,
                                     PetscReal ul, PetscReal ur) {
   PetscReal dudx = (ur - ul) / dx,
@@ -372,102 +535,6 @@ static inline PetscReal dFSRdright(PetscReal dx, PetscReal eps, PetscReal n,
   return - dFSRdleft(dx,eps,n,ul,ur);
 }
 
-
-PetscErrorCode FunctionLocal(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
-{
-  PetscErrorCode ierr;
-  PetscReal      rg = user->rho * user->g, dx = user->dx;
-  PetscReal      *M, *Bstag, *beta,
-                 duH, ul, u, ur, dHdx, Fl, Fr, Tl, Tr;
-  PetscInt       i, Mx = info->mx;
-  Vec            locBstag;
-
-  PetscFunctionBegin;
-
-  /* we need stencil width on Bstag (but not for M, beta) */
-  ierr = DMGetLocalVector(user->scalarda,&locBstag);CHKERRQ(ierr);  /* do NOT destroy it */
-  ierr = DMGlobalToLocalBegin(user->scalarda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
-  ierr = DMGlobalToLocalEnd(user->scalarda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
-
-  ierr = DMDAVecGetArray(user->scalarda,locBstag,&Bstag);CHKERRQ(ierr);
-  ierr = DMDAVecGetArray(user->scalarda,user->M,&M);CHKERRQ(ierr);
-  ierr = DMDAVecGetArray(user->scalarda,user->beta,&beta);CHKERRQ(ierr);
-  for (i = info->xs; i < info->xs + info->xm; i++) {
-
-    /* MASS CONT */
-    if (i == 0) {
-      /* residual at left-most point is Dirichlet cond. */
-      f[0].H = Hu[0].H - user->Ha;
-    } else {
-      /* centered difference IS UNSTABLE:
-        duH = Hu[i+1].u * Hu[i+1].H - ( (i == 1) ? 0.0 : Hu[i-1].u * Hu[i-1].H );
-        duH *= 0.5; */
-
-      if (user->upwind1) {
-        /* 1st-order upwind; leftward difference because u > 0 (because dH/dx < 0) */
-        duH = Hu[i].u * Hu[i].H - ( (i == 1) ? 0.0 : Hu[i-1].u * Hu[i-1].H );
-      } else {
-        /* 2nd-order upwind; see Beam-Warming discussion in R. LeVeque, "Finite Volume ..." */
-        if (i == 1) { /* use PDE  M - (uH)_x = 0 to get quadratic poly, then diff that */
-          duH = - dx * M[0] + 2.0 * Hu[1].u * Hu[1].H;
-        } else {
-          duH = 3.0 * Hu[i].u * Hu[i].H - 4.0 * Hu[i-1].u * Hu[i-1].H;
-          /* if i == 2 then u=0 so uH = 0 */
-          if (i >= 3)  duH += Hu[i-2].u * Hu[i-2].H;
-          duH *= 0.5;
-        }
-      }
-
-      f[i].H = dx * M[i] - duH;
-    }
-
-    /* SSA */
-    if (i == 0) {
-      /* residual at left-most point is Dirichlet cond. */
-      f[0].u = Hu[0].u - user->ua;
-    } else {
-      /* residual: SSA eqn */
-      /* consecutive values of u */
-      ul = (i == 1) ? 0.0 : Hu[i-1].u;
-      u  = Hu[i].u;
-      ur = (i == Mx-1) ? -1.1e30 : Hu[i+1].u;
-      /* surface slope */
-      if (i == 1) {
-        dHdx  = (Hu[i+1].H - user->Ha) / (2.0 * dx);
-      } else if (i == Mx-1) {
-        /* nearly 2nd-order global convergence seems to occur even with this:
-             dHdx  = (Hu[i].H - Hu[i-1].H) / dx; */
-        dHdx  = (3.0*Hu[i].H - 4.0*Hu[i-1].H + Hu[i-2].H) / (2.0 * dx);
-      } else { /* generic case */
-        dHdx  = (Hu[i+1].H - Hu[i-1].H) / (2.0 * dx);
-      }
-      /* vertically-integrated longitudinal stress */
-      Fl = GetFSR(dx,user->epsilon,user->n, ul,u);
-      if (i == Mx-1) {
-        Tl = 2.0 * (Hu[i-1].H + Hu[i].H) * Bstag[i-1] * Fl;
-        Tr = (1.0 - user->rho / user->rhow) * user->rho * user->g * Hu[i].H * Hu[i].H;
-        /* exact value: Tr = 2.0 * user->Txc; */
-      } else {
-        Fr = GetFSR(dx,user->epsilon,user->n, u,ur);
-        Tl = (Hu[i-1].H + Hu[i].H) * Bstag[i-1] * Fl;
-        Tr = (Hu[i].H + Hu[i+1].H) * Bstag[i] * Fr;
-      }
-
-      f[i].u = (Tr - Tl) - dx * beta[i] * u - dx * rg * Hu[i].H * dHdx; /* SSA */
-
-    }
-  }
-  ierr = DMDAVecRestoreArray(user->scalarda,locBstag,&Bstag);CHKERRQ(ierr);
-  ierr = DMDAVecRestoreArray(user->scalarda,user->M,&M);CHKERRQ(ierr);
-  ierr = DMDAVecRestoreArray(user->scalarda,user->beta,&beta);CHKERRQ(ierr);
-
-  ierr = DMRestoreLocalVector(user->scalarda,&locBstag);CHKERRQ(ierr);
-
-  PetscFunctionReturn(0);
-}
-
-
-#if 0
 
 /* Evaluate analytical Jacobian matrix. */
 /* FIXME:  this is not fully implemented */
