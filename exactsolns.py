@@ -6,8 +6,7 @@
 from sys import exit
 import numpy as np
 
-## the following code defining the Test N form of the Bodvardsson solution
-## represents complete code duplication from
+## the following code came from the PISM Test N form of the Bodvardsson solution
 ##   pism-dev/src/verif/tests/exactTestN.[h|c]
 ## see comments there
 
@@ -24,11 +23,10 @@ a       = 0.003 / secpera
 Hela    = H0 / 1.5
 k       = 9.0 * Hela / (a * L0 * L0)
 
-# Bodvardsson (1955) solution is purely grounded
 
 def exactBod(x):
   # Bodvardsson: get geometry and velocity from mass continuity and
-  #   T_x = 0  and assumption  beta = k rho g H
+  #   T_x = 0  and assumption  beta = k rho g H;  grounded only
   if np.any((x < 0.0) | (x > L0)):
     print "ERROR in exactN(): x out of range [0,L0]"
     return 1

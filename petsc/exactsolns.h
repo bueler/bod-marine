@@ -67,7 +67,7 @@ int exactBod(double x, double *H, double *u, double *M);
    /* input    : x                   (m; 0.0 <= x <= L0)
 
       output   : H = H(x)            (m; ice thickness)
-                 u = u(x)            (m s-1; ice horizontal velocity)
+                 u = u(x)            (m s-1; ice velocity)
                  M = M(x)            (m s-1; surface mass balance)
 
       Assumes n = 3.
@@ -90,6 +90,22 @@ int exactBodBueler(double x, double *T, double *B);
          0 if successful
          1 if x < 0
          2 if x > L0                                                        */
+
+
+int exactVeen(double x, double M0, double *H, double *u);
+   /* input    : x                   (m; 0.0 <= x <= L0)
+
+      output   : H = H(x)            (m; thickness)
+                 u = u(x)            (m s-1; ice velocity)
+
+      van der Veen: get thickness and velocity for floating ice shelf, given
+      Mg, Bg, xg, Hg, ug computed above from Bodvardsson
+
+      return value =
+         0 if successful
+         1 if x < xg
+         2 if u <= 0
+         3 if H <= 0                                                        */
 
 #ifdef __cplusplus
 }

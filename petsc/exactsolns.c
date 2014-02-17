@@ -29,7 +29,6 @@
 
 int params_exactBod(double *H0, double *L0, double *xg,
                     double *a, double *Hela, double *k) {
-  double s;
   /* geometry */
   *H0   = 3000.0;
   *L0   = 500.0e3;
@@ -45,7 +44,6 @@ int params_exactBod(double *H0, double *L0, double *xg,
 
 int exactBod(double x, double *H, double *u, double *M) {
 
-  const double omega = 1.0 - rho / rhow;
   double H0, L0, xg, a, Hela, k;
   double hx, hxx;
   params_exactBod(&H0, &L0, &xg, &a, &Hela, &k);
@@ -84,4 +82,26 @@ int exactBodBueler(double x, double *T, double *B) {
   return 0;
 }
 
+
+int exactVeen(double x, double M0, double *H, double *u) {
+
+  const double omega = 1.0 - rho / rhow;
+  double xg,Hg,ug,Bg,C,
+         tmp1,tmp2,tmp3,tmp4,tmp5;
+
+  params_exactBod(&tmp1, &tmp2, &xg, &tmp3, &tmp4, &tmp5);  // get xg
+  if (x < xg) { return 1; }
+
+  exactBod(xg, &Hg, &ug, &tmp1);
+  exactBodBueler(xg, &tmp1, &Bg);
+
+  C = pow(rho * g * omega / (4.0 * Bg), n);
+  tmp1 = ug * Hg + M0 * (x - xg);
+  tmp2 = pow(ug,n+1) + (C / M0) * ( pow(tmp1,n+1) - pow(ug * Hg,n+1) );
+  *u = pow(tmp2,1.0/(n+1));
+  if (*u <= 0.0) { return 2; }
+  *H = tmp1 / *u;
+  if (*H <= 0.0) { return 3; }
+  return 0;
+}
 

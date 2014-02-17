@@ -24,6 +24,7 @@ typedef struct {
   PetscReal   L0;  /* free boundary length in Bodvardsson solution */
   Vec         Hu;  /* exact thickness (Hu[i][0]) and exact velocity (Hu[i][1]) on regular grid */
   PetscReal   xg;  /* exact grounding line location */
+  PetscReal   Mg;  /* exact mass balance at grounding line location */
 } ExactCtx;
 
 /* User-defined application context.  Filled by Fill...() and used by
@@ -62,7 +63,7 @@ int main(int argc,char **argv)
   AppCtx                 user;                 /* user-defined work context */
   ExactCtx               exact;
   PetscInt               its, tmpxs, tmpxm; /* iteration count, index, etc. */
-  PetscReal              tmp1, tmp2, tmp3, tmp4, tmp5,
+  PetscReal              tmp1, tmp2, tmp3, tmp4,
                          errnorms[2];
   PetscBool              eps_set = PETSC_FALSE,
                          dump = PETSC_FALSE,
@@ -86,11 +87,12 @@ int main(int argc,char **argv)
 
   /* get parameters of exact solution */
   ierr = params_exactBod(&tmp1, &(exact.L0), &(exact.xg), &tmp2, &tmp3, &tmp4); CHKERRQ(ierr);
+  ierr = exactBod(exact.xg,&tmp1,&tmp2,&(exact.Mg)); CHKERRQ(ierr);
 
   /* define interval [xa,xc] and get Dirichlet initial conditions */
   user.xa = 0.1 * exact.L0;
   user.xc = 1.4 * exact.L0;
-  ierr = exactBod(user.xa, &(user.Ha), &tmp1, &(user.ua), &tmp2, &tmp3, &tmp4); CHKERRQ(ierr);
+  ierr = exactBod(user.xa, &(user.Ha), &(user.ua), &tmp1); CHKERRQ(ierr);
 
   /* regularize using strain rate of 1/(length) per year */
   user.epsilon = (1.0 / user.secpera) / (user.xc - user.xa);
@@ -255,12 +257,14 @@ int main(int argc,char **argv)
   return 0;
 }
 
-/*  Compute the exact thickness and velocity on the regular grid. */
+
+/*  Compute the exact thickness and velocity on the regular grid, and
+the staggered-grid ice hardness, over the locally-owned part of the grid.  */
 PetscErrorCode FillExactSoln(ExactCtx *exact, AppCtx *user)
 {
   PetscErrorCode ierr;
   PetscInt       i;
-  PetscReal      dum1, dum2, dum3, dum4;
+  PetscReal      M0, dum1;
   PetscReal      *x;
   Node           *Hu;
   Vec            coord_x;
@@ -268,19 +272,21 @@ PetscErrorCode FillExactSoln(ExactCtx *exact, AppCtx *user)
   PetscFunctionBegin;
   ierr = DMGetCoordinates(user->da,&coord_x); CHKERRQ(ierr);
   ierr = DMDAVecGetArray(user->da,coord_x,&x);CHKERRQ(ierr);
-  /* Compute regular grid exact soln and staggered-grid thickness over the
-     locally-owned part of the grid */
   ierr = DMDAVecGetArray(user->da,exact->Hu,&Hu);CHKERRQ(ierr);
   for (i = user->xs; i < user->xs + user->xm; i++) {
+    if (x[i] < user->xa)
+      SETERRQ2(PETSC_COMM_SELF,1,"ERROR on rank %d: x[i] = %f less than xa!",
+               user->rank,x[i]);
+    if (x[i] > user->xc)
+      SETERRQ2(PETSC_COMM_SELF,2,"ERROR on rank %d: x[i] = %f greater than xc!",
+               user->rank,x[i]);
     if (x[i] < exact->xg) {
       /* grounded part: Bodvardsson formula */
-      if (x[i] < user->xa)
-        SETERRQ2(PETSC_COMM_SELF,1,"ERROR on rank %d: x[i] = %f less than xa!",
-                 user->rank,x[i]);
-      ierr = exactBod(x[i], &(Hu[i].H), &dum1, &(Hu[i].u), &dum2, &dum3, &dum4); CHKERRQ(ierr);
+      ierr = exactBod(x[i], &(Hu[i].H), &(Hu[i].u), &dum1); CHKERRQ(ierr);
     } else {
       /* floating part: van der Veen formula */
-      FIXME;
+      M0 = 0.1 * exact->Mg;
+      ierr = exactVeen(x[i], M0, &(Hu[i].H), &(Hu[i].u)); CHKERRQ(ierr);
     }
   }
   ierr = DMDAVecRestoreArray(user->da,coord_x,&x);CHKERRQ(ierr);
@@ -313,9 +319,11 @@ PetscErrorCode FillDistributedParams(AppCtx *user)
 {
   PetscErrorCode ierr;
   PetscInt       i,Mx=user->Mx;
-  PetscReal      x, dum1, dum2, dum3, dum4, dum5, *M, *Bstag, *beta;
+  PetscReal      x, H, k, dum1, dum2, dum3, dum4, dum5,
+                 *M, *Bstag, *beta;
 
   PetscFunctionBegin;
+  ierr = params_exactBod(&dum1, &dum2, &dum3, &dum4, &dum5, &k); CHKERRQ(ierr);
   /* Compute regular grid exact soln and staggered-grid thickness over the
      locally-owned part of the grid */
   ierr = DMDAVecGetArray(user->scalarda,user->M,&M);CHKERRQ(ierr);
@@ -324,10 +332,11 @@ PetscErrorCode FillDistributedParams(AppCtx *user)
   for (i = user->xs; i < user->xs + user->xm; i++) {
     /* FIXME: both sides of grounding line */
     x = user->dx * (PetscReal)i;  /* = x_i = distance from dome; regular grid point */
-    ierr = exactBod(x, &dum1, &dum2, &dum3, &(M[i]), &dum4, &(beta[i])); CHKERRQ(ierr);
+    ierr = exactBod(x, &H, &dum1, &(M[i])); CHKERRQ(ierr);
+    beta[i] = k * user->rho * user->g * H;
     x = x + (user->dx/2.0);       /* = x_{i+1/2}; staggered grid point */
     if (i < Mx-1) {
-      ierr = exactBod(x, &dum1, &dum2, &dum3, &dum4, &(Bstag[i]), &dum5); CHKERRQ(ierr);
+      ierr = exactBodBueler(x, &dum1, &(Bstag[i])); CHKERRQ(ierr);
     } else {
       Bstag[i] = -9999.9999;  /* never accessed, and we don't have the value anyway */
     }
@@ -364,7 +373,7 @@ static inline PetscReal dFSRdright(PetscReal dx, PetscReal eps, PetscReal n,
 }
 
 
-PetscErrorCode BodFunctionLocal(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
+PetscErrorCode FunctionLocal(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
 {
   PetscErrorCode ierr;
   PetscReal      rg = user->rho * user->g, dx = user->dx;
