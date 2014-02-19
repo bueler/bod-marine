@@ -28,7 +28,7 @@ exmarine.aux: exmarine.tex $(figures)
 	pdflatex exmarine
 	bibtex exmarine
 
-exmarine.bbl: exmarine.aux ice_bib.bib
+exmarine.bbl: exmarine.aux ice-bib.bib
 	bibtex exmarine
 
 .PHONY: clean
