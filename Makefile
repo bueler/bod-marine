@@ -16,7 +16,10 @@ twoparabolas.pdf: twoparabolas.py
 
 exactmarine-geometry.pdf: marineshoot.py
 	./marineshoot.py --saveroot exactmarine --noshoot
-	# also generates exactmarine-M-B.pdf, exactmarine-beta.pdf
+	# also generates exactmarine-M-B.pdf
+	#                exactmarine-beta.pdf
+	#                exactmarine-geometry-detail.pdf
+	#                exactmarine-good-error.pdf
 
 verifN.pdf: conv.txt verifNfigure.py
 	./verifNfigure.py conv.txt verifN.pdf

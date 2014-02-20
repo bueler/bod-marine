@@ -223,6 +223,10 @@ The surface mass balance is, in this Test N case, a fixed function of $x$ also, 
 	$$M = M(x) = a(H-H_{ela}) = a(H_0(1 - (x/L_0)^2 - H_{ela}).$$
 By using this simple parabolic surface mass balance we remove one instability from the continuum problem, namely the accumulation-altitude feedback which was Bodavardsson's original purpose.  But we can put it back when needed.
 
+\begin{figure}[ht]
+\onecol{exactmarine-geometry-detail}
+\caption{Detail of Figure \ref{fig:exactmarine}, showing the floating ice shelf geometry and velocity.} \label{fig:exactmarine-detail}
+\end{figure}
 
 \begin{figure}[ht]
 \onecol{exactmarine-M-B}
@@ -231,7 +235,7 @@ By using this simple parabolic surface mass balance we remove one instability fr
 
 \begin{figure}[ht]
 \onecol{exactmarine-beta}
-\caption{The sliding parameter $\beta_0(x)$ for the exact solution.  Note that floating ice always experiences zero basal stress, as in equation \eqref{eq:betafull}.} \label{fig:exactbeta}
+\caption{The sliding coefficient $\beta$ for the exact solution.  Note that floating ice always experiences zero basal stress, as in equation \eqref{eq:betafull}; the solid curve shows $\beta_0(x)$ while the dashed is the actual basal resistance experienced by the shelf, which drops to zero at the grounding line.} \label{fig:exactbeta}
 \end{figure}
 
 
@@ -246,15 +250,20 @@ FOR THE SOLUTION FROM THE PREVIOUS SUBSECTION WE HAVE BOTH THE ELEVATION-ALTITUD
 
 \subsection*{Numerical results}
 
-This re-interpreted Bodvardsson exact solution is a verification test (``Test N'') in the open source code of the Parallel Ice Sheet Model \citep[PISM; ][]{pism-user-manual}.  A special-purpose, stand-alone C code implementing a second-order finite difference scheme is described in the appendix.  It is also available as part of the PISM source code.  It has a parallel implementation using the PETSc \citep{petsc-user-ref} library and it uses a Newton scheme to achieve observed quadratic convergence of the iteration.
+FIXME:  When one does nonlinear shooting using the exact correct $T$ value, one gets the best-case adaptive-grid error in Figure \ref{fig:shoot-good-error}.
+
+\begin{figure}[ht]
+\onecol{exactmarine-good-error}
+\caption{Pointwise relative error from shooting in the ``good'' case where we use the exactly correct initial value for $T$.} \label{fig:shoot-good-error}
+\end{figure}
+
+A special-purpose, stand-alone C code implementing a second-order finite difference scheme is described in the appendix.  It is also available as part of the PISM source code.  It has a parallel implementation using the PETSc \citep{petsc-user-ref} library and it uses a Newton scheme to achieve observed quadratic convergence of the iteration.
 
 Figure \ref{fig:verifNresult} shows the result of using this numerical scheme to approximate the exact solution.  Both the maximum numerical thickness error and the maximum numerical velocity error are observed to converge at essentially an $O(\Delta x^2)$ error as the grid spacing $\Delta x$ refines to zero.  
 
 \begin{figure}[ht]
-% add symbolic link to
-%    pism-dev/src/verif/tests/verifN/verifN.pdf
 \onecol{verifN}
-\caption{Verification result from Test N.  The ice thickness error decays at rate $O(\Delta x^{1.97})$ (dotted).} \label{fig:verifNresult}
+\caption{Verification result for finite difference code on grounded-only problem.  The ice thickness error decays at rate $O(\Delta x^{1.97})$ (dotted).} \label{fig:verifNresult}
 \end{figure}
 
 
