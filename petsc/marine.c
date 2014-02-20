@@ -46,6 +46,7 @@ typedef struct {
   PetscReal   ua;      /* velocity at x=xa, for Dirichlet condition on mass cont */
   PetscReal   zocean;  /* surface elevation of ocean; bedrock is at zero elevation */
   PetscReal   k;       /* sliding parameter */
+  PetscReal   Mfloat;  /* mass balance rate in floating ice */
   PetscReal   epsilon; /* regularization of viscosity, a strain rate */
   Vec         M;       /* surface mass balance on regular grid */
   Vec         Bstag;   /* ice hardness on staggered grid*/
@@ -96,14 +97,22 @@ int main(int argc,char **argv)
   ierr = exactBodBueler(exact.xg,&tmp1,&(exact.Bg)); CHKERRQ(ierr);
   user.zocean = user.rho * exact.Hg / user.rhow;
 
-  /* define interval [xa,xc] and get Dirichlet initial conditions */
-  user.xa = 0.1 * exact.L0;
-  user.xc = 1.4 * exact.L0;
+/* see ../marineshoot.py: */
+#define xa_default    0.2
+#define xc_default    0.98
+#define Mdrop_default 1.0
+
+  /* define interval [xa,xc] */
+  user.xa = xa_default * exact.L0;
+  user.xc = xc_default * exact.L0;
+
+  /* get Dirichlet boundary conditions, and mass balance on shelf */
   ierr = exactBod(user.xa, &(user.Ha), &(user.ua), &tmp1); CHKERRQ(ierr);
+  user.Mfloat = Mdrop_default * exact.Mg;
 
   /* regularize using strain rate of 1/(length) per year */
-  /*user.epsilon = (1.0 / user.secpera) / (user.xc - user.xa);*/
-  user.epsilon = 0.0;
+  user.epsilon = (1.0 / user.secpera) / (user.xc - user.xa);
+  /*user.epsilon = 0.0;*/
 
   ierr = PetscOptionsBegin(PETSC_COMM_WORLD,
            "","options to marine (steady marine ice sheet solver)","");CHKERRQ(ierr);
@@ -270,7 +279,7 @@ PetscErrorCode FillExactSoln(ExactCtx *exact, AppCtx *user)
 {
   PetscErrorCode ierr;
   PetscInt       i;
-  PetscReal      M0, dum1, *x;
+  PetscReal      dum1, *x;
   Node           *Hu;
   DM             coord_da;
   Vec            coord_x;
@@ -293,8 +302,7 @@ PetscErrorCode FillExactSoln(ExactCtx *exact, AppCtx *user)
       ierr = exactBod(x[i], &(Hu[i].H), &(Hu[i].u), &dum1); CHKERRQ(ierr);
     } else {
       /* floating part: van der Veen formula */
-      M0 = 0.1 * exact->Mg;
-      ierr = exactVeen(x[i], M0, &(Hu[i].H), &(Hu[i].u)); CHKERRQ(ierr);
+      ierr = exactVeen(x[i], user->Mfloat, &(Hu[i].H), &(Hu[i].u)); CHKERRQ(ierr);
     }
   }
   ierr = DMDAVecRestoreArray(coord_da,coord_x,&x);CHKERRQ(ierr);
@@ -363,7 +371,7 @@ PetscErrorCode FillDistributedParams(ExactCtx *exact, AppCtx *user)
     if (x[i] < exact->xg) {
       ierr = exactBod(x[i], &dum1, &dum2, &(M[i])); CHKERRQ(ierr);
     } else  {
-      M[i] = 0.1 * exact->Mg;
+      M[i] = user->Mfloat;
     }
     xstag = x[i] + (user->dx/2.0);
     if (xstag < exact->xg) {
