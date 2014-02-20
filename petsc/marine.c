@@ -56,6 +56,7 @@ typedef struct {
 extern PetscErrorCode FillExactSoln(ExactCtx*,AppCtx*);
 extern PetscErrorCode FillInitial(AppCtx*,Vec*);
 extern PetscErrorCode FillDistributedParams(ExactCtx*,AppCtx*);
+extern PetscErrorCode FunctionLocalGLREG(DMDALocalInfo*,Node*,Node*,AppCtx*);
 extern PetscErrorCode FunctionLocal(DMDALocalInfo*,Node*,Node*,AppCtx*);
 /* extern PetscErrorCode JacobianMatrixLocal(DMDALocalInfo*,Node*,Mat,AppCtx*); */
 
@@ -207,7 +208,8 @@ int main(int argc,char **argv)
   ierr = SNESCreate(PETSC_COMM_WORLD,&snes);CHKERRQ(ierr);
   ierr = SNESSetDM(snes,user.da);CHKERRQ(ierr);
 
-  ierr = DMDASNESSetFunctionLocal(user.da,INSERT_VALUES,(DMDASNESFunction)FunctionLocal,&user);CHKERRQ(ierr);
+  /*ierr = DMDASNESSetFunctionLocal(user.da,INSERT_VALUES,(DMDASNESFunction)FunctionLocal,&user);CHKERRQ(ierr);*/
+  ierr = DMDASNESSetFunctionLocal(user.da,INSERT_VALUES,(DMDASNESFunction)FunctionLocalGLREG,&user);CHKERRQ(ierr);
   /*ierr = DMDASNESSetJacobianLocal(user.da,(DMDASNESJacobian)JacobianMatrixLocal,&user);CHKERRQ(ierr);*/
 
   ierr = SNESSetFromOptions(snes);CHKERRQ(ierr);
@@ -395,6 +397,127 @@ static inline PetscReal GetFSR(PetscReal dx, PetscReal eps, PetscReal n,
             q    = (1.0 / n) - 1.0;
   return PetscPowScalar(dudx * dudx + eps * eps, q / 2.0) * dudx;
 }
+
+
+static inline PetscReal GLREG(PetscReal H, PetscReal Hg, PetscReal eps) {
+  PetscReal tmp = exp(-(H-Hg)/eps);
+  return 1.0 / (1.0 + tmp);
+}
+
+static inline PetscReal dGLREG(PetscReal H, PetscReal Hg, PetscReal eps) {
+  PetscReal tmp = exp(-(H-Hg)/eps);
+  return tmp / (eps * (1.0 + tmp) * (1.0 + tmp));
+}
+
+
+/* Evaluate residual f at current iterate Hu, WITH ADDITIONAL REGULARIZATION
+AT GROUNDING LINE.
+For mass-continuity equation, note centered difference IS UNSTABLE:
+   duH = Hu[i+1].u * Hu[i+1].H - ( (i == 1) ? 0.0 : Hu[i-1].u * Hu[i-1].H );
+   duH *= 0.5;
+*/
+PetscErrorCode FunctionLocalGLREG(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
+{
+  PetscErrorCode ierr;
+  PetscReal      rg = user->rho * user->g,
+                 omega = user->omega,
+                 dx = user->dx,
+                 Hg = user->zocean * (user->rhow / user->rho),
+                 epsH = 0.1 * Hg;
+  PetscReal      *M, *Bstag,
+                 duH, ul, Fl, Fr, Tl, Tr, dHdx, tmp, dhdx, beta;
+  PetscInt       i, Mx = info->mx;
+  Vec            locBstag;
+
+  PetscFunctionBegin;
+
+  /* we need stencil width on Bstag (but not for M, beta) */
+  ierr = DMGetLocalVector(user->scalarda,&locBstag);CHKERRQ(ierr);  /* do NOT destroy it */
+  ierr = DMGlobalToLocalBegin(user->scalarda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
+  ierr = DMGlobalToLocalEnd(user->scalarda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
+
+  ierr = DMDAVecGetArray(user->scalarda,locBstag,&Bstag);CHKERRQ(ierr);
+  ierr = DMDAVecGetArray(user->scalarda,user->M,&M);CHKERRQ(ierr);
+  for (i = info->xs; i < info->xs + info->xm; i++) {
+
+    /* MASS CONT */
+    if (i == 0) {
+      /* residual at left-most point is Dirichlet cond. */
+      f[0].H = user->ua * (Hu[0].H - user->Ha);  /* scale with u */
+    } else {
+      if (user->upwind1) {
+        /* 1st-order upwind; leftward difference because u > 0 (because dH/dx < 0) */
+        if (i == 1) {
+          duH = Hu[i].u * Hu[i].H - user->ua * user->Ha;
+        } else {
+          duH = Hu[i].u * Hu[i].H - Hu[i-1].u * Hu[i-1].H;
+        }
+      } else {
+        /* 2nd-order upwind; see Beam-Warming discussion in R. LeVeque, "Finite Volume ..." */
+        if (i == 1) { /* first-order in this case */
+          duH = Hu[i].u * Hu[i].H - user->ua * user->Ha;
+        } else {
+          if (i == 2) {
+            duH = 3.0 * Hu[i].u * Hu[i].H - 4.0 * Hu[i-1].u * Hu[i-1].H + user->ua * user->Ha;
+            duH *= 0.5;
+          } else {
+            duH = 3.0 * Hu[i].u * Hu[i].H - 4.0 * Hu[i-1].u * Hu[i-1].H + Hu[i-2].u * Hu[i-2].H;
+            duH *= 0.5;
+          }
+        }
+      }
+      /**** residual for mass continuity ****/
+      f[i].H = duH - dx * M[i];
+    }
+
+    /* SSA */
+    if (i == 0) {
+      /* residual at left-most point is Dirichlet cond. */
+      f[0].u = Hu[0].u - user->ua;
+    } else {
+      /* residual: SSA eqn */
+      /**** vertically-integrated longitudinal stress ****/
+      ul = (i == 1) ? user->ua : Hu[i-1].u;
+      Fl = GetFSR(dx,user->epsilon,user->n, ul,Hu[i].u);
+      Tl = Bstag[i-1] * (Hu[i-1].H + Hu[i].H) * Fl;
+      if (i == Mx-1) {
+        /* here "staggered" T comes from calving-front boundary condition
+           and introduced-point argument */
+        Tr = 0.5 * user->omega * rg * Hu[i].H * Hu[i].H;
+      } else {
+        Fr = GetFSR(dx,user->epsilon,user->n, Hu[i].u,Hu[i+1].u);
+        Tr = Bstag[i] * (Hu[i].H + Hu[i+1].H) * Fr;
+      }
+      /**** surface slope ****/
+      if (i == 1) {
+        dHdx  = (Hu[i+1].H - user->Ha) / (2.0 * dx);
+      } else if (i == Mx-1) {
+        /* nearly 2nd-order global convergence seems to occur even with this:
+             dhdx  = (Hu[i].H - Hu[i-1].H) / dx; */
+        dHdx  = (3.0*Hu[i].H - 4.0*Hu[i-1].H + Hu[i-2].H) / (2.0 * dx);
+      } else { /* generic case */
+        dHdx  = (Hu[i+1].H - Hu[i-1].H) / (2.0 * dx);
+      }
+      tmp = (1.0 - omega) * Hu[i].H + 0.0 - user->zocean;
+      dhdx = dHdx * (omega + (1.0 - omega) * GLREG(Hu[i].H,Hg,epsH) + dGLREG(Hu[i].H,Hg,epsH) * tmp);
+      /**** sliding coefficient ****/
+      beta = user->k * rg * Hu[i].H * GLREG(Hu[i].H,Hg,epsH);
+      /**** residual for SSA ****/
+      if (i == Mx-1) {
+        f[i].u = (2.0*Tr - 2.0*Tl) / dx;
+      } else {
+        f[i].u = (Tr - Tl) / dx;
+      }
+      f[i].u -= beta * Hu[i].u + rg * Hu[i].H * dhdx;
+    }
+  }
+  ierr = DMDAVecRestoreArray(user->scalarda,locBstag,&Bstag);CHKERRQ(ierr);
+  ierr = DMDAVecRestoreArray(user->scalarda,user->M,&M);CHKERRQ(ierr);
+  ierr = DMRestoreLocalVector(user->scalarda,&locBstag);CHKERRQ(ierr);
+  PetscFunctionReturn(0);
+}
+
+
 
 
 /* Evaluate residual f at current iterate Hu.
