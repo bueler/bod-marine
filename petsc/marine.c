@@ -35,10 +35,9 @@ typedef struct {
    FunctionLocal() and JacobianLocal().  */
 typedef struct {
   DM          da;      /* 1d,dof=2 distributed array for soln and residual */
-  DM          scalarda;/* 1d,dof=1 distributed array for suitable for parameters depending on x */
+  DM          stagda;  /* 1d,dof=1 distributed array for suitable for parameters at staggered grid points */
   PetscMPIInt rank;
-  PetscInt    Mx, xs, xm, solnghostwidth;
-  PetscBool   upwind1; /* if true, used low-order upwinding */
+  PetscInt    Mx, N, xs, xm;
   PetscReal   dx, secpera, n, rho, rhow, omega, g;
   PetscReal   xa;      /* location at which Dirichlet conditions are applied */
   PetscReal   xc;      /* calving front location at which stress (Neumann) condition applied to SSA eqn */
@@ -48,7 +47,7 @@ typedef struct {
   PetscReal   k;       /* sliding parameter */
   PetscReal   Mfloat;  /* mass balance rate in floating ice */
   PetscReal   epsilon; /* regularization of viscosity, a strain rate */
-  Vec         M;       /* surface mass balance on regular grid */
+  Vec         Mstag;   /* surface mass balance on staggered grid */
   Vec         Bstag;   /* ice hardness on staggered grid*/
 } AppCtx;
 
@@ -57,7 +56,6 @@ extern PetscErrorCode FillExactSoln(ExactCtx*,AppCtx*);
 extern PetscErrorCode FillInitial(AppCtx*,Vec*);
 extern PetscErrorCode FillDistributedParams(ExactCtx*,AppCtx*);
 extern PetscErrorCode FunctionLocalGLREG(DMDALocalInfo*,Node*,Node*,AppCtx*);
-extern PetscErrorCode FunctionLocal(DMDALocalInfo*,Node*,Node*,AppCtx*);
 /* extern PetscErrorCode JacobianMatrixLocal(DMDALocalInfo*,Node*,Mat,AppCtx*); */
 
 
@@ -120,9 +118,6 @@ int main(int argc,char **argv)
   {
     ierr = PetscOptionsBool("-snes_mf","","",PETSC_FALSE,&snes_mf_set,NULL);CHKERRQ(ierr);
     ierr = PetscOptionsBool("-snes_fd","","",PETSC_FALSE,&snes_fd_set,NULL);CHKERRQ(ierr);
-    ierr = PetscOptionsBool("-upwindone",
-             "use first-order upwinding instead of default second-order upwinding","",
-             PETSC_FALSE,&user.upwind1,NULL);CHKERRQ(ierr);
     ierr = PetscOptionsBool("-exact_init",
              "initialize using exact solution instead of default linear function","",
              PETSC_FALSE,&exactinitial,NULL);CHKERRQ(ierr);
@@ -155,14 +150,11 @@ int main(int argc,char **argv)
   }
 
   /* Create machinery for parallel grid management (DMDA), nonlinear solver (SNES),
-     and Vecs for fields (solution, RHS).  Note default Mx=46 grid points means
-     dx=10 km.  Also degrees of freedom = 2 (thickness and velocity
-     at each point) and stencil radius = ghost width = 2 for 2nd-order upwinding.  */
-  user.solnghostwidth = 2;
-  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,-66,2,user.solnghostwidth,PETSC_NULL,&user.da);
+     and Vecs for fields (solution, RHS).  Note default grid points.  Also degrees
+     of freedom = 2 (thickness and velocity at each point).  */
+  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,-100,2,1,PETSC_NULL,&user.da);
             CHKERRQ(ierr);
   ierr = DMSetApplicationContext(user.da,&user);CHKERRQ(ierr);
-  ierr = DMDASetUniformCoordinates(user.da,user.xa,user.xc,0.0,1.0,0.0,1.0);CHKERRQ(ierr);
 
   ierr = DMDASetFieldName(user.da,0,"ice thickness [non-dimensional]"); CHKERRQ(ierr);
   ierr = DMDASetFieldName(user.da,1,"ice velocity [non-dimensional]"); CHKERRQ(ierr);
@@ -175,24 +167,20 @@ int main(int argc,char **argv)
                      PETSC_IGNORE,PETSC_IGNORE,PETSC_IGNORE);CHKERRQ(ierr);
   ierr = DMDAGetCorners(user.da,&user.xs,PETSC_NULL,PETSC_NULL,&user.xm,PETSC_NULL,PETSC_NULL);
                    CHKERRQ(ierr);
-  user.dx = (user.xc-user.xa) / (PetscReal)(user.Mx-1);
 
-  /* another DMDA for scalar parameters, with same length */
-  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,user.Mx,1,1,PETSC_NULL,&user.scalarda);CHKERRQ(ierr);
-  ierr = DMDASetUniformCoordinates(user.scalarda,user.xa,user.xc,0.0,1.0,0.0,1.0);CHKERRQ(ierr);
-  /* check that parallel layout of scalar DMDA is same as dof=2 DMDA */
-  ierr = DMDAGetCorners(user.scalarda,&tmpxs,PETSC_NULL,PETSC_NULL,&tmpxm,PETSC_NULL,PETSC_NULL);
-                   CHKERRQ(ierr);
-  if ((tmpxs != user.xs) || (tmpxm != user.xm)) {
-    PetscPrintf(PETSC_COMM_SELF,
-       "\n***ERROR: rank %d gets different ownership range for the two DMDAs!  ENDING ...***\n\n",
-       user.rank);
-    PetscEnd();
-  }
+  /* another DMDA for scalar staggered parameters; one fewer point */
+  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,user.Mx-1,1,1,PETSC_NULL,&user.stagda);CHKERRQ(ierr);
+
+  /* establish geometry on grid */
+  /*user.dx = (user.xc-user.xa) / (PetscReal)(user.Mx-1);*/
+  user.N = user.Mx - 2;
+  user.dx = (user.xc - user.xa) / (PetscReal)(user.N+0.5);
+  ierr = DMDASetUniformCoordinates(user.da,    user.xa,            user.xc+0.5*user.dx,0.0,1.0,0.0,1.0);CHKERRQ(ierr);
+  ierr = DMDASetUniformCoordinates(user.stagda,user.xa+0.5*user.dx,user.xc,            0.0,1.0,0.0,1.0);CHKERRQ(ierr);
 
   /* report on current grid */
   ierr = PetscPrintf(PETSC_COMM_WORLD,
-      "  grid:  Mx = %D points,  dx = %.3f m,  xa = %.2f km,  xc = %.2f km\n",
+      "  grid:  Mx = N+2 = %D regular points,  dx = %.3f m,  xa = %.2f km,  xc = %.2f km\n",
       user.Mx, user.dx, user.xa/1000.0, user.xc/1000.0);CHKERRQ(ierr);
 
   /* Extract/allocate global vectors from DMDAs and duplicate for remaining same types */
@@ -201,14 +189,13 @@ int main(int argc,char **argv)
   ierr = VecDuplicate(Hu,&r);CHKERRQ(ierr); /* inherits block size */
   ierr = VecDuplicate(Hu,&exact.Hu);CHKERRQ(ierr); /* ditto */
 
-  ierr = DMCreateGlobalVector(user.scalarda,&user.M);CHKERRQ(ierr);
-  ierr = VecDuplicate(user.M,&user.Bstag);CHKERRQ(ierr);
+  ierr = DMCreateGlobalVector(user.stagda,&user.Mstag);CHKERRQ(ierr);
+  ierr = VecDuplicate(user.Mstag,&user.Bstag);CHKERRQ(ierr);
 
   /* set up snes */
   ierr = SNESCreate(PETSC_COMM_WORLD,&snes);CHKERRQ(ierr);
   ierr = SNESSetDM(snes,user.da);CHKERRQ(ierr);
 
-  /*ierr = DMDASNESSetFunctionLocal(user.da,INSERT_VALUES,(DMDASNESFunction)FunctionLocal,&user);CHKERRQ(ierr);*/
   ierr = DMDASNESSetFunctionLocal(user.da,INSERT_VALUES,(DMDASNESFunction)FunctionLocalGLREG,&user);CHKERRQ(ierr);
   /*ierr = DMDASNESSetJacobianLocal(user.da,(DMDASNESJacobian)JacobianMatrixLocal,&user);CHKERRQ(ierr);*/
 
@@ -509,139 +496,6 @@ PetscErrorCode FunctionLocalGLREG(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx
         f[i].u = (Tr - Tl) / dx;
       }
       f[i].u -= beta * Hu[i].u + rg * Hu[i].H * dhdx;
-    }
-  }
-  ierr = DMDAVecRestoreArray(user->scalarda,locBstag,&Bstag);CHKERRQ(ierr);
-  ierr = DMDAVecRestoreArray(user->scalarda,user->M,&M);CHKERRQ(ierr);
-  ierr = DMRestoreLocalVector(user->scalarda,&locBstag);CHKERRQ(ierr);
-  PetscFunctionReturn(0);
-}
-
-
-
-
-/* Evaluate residual f at current iterate Hu.
-For mass-continuity equation, note centered difference IS UNSTABLE:
-   duH = Hu[i+1].u * Hu[i+1].H - ( (i == 1) ? 0.0 : Hu[i-1].u * Hu[i-1].H );
-   duH *= 0.5;
-*/
-PetscErrorCode FunctionLocal(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
-{
-  PetscErrorCode ierr;
-  PetscReal      rg = user->rho * user->g, dx = user->dx;
-  PetscReal      *M, *Bstag,
-                 duH, ul, Fl, Fr, Tl, Tr, dhdx,
-                 hleft2, hleft, hhere, hright, beta;
-  PetscInt       i, Mx = info->mx;
-  PetscBool      grounded, groundedleft, groundedleft2;
-  Vec            locBstag;
-
-  PetscFunctionBegin;
-
-  /* we need stencil width on Bstag (but not for M, beta) */
-  ierr = DMGetLocalVector(user->scalarda,&locBstag);CHKERRQ(ierr);  /* do NOT destroy it */
-  ierr = DMGlobalToLocalBegin(user->scalarda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
-  ierr = DMGlobalToLocalEnd(user->scalarda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
-
-  ierr = DMDAVecGetArray(user->scalarda,locBstag,&Bstag);CHKERRQ(ierr);
-  ierr = DMDAVecGetArray(user->scalarda,user->M,&M);CHKERRQ(ierr);
-  for (i = info->xs; i < info->xs + info->xm; i++) {
-
-    /* MASS CONT */
-    if (i == 0) {
-      /* residual at left-most point is Dirichlet cond. */
-      f[0].H = user->ua * (Hu[0].H - user->Ha);  /* scale with u */
-    } else {
-      if (user->upwind1) {
-        /* 1st-order upwind; leftward difference because u > 0 (because dH/dx < 0) */
-        if (i == 1) {
-          duH = Hu[i].u * Hu[i].H - user->ua * user->Ha;
-        } else {
-          duH = Hu[i].u * Hu[i].H - Hu[i-1].u * Hu[i-1].H;
-        }
-      } else {
-        /* 2nd-order upwind; see Beam-Warming discussion in R. LeVeque, "Finite Volume ..." */
-        if (i == 1) { /* first-order in this case */
-          duH = Hu[i].u * Hu[i].H - user->ua * user->Ha;
-        } else {
-          if (i == 2) {
-            duH = 3.0 * Hu[i].u * Hu[i].H - 4.0 * Hu[i-1].u * Hu[i-1].H + user->ua * user->Ha;
-            duH *= 0.5;
-          } else {
-            duH = 3.0 * Hu[i].u * Hu[i].H - 4.0 * Hu[i-1].u * Hu[i-1].H + Hu[i-2].u * Hu[i-2].H;
-            duH *= 0.5;
-          }
-        }
-      }
-      /**** residual for mass continuity ****/
-      f[i].H = duH - dx * M[i];
-    }
-
-    /* SSA */
-    if (i == 0) {
-      /* residual at left-most point is Dirichlet cond. */
-      f[0].u = Hu[0].u - user->ua;
-    } else {
-      /* residual: SSA eqn */
-      /**** vertically-integrated longitudinal stress ****/
-      ul = (i == 1) ? user->ua : Hu[i-1].u;
-      Fl = GetFSR(dx,user->epsilon,user->n, ul,Hu[i].u);
-      Tl = Bstag[i-1] * (Hu[i-1].H + Hu[i].H) * Fl;
-      if (i == Mx-1) {
-        /* here "staggered" T comes from calving-front boundary condition
-           and introduced-point argument */
-        Tr = 0.5 * user->omega * rg * Hu[i].H * Hu[i].H;
-      } else {
-        Fr = GetFSR(dx,user->epsilon,user->n, Hu[i].u,Hu[i+1].u);
-        Tr = Bstag[i] * (Hu[i].H + Hu[i+1].H) * Fr;
-      }
-      /**** surface slope ****/
-      grounded = (user->rho * Hu[i].H >= user->rhow * user->zocean);
-      if (grounded) {
-        if (i == 1) {
-          dhdx  = (Hu[i+1].H - user->Ha) / (2.0 * dx);
-        } else if (i == Mx-1) {
-          /* nearly 2nd-order global convergence seems to occur even with this:
-               dhdx  = (Hu[i].H - Hu[i-1].H) / dx; */
-          dhdx  = (3.0*Hu[i].H - 4.0*Hu[i-1].H + Hu[i-2].H) / (2.0 * dx);
-        } else { /* generic case */
-          dhdx  = (Hu[i+1].H - Hu[i-1].H) / (2.0 * dx);
-        }
-      } else {
-        if (i == 1) SETERRQ1(PETSC_COMM_SELF,1,"ERROR on rank %d: i==1 case says not floating!",
-                             user->rank);
-        groundedleft = (user->rho * Hu[i-1].H >= user->rhow * user->zocean);
-        if (groundedleft)
-          hleft = Hu[i-1].H;
-        else
-          hleft  = user->zocean + user->omega * Hu[i-1].H;
-        if (i == Mx-1) {
-          groundedleft2 = (user->rho * Hu[i-2].H >= user->rhow * user->zocean);
-          if (groundedleft2)
-            hleft2 = Hu[i-2].H;
-          else
-            hleft2 = user->zocean + user->omega * Hu[i-2].H;
-          hhere = user->zocean + user->omega * Hu[i].H;
-          dhdx  = (3.0*hhere - 4.0*hleft + hleft2) / (2.0 * dx);
-        } else { /* generic case */
-          hright = user->zocean + user->omega * Hu[i+1].H;
-          dhdx  = (hright - hleft) / (2.0 * dx);
-        }
-      }
-      /**** sliding coefficient ****/
-      if (grounded)
-        beta = user->k * rg * Hu[i].H;
-      else
-        beta = 0.0;
-      /* beta = user->k * rg * Hu[i].H; for test */
-      /*beta = user->k * rg * 1000.0;*/
-      /**** residual for SSA ****/
-      if (i == Mx-1) {
-        f[i].u = (2.0*Tr - 2.0*Tl) / dx - beta * Hu[i].u - rg * Hu[i].H * dhdx;
-        /*f[i].u = Tr - Tl;*/
-      } else {
-        f[i].u = (Tr - Tl) / dx - beta * Hu[i].u - rg * Hu[i].H * dhdx;
-      }
     }
   }
   ierr = DMDAVecRestoreArray(user->scalarda,locBstag,&Bstag);CHKERRQ(ierr);
