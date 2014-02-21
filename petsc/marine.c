@@ -4,11 +4,9 @@ static const char help[] =
 "scheme to approximate the coupled mass continuity and SSA stress balance PDEs.\n"
 "\n"
 "IT WORKS!: this one is with a 'fair' initial condition:\n"
-"  ./marine -snes_fd -da_grid_x 600 -snes_monitor -snes_monitor_solution -draw_pause 0.1 -snes_max_funcs 1000000\n"
-"This run shows success with finite-difference-Jacobian:\n"
-"  ./marine -snes_fd -da_grid_x 201 -snes_monitor\n"
-"A refinement path; ~8000 m to ~250 m grids:\n"
-"  for J in 49 98 196 391 781 1561; do ./marine -snes_fd -da_grid_x $J -snes_max_funcs 100000 -exact_init; done\n"
+"  ./marine -snes_fd -dx 1000 -snes_monitor -snes_monitor_solution -draw_pause 0.1 -snes_max_funcs 1000000\n"
+"A refinement path:\n"
+"  for DX in 8000 4000 2000 1000 500 250; do ./marine -snes_fd -dx $DX -snes_max_funcs 100000 -exact_init; done\n"
 "\n\n";
 
 #include <petscdmda.h>
@@ -77,7 +75,7 @@ int main(int argc,char **argv)
   PetscBool              eps_set = PETSC_FALSE,
                          dump = PETSC_FALSE,
                          exactinitial = PETSC_FALSE,
-                         snes_mf_set, snes_fd_set;
+                         snes_mf_set, snes_fd_set, dx_set;
 
   PetscInitialize(&argc,&argv,(char *)0,help);
   ierr = MPI_Comm_rank(PETSC_COMM_WORLD, &user.rank); CHKERRQ(ierr);
@@ -116,18 +114,22 @@ int main(int argc,char **argv)
   user.epsilon = (1.0 / user.secpera) / (user.xc - user.xa);
   /*user.epsilon = 0.0;*/
 
+  user.dx = 10000.0;  /* default to coarse 10 km grid */
+
   ierr = PetscOptionsBegin(PETSC_COMM_WORLD,
            "","options to marine (steady marine ice sheet solver)","");CHKERRQ(ierr);
   {
     ierr = PetscOptionsBool("-snes_mf","","",PETSC_FALSE,&snes_mf_set,NULL);CHKERRQ(ierr);
     ierr = PetscOptionsBool("-snes_fd","","",PETSC_FALSE,&snes_fd_set,NULL);CHKERRQ(ierr);
+    ierr = PetscOptionsReal("-dx","grid spacing (m)","",
+                            user.dx,&user.dx,&dx_set);CHKERRQ(ierr);
     ierr = PetscOptionsBool("-exact_init",
              "initialize using exact solution instead of default linear function","",
              PETSC_FALSE,&exactinitial,NULL);CHKERRQ(ierr);
     ierr = PetscOptionsBool("-dump_solns",
              "dump out exact and approximate solution and residual, as asci","",
              dump,&dump,NULL);CHKERRQ(ierr);
-    ierr = PetscOptionsReal("-bod_epsilon","regularization (a strain rate in units of 1/a)","",
+    ierr = PetscOptionsReal("-epsilon","regularizing strain rate for stress computation (a-1)","",
                             user.epsilon * user.secpera,&user.epsilon,&eps_set);CHKERRQ(ierr);
     if (eps_set)  user.epsilon *= 1.0 / user.secpera;
   }
@@ -152,10 +154,19 @@ int main(int argc,char **argv)
        "  true Jacobian\n"); CHKERRQ(ierr);
   }
 
+  if (dx_set && (user.dx <= 0.0)) {
+    PetscPrintf(PETSC_COMM_WORLD,
+       "\n***ERROR: -dx value unreasonable ... USAGE FOLLOWS ...\n\n%s",help);
+    PetscEnd();
+  }
+  user.N = (int)ceil( ((user.xc - user.xa) / user.dx) - 0.5 );
+  user.Mx = user.N + 2;
+  user.dx = (user.xc - user.xa) / ((PetscReal)(user.N) + 0.5);  /* recompute so  dx * (N+1/2) = xc - xa  */
+
   /* Create machinery for parallel grid management (DMDA), nonlinear solver (SNES),
      and Vecs for fields (solution, RHS).  Note default grid points.  Also degrees
      of freedom = 2 (thickness and velocity at each point).  */
-  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,-100,2,1,PETSC_NULL,&user.da);
+  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,-user.Mx,2,1,PETSC_NULL,&user.da);
             CHKERRQ(ierr);
   ierr = DMSetApplicationContext(user.da,&user);CHKERRQ(ierr);
 
@@ -175,8 +186,6 @@ int main(int argc,char **argv)
   ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,user.Mx-1,1,1,PETSC_NULL,&user.stagda);CHKERRQ(ierr);
 
   /* establish geometry on grid; note xa = x_0 and xc = x_{N+1/2} */
-  user.N = user.Mx - 2;
-  user.dx = (user.xc - user.xa) / (PetscReal)(user.N+0.5);
   ierr = DMDASetUniformCoordinates(user.da,    user.xa,            user.xc+0.5*user.dx,0.0,1.0,0.0,1.0);CHKERRQ(ierr);
   ierr = DMDASetUniformCoordinates(user.stagda,user.xa+0.5*user.dx,user.xc,            0.0,1.0,0.0,1.0);CHKERRQ(ierr);
 
@@ -198,7 +207,6 @@ int main(int argc,char **argv)
   ierr = SNESCreate(PETSC_COMM_WORLD,&snes);CHKERRQ(ierr);
   ierr = SNESSetDM(snes,user.da);CHKERRQ(ierr);
 
-  /*ierr = DMDASNESSetFunctionLocal(user.da,INSERT_VALUES,(DMDASNESFunction)FunctionLocalGLREG,&user);CHKERRQ(ierr);*/
   ierr = DMDASNESSetFunctionLocal(user.da,INSERT_VALUES,(DMDASNESFunction)scshell,&user);CHKERRQ(ierr);
 
   /*ierr = DMDASNESSetJacobianLocal(user.da,(DMDASNESJacobian)JacobianMatrixLocal,&user);CHKERRQ(ierr);*/
@@ -290,16 +298,14 @@ PetscErrorCode FillExactSoln(ExactCtx *exact, AppCtx *user)
   ierr = DMDAVecGetArray(coord_da,coord_x,&x);CHKERRQ(ierr);
   ierr = DMDAVecGetArray(user->da,exact->Hu,&Hu);CHKERRQ(ierr);
   for (i = user->xs; i < user->xs + user->xm; i++) {
-    //ierr = PetscPrintf(PETSC_COMM_WORLD,"i=%3d, x[i]=%.3f km\n",i,x[i]/1000.0); CHKERRQ(ierr);
     if (x[i] < exact->xg) {
       /* grounded part: Bodvardsson formula */
       ierr = exactBod(x[i], &(Hu[i].H), &(Hu[i].u), &dum1); CHKERRQ(ierr);
     } else {
       /* floating part: van der Veen formula */
       ierr = exactVeen(x[i], user->Mfloat, &(Hu[i].H), &(Hu[i].u));
-      if (ierr) PetscPrintf(PETSC_COMM_WORLD,"exactVeen() returns error %d at i=%d, x[i]=%.3f km\n",
+      if (ierr) PetscPrintf(PETSC_COMM_WORLD,"WARNING:  exactVeen() returns error %d at i=%d, x[i]=%.3f km\n",
                             ierr,i,x[i]/1000.0);
-      //CHKERRQ(ierr);
     }
   }
   ierr = DMDAVecRestoreArray(coord_da,coord_x,&x);CHKERRQ(ierr);
@@ -359,7 +365,6 @@ PetscErrorCode FillDistributedParams(ExactCtx *exact, AppCtx *user)
   ierr = DMDAVecGetArray(user->stagda,user->Mstag,&Mstag);CHKERRQ(ierr);
   ierr = DMDAVecGetArray(user->stagda,user->Bstag,&Bstag);CHKERRQ(ierr);
   for (i = user->xs; i < user->xs + user->xm - 1; i++) {  /* note "-1" at end */
-    //ierr = PetscPrintf(PETSC_COMM_WORLD,"i=%3d, xstag[i]=%.3f km\n",i,xstag[i]/1000.0); CHKERRQ(ierr);
     if (xstag[i] < exact->xg) {
       ierr = exactBod(xstag[i], &dum1, &dum2, &(Mstag[i])); CHKERRQ(ierr);
       ierr = exactBodBueler(xstag[i], &dum1, &(Bstag[i])); CHKERRQ(ierr);
@@ -391,8 +396,9 @@ static inline PetscReal GLREG(PetscReal H, PetscReal Hg, PetscReal eps) {
 }
 
 static inline PetscReal dGLREG(PetscReal H, PetscReal Hg, PetscReal eps) {
-  PetscReal tmp = exp(-(H-Hg)/eps);
-  return tmp / (eps * (1.0 + tmp) * (1.0 + tmp));
+  /* this version has *no* regularization! */
+  if (H > Hg) return 1.0;
+  else        return 0.0;
 }
 
 
@@ -404,8 +410,7 @@ PetscErrorCode FunctionLocalGLREG(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx
   PetscReal      rg = user->rho * user->g,
                  omega = user->omega,
                  dx = user->dx,
-                 Hg = user->zocean * (user->rhow / user->rho),
-                 epsH = 0.00001 * Hg;
+                 Hg = user->zocean * (user->rhow / user->rho);
   PetscReal      *Mstag, *Bstag,
                  duH, ul, Fl, Fr, Tl, Tr, tmp, Hl, Hr, hl, hr, dhdx, beta;
   PetscInt       i, Mx = info->mx;
@@ -457,14 +462,14 @@ PetscErrorCode FunctionLocalGLREG(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx
       Fr = GetFSR(dx,user->epsilon,user->n, Hu[i].u,Hu[i+1].u);
       Tr = Bstag[i] * (Hu[i].H + Hu[i+1].H) * Fr;
       /**** sliding coefficient ****/
-      beta = user->k * rg * Hu[i].H * GLREG(Hu[i].H,Hg,epsH);
+      beta = user->k * rg * Hu[i].H * GLREG(Hu[i].H,Hg,0.0);
       /**** gl-regularized surface slope ****/
       Hl = (i == 1) ? user->Ha : Hu[i-1].H;
       tmp = (1.0 - omega) * Hl + 0.0 - user->zocean;
-      hl = omega * Hl + user->zocean + GLREG(Hl,Hg,epsH) * tmp;
+      hl = omega * Hl + user->zocean + GLREG(Hl,Hg,0.0) * tmp;
       Hr = Hu[i+1].H;
       tmp = (1.0 - omega) * Hr + 0.0 - user->zocean;
-      hr = omega * Hr + user->zocean + GLREG(Hr,Hg,epsH) * tmp;
+      hr = omega * Hr + user->zocean + GLREG(Hr,Hg,0.0) * tmp;
       dhdx = (hr - hl) / (2.0 * dx);
       /**** residual for SSA ****/
       f[i].u = (Tr - Tl) / dx - beta * Hu[i].u - rg * Hu[i].H * dhdx;
@@ -479,7 +484,7 @@ PetscErrorCode FunctionLocalGLREG(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx
 }
 
 
-/* Apply scalings to variables and equations to improve. */
+/* Apply scalings to variables and equations to make it all possible! */
 PetscErrorCode scshell(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
 {
   PetscErrorCode ierr;
