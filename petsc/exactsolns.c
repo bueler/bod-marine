@@ -67,12 +67,13 @@ int exactBodBueler(double x, double *T, double *B) {
   double H0, L0, xg, a, Hela, k;
   double Hg, ug, Mg, H, u, M;
   double q, hxx, ux;
+  int ierr;
+
   params_exactBod(&H0, &L0, &xg, &a, &Hela, &k);
   exactBod(xg, &Hg, &ug, &Mg);
 
-  if (x < 0.0) { return 1; }
-  if (x > L0) { return 2; }
-  exactBod(x, &H, &u, &M);
+  ierr = exactBod(x, &H, &u, &M);
+  if (ierr)  return ierr;
 
   q   = (1.0 / n) - 1.0;           /* a useful power */
   hxx = - 2.0 * H0 / (L0 * L0);    /* constant concavity of h(x) */

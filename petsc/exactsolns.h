@@ -93,7 +93,7 @@ int exactBodBueler(double x, double *T, double *B);
 
 
 int exactVeen(double x, double M0, double *H, double *u);
-   /* input    : x                   (m; 0.0 <= x <= L0)
+   /* input    : x                   (m; xg <= x)
 
       output   : H = H(x)            (m; thickness)
                  u = u(x)            (m s-1; ice velocity)
