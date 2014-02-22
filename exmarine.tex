@@ -54,9 +54,8 @@
 
 \author{Ed Bueler}
 
-\affiliation{Dept.~of Mathematics and Statistics, University of Alaska, Fairbanks AK 99775-6660, USA \\
+\affiliation{Department of Mathematics and Statistics and Geophysical Institute, University of Alaska Fairbanks, USA \\
 E-mail: \emph{\texttt{elbueler\@@alaska.edu}}}
-
 
 \maketitle
 
@@ -71,16 +70,13 @@ These parabolas, which exactly solve the nonlinear flow equations for geometry, 
 
 This paper combines Bodvardsson's solution with the well-known exact solution for an ice shelf \citep{vanderVeen83,vanderVeen} to generate an exact solution for a flowline, steady marine ice sheet.  The result, shown in Figure \ref{fig:exactmarine}, is an exact solution of the steady equations for the rapidly-sliding marine ice sheet case \citep{SchoofMarine1} which is addressed by the MISMIP intercomparison \citep{MISMIP2012}.  This exact solution simultaneously solves the steady mass continuity equation and the so-called shallow shelf approximation (``SSA''; Weis and others, 1999).\nocite{WeisGreveHutter}
 
-
-\subsection*{Continuum model}
-
-Our continuum model is the steady-state, flat bed form of the flowline, rapid-sliding model of Schoof\nocite{SchoofMarine1} (2007; equations (2.1)--(2.5)).  We restrict to the linear sliding case, but with a reasonably general sliding coefficient.  The primary unknowns in these equations are the ice thickness $H(x)$, velocity $u(x)$, and vertically-integrated longitudinal stress $T(x)$ \citep{SchoofStream}, where $x$ is the flowline distance.  Using other notation from Table \ref{tab:notation}, the equations are
+\subsection*{Continuum model}  Our continuum model is the steady-state, flat bed form of the flowline, rapid-sliding model of Schoof\nocite{SchoofMarine1} (2007; equations (2.1)--(2.5)).  We restrict to the linear sliding case, but with a reasonably general sliding coefficient.  The primary unknowns in these equations are the ice thickness $H(x)$, velocity $u(x)$, and vertically-integrated longitudinal stress $T(x)$ \citep{SchoofStream}, where $x$ is the flowline distance.  Using other notation from Table \ref{tab:notation}, the equations are
 \begin{gather}
 (uH)_x - M = 0, \label{eq:steadymass} \\
 T_x - \beta u - \rho g H h_x = 0, \label{eq:steadySSA} \\
 T = 2 B H |u_x|^{\frac{1}{n}-1} u_x, \label{eq:Tstress}
 \end{gather}
-where
+where the subscript $x$ denotes the derivative and where
 \begin{gather}
 h = \begin{cases} H+b,            & \rho H \ge \rho_w (z_o - b) \\
                   \omega H + z_o, & \rho H < \rho_w (z_o - b) \end{cases}, \label{eq:surface} \\
@@ -105,29 +101,6 @@ H, u, T \quad \text{ continuous at } x = x_g.  \label{eq:xgregularity}
 Here $x=0$ is an upstream location where a Dirichlet boundary condition is applied to the (coupled) problem of determining velocity and thickness, while at the (non-moving) calving front $x_c$ we have the standard hydrostatic pressure ``imbalance'' condition \citep{SchoofMarine1}.  Fact \eqref{eq:xgregularity} at $x_g$ is actually a regularity requirement, not strictly a boundary condition; see below.  By equation \eqref{eq:Tstress}, $T$ is continuous at $x_g$ if and only if $u_x$ is continuous at $x_g$ \citep{SchoofMarine1}.
 
 Given data $B(x)$, $b$, $k>0$, $M(x)$, $x_c>0$, $z_o$, along with physical constants $g,n,\rho,\rho_w$, we expect the problem consisting of equations \eqref{eq:steadymass}--\eqref{eq:xgregularity} to be well-posed.  To our knowledge this has not been proved, nor do we attempt to prove it.  It is, however, worth considering the smoothness (regularity) of the solution, including what hypotheses would lead to satisfying \eqref{eq:xgregularity}, noting that the grounding line is an unknown point inside the domain.  Suppose that, for \emph{a priori} physical reasons, the mass balance $M(x)$ and ice hardness $B(x)$ are bounded and integrable, and further that $B(x)$ is bounded below by a positive constant.  From integrating $M$, equation \eqref{eq:steadymass} implies that the flux $q=uH$ is absolutely-continuous and thus bounded.  If there is an \emph{a priori} positive lower bound on thickness $H$, a function which we must assume is integrable, then we can conclude that the magnitude of $u$ is bounded because $u=q/H$.  If there is also an \emph{a priori} bound on the magnitude of the driving stress $-\rho g H h_x$ then equation \eqref{eq:steadySSA} implies $T$ is absolutely-continuous.  By equation \eqref{eq:Tstress} this implies $u$ has a bounded and integrable derivative, and thus that it is also absolutely-continuous.  From these facts we could then return to the flux and write $H=q/u$ which shows $H$ is absolutely-continuous away from locations where $u=0$ (e.g.~divides).  In summary, assuming \emph{(i)} that an integrable solution $(H,u,T)$ to \eqref{eq:steadymass}--\eqref{eq:Tstress} exists, \emph{(ii)} that the functions $M,B$ are bounded and integrable, \emph{(iii)} that $B$ is bounded below by a positive constant, \emph{(iv)} that a positive lower bound on thickness exists, and \emph{(v)} that an upper bound on the magnitude of the driving stress exists, then we can regard condition \eqref{eq:xgregularity}, giving the continuity at the grounding line, as properties of the solution instead of as part of the ``imposed'' problem statement.
-
-\subsection*{Bodvardsson's parabola}
-
-FIXME
-
-The \cite{Bodvardsson} solution is also a parabola, but this time the margin has finite slope and the dome is smooth.  The \cite{Bodvardsson} solution was analyzed by \cite{Weertman61stability}, who decides that the physics chosen by Bodvardsson should be replaced by more SIA-like deformation, though sliding is allowed as well.
-
-Bodvardsson doesn't actual solve the SIA but instead solves a plug-flow model with a basal velocity which is proportional to the glaciological driving stress.  The SIA with Glen (power) law rheology is stated in his equation (13).  The ice softness is parameterized in equation (1) by $S_0$, the ``pseudo yield stress'' for power law ice.  Thus his equation (13) has constants $n$ and $S_0$, as well as constant $k$ describing the basal sliding.  But he then says on page 4, regarding his equation (13): ``This equation is quite tedious and very difficult to handle especially because of the first term in the parentheses.  It is therefore fortunate that this term appears to be small compared to the second term.''  In the next paragraph he drops the ``first term in the parentheses,'' and thus drops the Glen law and any internal ice deformation at all, and writes down equation (14) with only the constant ``$k$'' describing the base.  He never goes back to SIA equation (13), nor are any solutions of equation (13) provided.
-
-Regarding the ``$k$'' in equation, and noting that his actual results are all on a flat bed, he says between his equation (9) and (10): ``$s_b = k v w h$''.  In modern symbols we would write the shear stress applied to the base of the ice as
-  $$\tau_b = - k u_b \rho g H$$
-This a linear sliding relation $\tau_b = - \beta u_b$ where $\beta = k (\rho g H).$.  That is, $\beta$ scales with the overburden pressure.
-
-But equations (14) and (16) and (17), for which he discusses stability, are not SIA.  The involve no ice deformation at all, nor are stresses in the ice balanced in any way.  His flows are \emph{plug flows} with a weak fluid which feels only linear basal resistance.
-
-Bodvardsson's solution (18) of (17) is exact.
-
-\emph{But} the quadratic solution (18) absolutely does not have a margin
-shape which would come from deformation and Glen's law.  Rather his
-margin is asymptotically a ``wedge'' with finite slope, because his ice
-sheet profile is merely a parabola \emph{in the horizontal variable} $x$.
-See the profile in figure 2 for the margin shape, the last 20km of
-Bruarjokull.
 
 \small
 \begin{table}
@@ -158,73 +131,47 @@ $\omega$ & Archimedean factor; $=1 - \rho/\rho_w$ & $0.115$
 \end{tabular}
 \end{table}
 
-Bodvardsson's parabola must be the opposite end of some spectrum from the
-purely-plastic, $n=\infty$ ice which gives a shape which is a parabola
-on its side, that is, a square root in $x$!  In particular, Bodvardsson's equation (23) gives an exact solution of his equation (17), and this is shown in Figure \ref{fig:twoparabolas}.  FIXME: form with $L$ and $H_0$ needed for reference from Figure \ref{fig:twoparabolas}.
+\subsection*{Bodvardsson's parabola}
 
-\citet[equation (17)]{Bodvardsson} writes 
+The \cite{Bodvardsson} solution for a grounded glacier was apparently first cited by \cite{Weertman61stability}, who decided that the physics chosen by Bodvardsson should be replaced by more shallow ice approximation (``SIA'')-like shear deformation, though Weertman allowed sliding as well, and this seems to have influenced readers from then on.  Bodvardsson does not solve the SIA, however, and instead solves a plug-flow model with a basal velocity which is proportional to the glaciological driving stress.  He first states an equation having both shear and longitudinal stress but he says about this equation that it ``is quite tedious and very difficult to handle especially because of the [shear] term in the parentheses.  It is therefore fortunate that [the shear] term appears to be small compared to the [basal sliding] term.''  Then he drops the shear term and writes an equation in which driving stress is balanced entirely by basal resistance.
+
+Describing this plug flow in his terms, he chooses the shear stress applied to the base of the ice to have a coefficient which scales with the overburden pressure
 \begin{equation}
-a (H - H_{ela}) + (k^{-1} H H')' = 0  \label{bodsteady}
+\tau_b = - k \rho g H u  \label{eq:bodstresschoice}
 \end{equation}
-for $k>0$ and $a>0$ and equilibrium-line altitude $H_{ela}$.  The offered solution \citep[equation (23)]{Bodvardsson} is
+He then writes that the ice flux is $uH=-(H/k) H_x$, or equivalently that the ice velocity is
 \begin{equation}
-H(x) = H_0 (1 - (x/L_0)^2)  \label{bodsoln}
+u = - \frac{1}{k} H_x. \label{eq:bodvelocity}
 \end{equation}
-where $H_0 = 1.5 H_{ela}$ and $a k L_0^2 = 9 H_{ela}$.  This is an exact solution to equation \eqref{bodsteady} with boundary condition $H(0)=H_0$, as the reader may verify.  Formula \eqref{bodsoln} defines the dashed parabola shown in Figure \ref{fig:twoparabolas}.
-
-In the Bodvardsson theory the ice velocity is
+As is best-known about Bodvardsson's work, he chooses the surface mass balance to be
 \begin{equation}
-u = - \frac{1}{k} H' \label{bodstressbalance}
+M = a (H - H_{ela})  \label{eq:bodmassbalance}
 \end{equation}
-and the surface mass balance is
+for a mass balance gradient $a>0$ and equilibrium-line altitude $H_{ela}$.  Combining these equations he reports \citep[equation (17)]{Bodvardsson} that the thickness solves 
 \begin{equation}
-M = a (H - H_{ela}).  \label{bodmassbalance}
+a (H - H_{ela}) + (k^{-1} H H_x)_x = 0.  \label{eq:bodsteady}
 \end{equation}
-This same surface balance appears in \cite{Weertman61stability,Jouvetetal2011}, among other places, and, though realisting in its broad outlines, it is generally understood to be a source of instability for the problem of determining the steady state of an ice sheet.
-
-Bodvardsson explicitly considers solution \eqref{bodsoln} to solve a free boundary problem.  Specifically, the sense is that the single boundary condition $H(0)=H_0$, in the equation \eqref{bodsteady}, determines the quadratic solution \eqref{bodsoln}, which generates a value for $L_0$ from the hypothesis that the flux at $x=L_0$ is zero and the thickness at $x=L_0$ is also zero.  A DEEPER REASON WHY \eqref{bodsteady} SHOULD HAVE A QUADRATIC SOLUTION IS NOT OFFERED.
-
-A MODERN RE-INTERPETATION  The solution \eqref{bodsoln} exactly solves a combination of the flow-line mass-continuity equation and the SSA stress balance \citep{MacAyeal,WeisGreveHutter}, but with somewhat-contrived (``manufactured'') sliding coefficient and ice softness.
-
-We write flow-line mass-continuity equation and SSA stress balance equations together as a system describing a steady grounded flow with sliding.  The SSA is a balance of vertically-integrated longitudinal stresses, basal shear stress, and glaciological driving stress.  Specifically we assume flat bed and linear sliding $\tau_b = -\beta u$ and get:
-\begin{align}
-M - (u H)_x &= 0 \label{mcsteady} \\
-\left(2 H B |u_x|^{(1/n)-1} u_x\right)_x - \beta u &= \rho g H H_x  \label{ssasteady}
-\end{align}
-Such a model will be familiar to many readers as the steady state form of the model used in much recent work on marine ice sheet flowline models \citep[e.g.][]{SchoofMarine1}.  In equations \eqref{mcsteady} and \eqref{ssasteady} we see a non-linearly viscous constitutive relation for the ice.  A balance is required in which only the along-flow deviatoric (``longitudinal'') stress
-	$$\tau = 2 \nu u_x$$
-appears, but not the vertical shear stress.  In this isothermal case, Glen's power law for ice flow implies
-	$$\nu = B |u_x|^{(1/n)-1}$$
-where $B$ is the ice hardness.  Following \cite{SchoofStream} we define the vertically-integrated longitudinal stress
+The offered solution \citep[\emph{equivalent} equations (18) and (23)]{Bodvardsson} is
 \begin{equation}
-T = \tau H = 2 H B |u_x|^{(1/n)-1} u_x.  \label{schoofsT}
+H(x) = H_0 (1 - (x/L_0)^2)  \label{eq:bodsoln}
 \end{equation}
+where $H_0 = 1.5 H_{ela}$ and $a k L_0^2 = 9 H_{ela}$ \citep[equation (24)]{Bodvardsson}.
 
-We now consider equations \eqref{mcsteady}, \eqref{ssasteady} in the case of specific mass balance \eqref{bodmassbalance}.
-Furthermore let us suppose a sliding coefficient which scales with the overburden pressure,
-\begin{equation}
-\beta = \beta(x) = k \rho g H(x),\label{betadefine}
-\end{equation}
-where $k>0$ is a constant.  With these substitutions the system \eqref{ssasteady} appears as
-\begin{align}
-a(H-H_{ela}) - (u H)_x &= 0 \label{mcsteadysimpler} \\
-\left(T\right)_x - k \rho g H u &= \rho g H H_x \label{ssasteadysimpler}
-\end{align}
+Equation \eqref{eq:bodsoln} is an exact solution to equation \eqref{eq:bodsteady} with boundary condition $H(0)=H_0$, as the reader may verify!  Bodvardsson does not offer a reason why there should be such a simple quadratic solution, and his solution seems to be a not-well-known result for certain nonlinear second-order ODEs; see Appendix A.  Formula \eqref{eq:bodsoln} defines the solid parabola shown in Figure \ref{fig:twoparabolas}.
 
-Now suppose that we consider only solutions with constant vertically-integrated longitudinal stress, $T_x \equiv 0$.  In that case a brief calculation reduces equations \eqref{ssasteadysimpler} to Bodvardsson's model, equation \eqref{bodsteady} above.  That is, if $T_x \equiv 0$ then we recover a parabolic profile for $H(x)$, namely equation \eqref{bodsoln}.
+The surface balance parameterization \eqref{eq:bodmassbalance} reappears in \cite{Weertman61stability}, among many other places.  It realistically parameterizes a potential climatic instability, which was Bodvardsson's, Weertman's, and most readers', major interest.  We are, however, interested in Bodvardsson's solution of the ice flow equations themselves.
 
-What does the condition ``$T_x\equiv 0$'' imply as a relation among the modeled quantities?  Given a thickness profile $H(x)$ and a strain rate profile $u_x(x)$, we may interpret ``$T_x\equiv 0$'' as a statement about \emph{variable ice hardness}.  Such variable hardness is physical and common to many models using the SSA \citep{BBssasliding}, so implementing such $x$-dependent hardness requires no new concepts or components in such models.  In particular, if $T=T_0$ is the constant value then equation \eqref{schoofsT} implies
+Bodvardsson explicitly considers solution \eqref{eq:bodsoln} to solve a free boundary problem.  Specifically, the sense is that the single boundary condition $H(0)=H_0$, in the equation \eqref{eq:bodsteady}, determines the quadratic solution \eqref{eq:bodsoln}, which generates a value for $L_0$ from the hypothesis that the flux and the thickness at $x=L_0$ are both zero.
+
+\subsection{A re-interpretation}  We now claim that the solution \eqref{eq:bodsoln} exactly solves a combination of the steady flow-line mass-continuity equation \eqref{eq:steadymass} and SSA stress balance equation \eqref{eq:steadySSA}, but with contrived (``manufactured'') ice softness.
+
+In fact, suppose that we consider only solutions with constant vertically-integrated longitudinal stress, $T_x \equiv 0$.  In that case equations \eqref{eq:Tstress} and \eqref{eq:xgregularity} imply formula \eqref{eq:bodvelocity}.  Then \eqref{eq:steadymass} and \eqref{eq:bodmassbalance} give Bodvardsson's main equation \eqref{eq:bodsteady}.  That is, if \emph{(i)} $T_x \equiv 0$, \emph{(ii)} sliding resistance is linear and scales with overburden pressure, and \emph{(iii)} mass balance is proportional to elevation above the equilibrium line, then we recover a simple parabolic profile for $H(x)$, namely equation \eqref{eq:bodsoln}.
+
+But what does the condition ``$T_x\equiv 0$'' imply as a relation among the modeled quantities?  Given a thickness profile $H(x)$ and a strain rate profile $u_x(x)$, we may interpret ``$T_x\equiv 0$'' as a statement about \emph{variable ice hardness}.  Such variable hardness is physical and common to many models using the SSA \citep{BBssasliding}, so implementing such $x$-dependent hardness requires no new concepts or components in such models.  In particular, if $T=T_0$ is the constant value then equation \eqref{eq:Tstress} implies
 \begin{equation}
 B = B(x) = \frac{T_0}{2 H |u_x|^{(1/n)-1} u_x}. \label{hardnessdefine}
 \end{equation}
-
-We are now in the following extraordinary situation.  Given Bodvardsson's formula \eqref{bodsoln} for $H(x)$, and computing the horizontal velocity $u(x)$ by the simple rule from \cite{Bodvardsson},
-	$$u = -\frac{1}{k} H',$$
-we can construct a nontrivial solution to the steady SSA-plus-mass continuity system \eqref{ssasteady}.  Namely, we define the linear friction coefficient $\beta$ by equation \eqref{betadefine} and the ice hardness $B$ by equation \eqref{hardnessdefine}, and regard these as the fixed functions of $x$ shown in Figure \ref{fig:bodverifbetaB}.  The resulting profiles of elevation and horizontal velocity solve a nontrivial problem with a flat base and a surface mass balance function depending linearly on elevation, namely system \eqref{ssasteadysimpler}.  These profiles are shown in Figure FIXME.
-
-The surface mass balance is, in this Test N case, a fixed function of $x$ also, in which we have incorporated solution \eqref{bodsoln},
-	$$M = M(x) = a(H-H_{ela}) = a(H_0(1 - (x/L_0)^2 - H_{ela}).$$
-By using this simple parabolic surface mass balance we remove one instability from the continuum problem, namely the accumulation-altitude feedback which was Bodavardsson's original purpose.  But we can put it back when needed.
+The value $T_0$ is set by the calving front stress. FIXME: EXPLAIN THAT THIS COULD BE GROUNDED OR AT FLOTATION OR WITH AN ATTACHED SHELF
 
 \subsection*{Extending the exact solution to floating ice}
 
