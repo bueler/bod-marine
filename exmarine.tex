@@ -307,53 +307,37 @@ These two relations determine $\alpha,\beta$ from $A,B$.  The first relation exp
 In the main text, Bodvardsson's problem relates the initial (upstream) ice thickness $y_0=H_0$, an ablation gradient $a>0$, the equilibrium-line altitude $H_{ela}$, and a sliding constant $k>0$ to the glacier thickness $y(x) = H(x)$.  He has $A=-ka$ and $B=k a H_{ela}$ in \eqref{eq:abstractode} so the technical condition $2A y_0 + 3 B \ge 0$ says $3 H_{ela} \ge 2 H_0$ after simplification.  This causes the equilibrium line altitude to be relatively high on the glacier.
 
 
-\subsection{Appendix: Finite difference scheme for coupled Equations \eqref{mcsteady} and \eqref{ssasteady}}  The coupled, steady-state equations for mass continuity and the SSA stress balance form a continuum system that is solved exactly by the Bodvardsson solution (Test N), as explained in the main text.  Here we detail a numerical scheme for these equations.  The scheme uses centered, second-order finite differences for the SSA equation and a second-order upwind finite difference scheme for the mass continuity equation.  Figure \ref{fig:verifNresult} gives clear evidence that the scheme computes convergent ice thickness and ice velocity as the grid spacing decreases.
+\subsection{Appendix: a finite difference scheme}  The steady-state equations for mass continuity \eqref{eq:steadymass} and stress balance \eqref{eq:steadySSA} form a coupled system that can be approximately solved by the numerical scheme described here.  It uses centered, second-order finite differences for both equations.
 
-Let $N$ be the number of equal-length subintervals of the domain $[0,x_c]$, where $x_c$ is the horizontal location of the calving front.  Let $\Delta x = x_c/N$ and $x_i = i \Delta x$ for $i=0,1,\dots,N$.  % note for code:  N = Mx-1
-Denote the numerical approximations $H_i\approx H(x_i)$ and $u_i \approx u(x_i)$.
+We define an equally-spaced grid on the domain $[x_a,x_c]$.  Because the boundary condition at the calving front evaluates the stress $T$, the right endpoint $x_c$ is at a ``staggered'' location halfway in-between grid points.  Let $L=x_c-x_a$.  If $N$ is an integer then we define $\Delta x = L / (N+1/2)$ and $x_j = x_a + j\Delta x$ for $j=0,\dots,N+1$.  Denote the numerical approximations $H_i\approx H(x_i)$ and $u_i \approx u(x_i)$.  Let $x_j^* = x_j + \Delta x/2$ be the staggered location, for $j=0,\dots,N$, and note $x_c = x_N^* < x_{N+1}$.  Denote $B_j^*=B(x_j^*)$ and $M_j^*=M(x_j^*)$.
 
-The mass continuity equation \eqref{mcsteady} is approximated by second-order upwinding.  In our application the velocity is positive ($u_i\ge 0$), thus
+The mass continuity equation \eqref{eq:steadymass} is approximated by a second-order method centered at the staggered location.  For $j=0,\dots,N$,
 \begin{equation}
-M_i - \frac{3 u_i H_i - 4 u_{i-1} H_{i-1} + u_{i-2} H_{i-2}}{2 \Delta x} = 0 \label{mcsteadyFD}
-\end{equation}
-approximates \eqref{mcsteady} for $i=2,\dots,N$.
-
-The Dirichlet boundary conditions in Test N are $H(0)=H_0$ and $u(0)=u_0=0$.  Thus the flux $uH$ is zero at $x=0$.  The mass continuity equation \eqref{mcsteady} additionally implies $(uH)'\big|_{x=0}=M(0)=M_0$.  To build a special second-order rule for the $i=1$ case (i.e.~at $x_1 = \Delta x$) from this information, we construct interpolating quadratic $Q(x) = c_0 + c_1 x + c_2 x^2$ which approximates the flux, $Q(x) \approx u(x)H(x)$, on $0 \le x \le x_1$.  Specifically, we require $Q(0)=0$, $Q'(0)=M_0$, and $Q(x_1) = u_1 H_1$.  Then $Q'(x_1) = M_0 - (2 u_1 H_1/  \Delta x)$ so
-\begin{equation}
-M_1 - M_0 + \frac{2 u_1 H_1}{\Delta x} = 0 \label{mcbcFD}
-\end{equation}
-is the second-order upwind condition at $x_1$, as equation \eqref{mcsteadyFD} has no $i=1$ case.
-
-In order to solve the SSA stress balance equation \eqref{ssasteady} we avoid infinite viscosity by choosing a regularization constant $\eps=x_c^{-1}$ per year, a strain rate of 1 m$/$a over the full horizontal span $x_c$.  Let $q = (1-n)/n$, and define
-\begin{equation}
-F(u_l,u_r) = \left(\left(\frac{u_r-u_l}{\Delta x}\right)^2 + \eps^2\right)^{q/2} \frac{u_r-u_l}{\Delta x}.  \label{viscregFD}
+\frac{u_{j+1} H_{j+1} - u_j H_j}{\Delta x} - M_j^* = 0 \label{eq:steadymassFD}
 \end{equation}
 
-Also let $H_{i+1/2} = (H_i+H_{i+1})/2$.  With this notation the SSA stress balance equation in \eqref{ssasteady} is approximated by this centered-difference, second-order scheme
-\begin{align}
-&\frac{2 H_{i+1/2} B_{i+1/2} F(u_i,u_{i+1}) - 2 H_{i-1/2} B_{i-1/2} F(u_{i-1},u_i)}{\Delta x} \notag \\
-&\qquad - \beta_i u_i - \rho g H_i \frac{H_{i+1}-H_{i-1}}{2\Delta x} = 0  \label{SSAFD}
-\end{align}
-for $i=1,\dots,N-1$.
+In equation \eqref{eq:steadySSA} we avoid infinite viscosity by regularization \citep{SchoofStream}.  Let $\eps=1/L$ per year, i.e.~a strain rate corresponding to 1 m$/$a velocity change over the whole domain, $q = (1-n)/n$, and define
+\begin{equation}
+F(u_l,u_r) = \left(\left(\frac{u_r-u_l}{\Delta x}\right)^2 + \eps^2\right)^{q/2} \frac{u_r-u_l}{\Delta x}. \label{eq:viscregFD}
+\end{equation}
+Then we approximate the stress $T$ at staggered points,
+\begin{equation}
+T_j^* = 2 B_j^* \left(\frac{H_j + H_{j+1}}{2}\right) F(u_j,u_{j+1}), \label{eq:TFD}
+\end{equation}
+for $j=0,\dots,N$, and equation \eqref{eq:steadySSA} is approximated by
+\begin{equation}
+\frac{T_j^* - T_{j-1}^*}{\Delta x} - \beta_j u_j - \rho g H_j \frac{h_{j+1} - h_{j-1}}{2 \Delta x} = 0 \label{eq:steadySSAFD}
+\end{equation}
+where $\beta_j = k \rho g H_j$ if the ice is grounded at $x_j$ (i.e.~if $\rho H_j \ge \rho_w (z_o - b)$) and $\beta_j=0$ if the ice is floating, and where $h_j = H_j + b$ if the ice is grounded and $h_j = \omega H_j + z_o$ if the ice is floating.  Equation \eqref{eq:steadySSAFD} applies as stated both for grounded and floating ice, and it applies for all interior regular points, thus for $j=1,\dots,N$.
 
-At $x=x_c$ the calving-front stress balance condition is applied, so the vertically-integrated longitudinal stress $T$ (equation \eqref{schoofsT}) has a specific value
-\begin{align}
-T(x_c) &= \frac{1}{2} \omega \rho g H_N^2. \label{calvingstressFD}
-\end{align}
-The resulting boundary condition is handled as are many such Neumann boundary conditions in finite difference and finite volume schemes, namely by introducing and then removing a notional unknown $u_{N+1}$ at a notional node $x_{N+1}$ which is a distance $\Delta x$ beyond $x_N=x_c$ \citep{MortonMayers}.  Recalling equation \eqref{schoofsT}, we approximate $T(x_c)$ by the average
-\begin{align}
-T(x_c) &\approx H_{N+1/2} B_{N+1/2} F(u_N,u_{N+1}) \notag \\
-  &\qquad+ H_{N-1/2} B_{N-1/2} F(u_{N-1},u_{N}),\label{notionalFD}
-\end{align}
-which also involves a notional thickness $H_{N+1}$.  Combining equations \eqref{calvingstressFD}, \eqref{notionalFD}, and the $i=N$ case of \eqref{SSAFD} allows us to eliminate all reference to the notional unknowns $u_{N+1}$ and $H_{N+1}$.  We derive this special replacement for \eqref{SSAFD} at $x_N$:
-\begin{align*}
-&\frac{\omega \rho g H_N^2 - 4 H_{N-1/2} B_{N-1/2} F(u_{N-1},u_N)}{\Delta x} \\
-&\qquad - \beta_N u_N - \rho g H_N \frac{3 H_N - 4H_{N-1} + H_{N-2}}{2\Delta x} = 0.
-\end{align*}
-Note that for the driving stress we have used a second-order one-sided approximation of the surface slope $H'$.
+At this point we have $2N+4$ unknowns, namely $u_j,H_j$ for $j=0,\dots,N+1$.  There are $2N+1$ nonlinear equations in \eqref{eq:steadymassFD} and \eqref{eq:steadySSAFD} above.  The two upstream Dirichlet equations \eqref{eq:leftbc}, namely $u_0=u_a$ and $H_0=H_a$, and an approximation of the calving front condition \eqref{eq:rightbc} complete the system.  For the last one we write
+\begin{equation}
+\frac{1}{2} \omega \rho g \left(\frac{H_N + H_{N+1}}{2}\right)^2 = T_N^* \label{eq:rightbcFD}
+\end{equation}
+where $T_N^*$ is the approximation given in \eqref{eq:TFD}.
 
-In equations \eqref{mcsteadyFD} and \eqref{SSAFD} the $2N+2$ unknowns are the $N+1$ approximate thickness values $\{H_i\}_{i=0}^N$ and the $N+1$ approximate velocities $\{u_i\}_{i=0}^N$.  The additional parameters (knowns) are the surface mass balance values $M_i = M(x_i)$, the basal sliding coefficients $\beta_i = \beta(x_i)$, and the staggered-grid values of the ice hardness $B_{i+1/2} =B(x_{i+1/2})$ where $x_{i+1/2} = x_i + \Delta x/2$.  Equations \eqref{mcsteadyFD} and \eqref{SSAFD} form a presumably-well-posed system when augmented by the given boundary conditions.
+We now have a system of $2N+4$ equations in the same number of unknowns, which we can write abstractly as $\mathbf{F}(\mathbf{v})=0$.  These equations are solved by Newton's method \citep{Kelley} as implemented in PETSc \citep{petsc-user-ref}.  We first write a residual evaluation function which merely computes $\mathbf{F}(\mathbf{v})$ given $\mathbf{v}$, and a finite-difference Jacobian can be computed by PETSc, so this allows us to solve systems up to size about $N=1000$.  (It is critical in this finite-difference Jacobian case that the equations $\mathbf{F}(\mathbf{v})=0$ are scaled so that both the unknowns $\mathbf{v}$ and the ``residuals'', namely the output values of $\mathbf{F}$, have values which are $O(1)$.)  For higher resolution WE NEED AN ANALYTICAL JACOBIAN (FIXME).  FOR 2D CASES PERHAPS PRECONDITIONING BY AN APPROXIMATION TO THE JACOBIAN WOULD BE WISE.  
 
-Equations \eqref{mcsteadyFD}, \eqref{mcbcFD}, \eqref{SSAFD}, and \eqref{notionalFD}, along with Dirichlet boundary conditions $H_0=H_0$ and $u_0=0$ form a system of $2N+2$ equations $\mathbf{F}(\mathbf{v})=0$ in the same number of unknowns, which we denote as a vector $\mathbf{v}$.  These equations are solved by Newton's method \citep[e.g.][]{Pressetal}.  Following the paradigm sketched by \cite{KnollKeyes2004} we first implement a residual evaluation function which merely computes $\mathbf{F}(\mathbf{v}_0)$ given a guess $\mathbf{v}_0$.  The Jacobian-free Newton-Krylov method implemented in PETSc \citep{KnollKeyes2004,petsc-user-ref}, and/or the finite difference Jacobian also in PETSc, can solve the system up to sizes of about $N=1000$.  For scaling to higher resolution as shown in Figure \ref{fig:verifNresult} WE USED AN ANALYTICAL JACOBIAN.  FOR 2D CASES PERHAPS PRECONDITIONING BY AN APPROXIMATION TO THE JACOBIAN WOULD BE WISE.  FIXME: WHAT ABOUT INITIAL GUESS?
+FIXME: WHAT ABOUT INITIAL GUESS?
 
 \end{document}
