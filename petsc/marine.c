@@ -4,9 +4,11 @@ static const char help[] =
 "scheme to approximate the coupled mass continuity and SSA stress balance PDEs.\n"
 "\n"
 "IT WORKS!: this one is with a 'fair' initial condition:\n"
-"  ./marine -snes_fd -dx 1000 -snes_monitor -snes_monitor_solution -draw_pause 0.1 -snes_max_funcs 1000000\n"
+"  ./marine -snes_fd -dx 2000 -snes_monitor -snes_monitor_solution -draw_pause 0.1 -snes_max_funcs 1000000\n"
 "A refinement path:\n"
 "  for DX in 8000 4000 2000 1000 500 250; do ./marine -snes_fd -dx $DX -snes_max_funcs 100000 -exact_init; done\n"
+"Dump result in matlab:\n"
+"  ./marine -snes_fd -dx 250 -dump result250.m -exact_init -snes_max_funcs 100000\n"
 "\n\n";
 
 #include <petscdmda.h>
@@ -64,7 +66,7 @@ int main(int argc,char **argv)
   PetscErrorCode         ierr;
 
   SNES                   snes;                 /* nonlinear solver */
-  Vec                    Hu,r;                 /* solution, residual vectors */
+  Vec                    Hu;                   /* solution vector */
   AppCtx                 user;                 /* user-defined work context */
   ExactCtx               exact;
   PetscInt               its;                  /* snes reports iteration count */
@@ -72,6 +74,7 @@ int main(int argc,char **argv)
   PetscReal              tmp1, tmp2, tmp3,
                          errnorms[2], scaleNode[2], descaleNode[2];
   PetscInt               i;
+  char                   dumpfile[80],dxdocstr[80];
   PetscBool              eps_set = PETSC_FALSE,
                          dump = PETSC_FALSE,
                          exactinitial = PETSC_FALSE,
@@ -121,14 +124,15 @@ int main(int argc,char **argv)
   {
     ierr = PetscOptionsBool("-snes_mf","","",PETSC_FALSE,&snes_mf_set,NULL);CHKERRQ(ierr);
     ierr = PetscOptionsBool("-snes_fd","","",PETSC_FALSE,&snes_fd_set,NULL);CHKERRQ(ierr);
-    ierr = PetscOptionsReal("-dx","grid spacing (m)","",
-                            user.dx,&user.dx,&dx_set);CHKERRQ(ierr);
+    snprintf(dxdocstr,80,"target grid spacing (m) on interval of length %.0f m",
+             user.xc-user.xa);
+    ierr = PetscOptionsReal("-dx",dxdocstr,"",user.dx,&user.dx,&dx_set);CHKERRQ(ierr);
     ierr = PetscOptionsBool("-exact_init",
              "initialize using exact solution instead of default linear function","",
              PETSC_FALSE,&exactinitial,NULL);CHKERRQ(ierr);
-    ierr = PetscOptionsBool("-dump_solns",
-             "dump out exact and approximate solution and residual, as asci","",
-             dump,&dump,NULL);CHKERRQ(ierr);
+    ierr = PetscOptionsString("-dump",
+             "dump approx and exact solution into given file (as ascii matlab format)","",
+             NULL,dumpfile,80,&dump);CHKERRQ(ierr);
     ierr = PetscOptionsReal("-epsilon","regularizing strain rate for stress computation (a-1)","",
                             user.epsilon * user.secpera,&user.epsilon,&eps_set);CHKERRQ(ierr);
     if (eps_set)  user.epsilon *= 1.0 / user.secpera;
@@ -156,17 +160,23 @@ int main(int argc,char **argv)
 
   if (dx_set && (user.dx <= 0.0)) {
     PetscPrintf(PETSC_COMM_WORLD,
-       "\n***ERROR: -dx value unreasonable ... USAGE FOLLOWS ...\n\n%s",help);
+       "\n***ERROR: -dx value must be positive ... USAGE FOLLOWS ...\n\n%s",help);
     PetscEnd();
   }
   user.N = (int)ceil( ((user.xc - user.xa) / user.dx) - 0.5 );
   user.Mx = user.N + 2;
   user.dx = (user.xc - user.xa) / ((PetscReal)(user.N) + 0.5);  /* recompute so  dx * (N+1/2) = xc - xa  */
+  if (dx_set && (user.dx < 1.0)) {
+    PetscPrintf(PETSC_COMM_WORLD,
+       "\n***WARNING: '-dx %.3f' meters is below one meter and creates grid of %d points\n"
+       "            ... probably uncomputable!\n\n",
+       user.dx,user.Mx);
+  }
 
   /* Create machinery for parallel grid management (DMDA), nonlinear solver (SNES),
-     and Vecs for fields (solution, RHS).  Note default grid points.  Also degrees
-     of freedom = 2 (thickness and velocity at each point).  */
-  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,-user.Mx,2,1,PETSC_NULL,&user.da);
+     and Vecs for fields (solution, RHS).  Degrees of freedom = 2 (thickness and
+     velocity at each point).  */
+  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,user.Mx,2,1,PETSC_NULL,&user.da);
             CHKERRQ(ierr);
   ierr = DMSetApplicationContext(user.da,&user);CHKERRQ(ierr);
 
@@ -186,8 +196,10 @@ int main(int argc,char **argv)
   ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,user.Mx-1,1,1,PETSC_NULL,&user.stagda);CHKERRQ(ierr);
 
   /* establish geometry on grid; note xa = x_0 and xc = x_{N+1/2} */
-  ierr = DMDASetUniformCoordinates(user.da,    user.xa,            user.xc+0.5*user.dx,0.0,1.0,0.0,1.0);CHKERRQ(ierr);
-  ierr = DMDASetUniformCoordinates(user.stagda,user.xa+0.5*user.dx,user.xc,            0.0,1.0,0.0,1.0);CHKERRQ(ierr);
+  ierr = DMDASetUniformCoordinates(user.da,    user.xa,            user.xc+0.5*user.dx,
+                                   0.0,1.0,0.0,1.0);CHKERRQ(ierr);
+  ierr = DMDASetUniformCoordinates(user.stagda,user.xa+0.5*user.dx,user.xc,
+                                   0.0,1.0,0.0,1.0);CHKERRQ(ierr);
 
   /* report on current grid */
   ierr = PetscPrintf(PETSC_COMM_WORLD,
@@ -197,8 +209,9 @@ int main(int argc,char **argv)
   /* Extract/allocate global vectors from DMDAs and duplicate for remaining same types */
   ierr = DMCreateGlobalVector(user.da,&Hu);CHKERRQ(ierr);
   ierr = VecSetBlockSize(Hu,2);CHKERRQ(ierr);
-  ierr = VecDuplicate(Hu,&r);CHKERRQ(ierr); /* inherits block size */
-  ierr = VecDuplicate(Hu,&exact.Hu);CHKERRQ(ierr); /* ditto */
+  ierr = PetscObjectSetName((PetscObject)Hu,"Hu");CHKERRQ(ierr);
+  ierr = VecDuplicate(Hu,&exact.Hu);CHKERRQ(ierr); /* inherits block size */
+  ierr = PetscObjectSetName((PetscObject)exact.Hu,"exactHu");CHKERRQ(ierr);
 
   ierr = DMCreateGlobalVector(user.stagda,&user.Mstag);CHKERRQ(ierr);
   ierr = VecDuplicate(user.Mstag,&user.Bstag);CHKERRQ(ierr);
@@ -219,8 +232,7 @@ int main(int argc,char **argv)
   ierr = FillDistributedParams(&exact, &user);CHKERRQ(ierr);
 
   if (exactinitial) {
-    ierr = PetscPrintf(PETSC_COMM_WORLD,"  using exact solution as initial guess\n");
-             CHKERRQ(ierr);
+    ierr = PetscPrintf(PETSC_COMM_WORLD,"  using exact solution as initial guess\n"); CHKERRQ(ierr);
     /* the initial guess is the exact continuum solution */
     ierr = VecCopy(exact.Hu,Hu); CHKERRQ(ierr);
   } else {
@@ -237,7 +249,6 @@ int main(int argc,char **argv)
   ierr = SNESSolve(snes,PETSC_NULL,Hu);CHKERRQ(ierr);
   ierr = VecStrideScaleAll(Hu,scaleNode); CHKERRQ(ierr); /* put back in "real" scale */
 
-
   /* minimal report on solve */
   ierr = SNESGetIterationNumber(snes,&its);CHKERRQ(ierr);
   ierr = SNESGetConvergedReason(snes,&reason);CHKERRQ(ierr);
@@ -247,14 +258,41 @@ int main(int argc,char **argv)
 
   if (dump) {
     ierr = PetscPrintf(PETSC_COMM_WORLD,
-           "  viewing combined result Hu\n");CHKERRQ(ierr);
-    ierr = VecView(Hu,PETSC_VIEWER_STDOUT_WORLD); CHKERRQ(ierr);
-    ierr = PetscPrintf(PETSC_COMM_WORLD,
-           "  viewing combined exact result exact.Hu\n");CHKERRQ(ierr);
-    ierr = VecView(exact.Hu,PETSC_VIEWER_STDOUT_WORLD); CHKERRQ(ierr);
-    ierr = PetscPrintf(PETSC_COMM_WORLD,
-           "  viewing final combined residual (at Hu)\n");CHKERRQ(ierr);
-    ierr = VecView(r,PETSC_VIEWER_STDOUT_WORLD); CHKERRQ(ierr);
+      "dumping results in ascii matlab format to file '%s' ...\n",dumpfile);CHKERRQ(ierr);
+    PetscViewer viewer;
+    ierr = PetscViewerASCIIOpen(PETSC_COMM_WORLD,dumpfile,&viewer);CHKERRQ(ierr);
+    ierr = PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);CHKERRQ(ierr);
+    DM  coord_da;
+    Vec coord_x;
+    ierr = DMGetCoordinateDM(user.da, &coord_da); CHKERRQ(ierr);
+    ierr = DMGetCoordinates(user.da, &coord_x); CHKERRQ(ierr);
+    ierr = PetscViewerASCIIPrintf(viewer,"%% START MATLAB\n"); CHKERRQ(ierr);
+    ierr = PetscObjectSetName((PetscObject)coord_x,"x");CHKERRQ(ierr);
+    ierr = PetscViewerASCIIPrintf(viewer,"%%  viewing coordinate vector x \n");CHKERRQ(ierr);
+    ierr = VecView(coord_x,viewer); CHKERRQ(ierr);
+    ierr = VecView(Hu,viewer); CHKERRQ(ierr);
+    ierr = PetscViewerASCIIPrintf(viewer,"%%  viewing combined result Hu\n");CHKERRQ(ierr);
+    ierr = VecView(Hu,viewer); CHKERRQ(ierr);
+    ierr = PetscViewerASCIIPrintf(viewer,"%%  viewing combined exact result exactHu\n");CHKERRQ(ierr);
+    ierr = VecView(exact.Hu,viewer); CHKERRQ(ierr);
+    ierr = PetscViewerASCIIPrintf(viewer,
+           "%% defining plottable variables and plotting in Matlab\n"
+           "Mx = %d;  secpera = 31556926.0;\n"
+           "H = Hu(1:2:2*Mx-1);\n"
+           "u = Hu(2:2:2*Mx);\n"
+           "exactH = exactHu(1:2:2*Mx-1);\n"
+           "exactu = exactHu(2:2:2*Mx);\n"
+           "figure, plot(x,H,x,exactH);\n"
+           "legend('numerical','exact'), xlabel x, ylabel('H  (m)')\n"
+           "figure, plot(x,u*secpera,x,exactu*secpera);\n"
+           "legend('numerical','exact'), xlabel x, ylabel('u  (m/a)')\n"
+           "figure, subplot(2,1,1), semilogy(x,abs(H-exactH));\n"
+           "ylabel('H error (m)'),  grid\n"
+           "subplot(2,1,2), semilogy(x,abs(u-exactu)*secpera);\n"
+           "xlabel x,  ylabel('u error (m/a)'), grid\n",
+           user.Mx); CHKERRQ(ierr);
+    ierr = PetscViewerASCIIPrintf(viewer,"%% END MATLAB\n"); CHKERRQ(ierr);
+    ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
   }
 
   /* evaluate error relative to exact solution */
@@ -265,7 +303,6 @@ int main(int argc,char **argv)
            user.dx,errnorms[0],errnorms[1]*user.secpera);CHKERRQ(ierr);
 
   ierr = VecDestroy(&Hu);CHKERRQ(ierr);
-  ierr = VecDestroy(&r);CHKERRQ(ierr);
   ierr = VecDestroy(&(exact.Hu));CHKERRQ(ierr);
   ierr = VecDestroy(&(user.Mstag));CHKERRQ(ierr);
   ierr = VecDestroy(&(user.Bstag));CHKERRQ(ierr);
