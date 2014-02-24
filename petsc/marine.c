@@ -56,7 +56,7 @@ typedef struct {
 extern PetscErrorCode FillExactSoln(ExactCtx*,AppCtx*);
 extern PetscErrorCode FillInitial(AppCtx*,Vec*);
 extern PetscErrorCode FillDistributedParams(ExactCtx*,AppCtx*);
-extern PetscErrorCode FunctionLocalGLREG(DMDALocalInfo*,Node*,Node*,AppCtx*);
+extern PetscErrorCode FunctionLocal(DMDALocalInfo*,Node*,Node*,AppCtx*);
 extern PetscErrorCode scshell(DMDALocalInfo*,Node*,Node*,AppCtx*);
 /* extern PetscErrorCode JacobianMatrixLocal(DMDALocalInfo*,Node*,Mat,AppCtx*); */
 
@@ -428,28 +428,26 @@ static inline PetscReal GetFSR(PetscReal dx, PetscReal eps, PetscReal n,
 
 
 static inline PetscReal GLREG(PetscReal H, PetscReal Hg, PetscReal eps) {
-  PetscReal tmp = exp(-(H-Hg)/eps);
-  return 1.0 / (1.0 + tmp);
-}
-
-static inline PetscReal dGLREG(PetscReal H, PetscReal Hg, PetscReal eps) {
   /* this version has *no* regularization! */
   if (H > Hg) return 1.0;
   else        return 0.0;
+  /*PetscReal tmp = exp(-(H-Hg)/eps);
+  return 1.0 / (1.0 + tmp);*/
 }
 
+static inline PetscReal getsurf(PetscReal H, PetscReal Hg, PetscReal omega, PetscReal zo, PetscReal eps) {
+  return omega * H + zo + GLREG(H,Hg,eps) * ( (1.0 - omega) * H - zo );
+}
 
-/* Evaluate residual f at current iterate Hu, with regularization at grounding
-lint.  */
-PetscErrorCode FunctionLocalGLREG(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
+/* Evaluate residual f at current iterate Hu.  */
+PetscErrorCode FunctionLocal(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
 {
   PetscErrorCode ierr;
   PetscReal      rg = user->rho * user->g,
-                 omega = user->omega,
                  dx = user->dx,
                  Hg = user->zocean * (user->rhow / user->rho);
   PetscReal      *Mstag, *Bstag,
-                 duH, ul, Fl, Fr, Tl, Tr, tmp, Hl, Hr, hl, hr, dhdx, beta;
+                 duH, ul, Fl, Fr, Tl, Tr, Hl, hl, hr, dhdx, beta;
   PetscInt       i, Mx = info->mx;
   Vec            locBstag, locMstag;
 
@@ -480,33 +478,30 @@ PetscErrorCode FunctionLocalGLREG(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx
         duH = Hu[i].u * Hu[i].H - Hu[i-1].u * Hu[i-1].H;
       }
       /**** residual for mass continuity ****/
-      f[i].H = duH - dx * Mstag[i-1];
+      f[i].H = duH/dx - Mstag[i-1];
     }
 
     /* SSA */
     if (i == 0) {
-      /* residual at left-most point is Dirichlet cond. */
+      /* residual at left-most point is Dirichlet condition */
       f[0].u = Hu[0].u - user->ua;
     } else if (i == Mx-1) {
+      /* residual at right-most point is calving condition */
       Fr = GetFSR(dx,user->epsilon,user->n, Hu[i-1].u,Hu[i].u);
-      f[i].u = 0.25 * omega * rg * (Hu[i-1].H + Hu[i].H) - 2.0 * Bstag[i-1] * Fr;
+      f[i].u = 0.25 * user->omega * rg * (Hu[i-1].H + Hu[i].H) - 2.0 * Bstag[i-1] * Fr;
     } else {
-      /* residual: SSA eqn */
-      /**** T = vertically-integrated longitudinal stress ****/
+      /* T = vertically-integrated longitudinal stress */
       ul = (i == 1) ? user->ua : Hu[i-1].u;
       Fl = GetFSR(dx,user->epsilon,user->n, ul,Hu[i].u);
       Tl = Bstag[i-1] * (Hu[i-1].H + Hu[i].H) * Fl;
       Fr = GetFSR(dx,user->epsilon,user->n, Hu[i].u,Hu[i+1].u);
       Tr = Bstag[i] * (Hu[i].H + Hu[i+1].H) * Fr;
-      /**** sliding coefficient ****/
+      /* sliding coefficient */
       beta = user->k * rg * Hu[i].H * GLREG(Hu[i].H,Hg,0.0);
-      /**** gl-regularized surface slope ****/
+      /* surface slope */
       Hl = (i == 1) ? user->Ha : Hu[i-1].H;
-      tmp = (1.0 - omega) * Hl + 0.0 - user->zocean;
-      hl = omega * Hl + user->zocean + GLREG(Hl,Hg,0.0) * tmp;
-      Hr = Hu[i+1].H;
-      tmp = (1.0 - omega) * Hr + 0.0 - user->zocean;
-      hr = omega * Hr + user->zocean + GLREG(Hr,Hg,0.0) * tmp;
+      hl = getsurf(Hl,Hg,user->omega,user->zocean,0.0);
+      hr = getsurf(Hu[i+1].H,Hg,user->omega,user->zocean,0.0);
       dhdx = (hr - hl) / (2.0 * dx);
       /**** residual for SSA ****/
       f[i].u = (Tr - Tl) / dx - beta * Hu[i].u - rg * Hu[i].H * dhdx;
@@ -531,24 +526,27 @@ PetscErrorCode scshell(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
   /* variable scaling coeffs */
   PetscReal scaleH = 1000.0,
             scaleu = 100.0 / user->secpera;
-
-  /* residual scaling coeffs */
-  PetscReal rscH      = 1.0 / scaleH,
-            rscu      = 1.0 / scaleu,
-            rscuH     = 1.0 / (scaleH * scaleu),
-            rscstress = 1.0 / (user->rho * user->g);
+  /* residual scaling coeffs; motivation at right */
+  PetscReal rscHa     = 1.0 / scaleH,   /* Dirichlet cond for H */
+            rscua     = 1.0 / scaleu,   /* Dirichlet cond for u */
+            rscuH     = user->dx / (scaleH * scaleu),  /* flux derivative  d(uH)/dx */
+            rscstress = 1.0 / (user->k * user->rho * user->g * scaleH * scaleu),  /* beta term in SSA */
+            rsccalv   = 1.0 / (0.025 * user->rho * user->g * scaleH);  /* 0.5 * omega * overburden */
   /* dimensionalize unknowns (put in "real" scale), including the ghost values */
   for (i = start; i < end; i++) {
     Hu[i].H *= scaleH;
     Hu[i].u *= scaleu;
   }
   /* compute residual in dimensional units */
-  ierr = FunctionLocalGLREG(info, Hu, f, user); CHKERRQ(ierr);
+  ierr = FunctionLocal(info, Hu, f, user); CHKERRQ(ierr);
   /* scale the residual to be O(1) */
   for (i = info->xs; i < info->xs + info->xm; i++) {
     if (i == 0) {
-      f[0].H *= rscH;
-      f[0].u *= rscu;
+      f[0].H *= rscHa;
+      f[0].u *= rscua;
+    } else if (i == user->Mx - 1) {
+      f[i].H *= rscuH;
+      f[i].u *= rsccalv;
     } else {
       f[i].H *= rscuH;
       f[i].u *= rscstress;
@@ -563,22 +561,17 @@ PetscErrorCode scshell(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
 }
 
 
+/* dFSR/d1 = - G / dx,  dFSR/d2 = + G / dx */
+static inline PetscReal GSR(PetscReal dx, PetscReal eps, PetscReal n,
+                            PetscReal ul, PetscReal ur) {
+  PetscReal dudx = (ur - ul) / dx,
+            q    = (1.0 / n) - 1.0,
+            D2   = dudx * dudx + eps * eps;
+  return PetscPowScalar(D2, (q / 2.0) - 1) * ( q * dudx * dudx + D2 );
+}
+
 
 #if 0
-static inline PetscReal dFSRdleft(PetscReal dx, PetscReal eps, PetscReal n,
-                                    PetscReal ul, PetscReal ur) {
-  PetscReal dudx = (ur - ul) / dx,
-              q    = (1.0 / n) - 1.0,
-              D2   = dudx * dudx + eps * eps;
-  return - (1.0 / dx) * PetscPowScalar(D2, (q / 2.0) - 1) * ( q * dudx * dudx + D2 );
-}
-
-
-static inline PetscReal dFSRdright(PetscReal dx, PetscReal eps, PetscReal n,
-                                    PetscReal ul, PetscReal ur) {
-  return - dFSRdleft(dx,eps,n,ul,ur);
-}
-
 
 /* Evaluate analytical Jacobian matrix. */
 /* FIXME:  this is not fully implemented */
