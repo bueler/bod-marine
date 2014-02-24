@@ -6,9 +6,9 @@ static const char help[] =
 "IT WORKS!: this one is with a 'fair' initial condition:\n"
 "  ./marine -snes_fd -dx 2000 -snes_monitor -snes_monitor_solution -draw_pause 0.1 -snes_max_funcs 1000000\n"
 "A refinement path:\n"
-"  for DX in 8000 4000 2000 1000 500 250; do ./marine -snes_fd -dx $DX -snes_max_funcs 100000 -exact_init; done\n"
+"  for DX in 8000 4000 2000 1000 500 250; do ./marine -snes_fd -dx $DX -snes_max_funcs 100000 -exactinit; done\n"
 "Dump result in matlab:\n"
-"  ./marine -snes_fd -dx 250 -dump result250.m -exact_init -snes_max_funcs 100000\n"
+"  ./marine -snes_fd -dx 250 -dump result250.m -exactinit -snes_max_funcs 100000\n"
 "\n\n";
 
 #include <petscdmda.h>
@@ -33,7 +33,7 @@ typedef struct {
 } ExactCtx;
 
 /* User-defined application context.  Filled by Fill...() and used by
-   FunctionLocal() and JacobianLocal().  */
+   FunctionLocal() and JacobianMatrixLocal().  */
 typedef struct {
   DM          da;      /* 1d,dof=2 distributed array for soln and residual */
   DM          stagda;  /* 1d,dof=1 distributed array for suitable for parameters at staggered grid points */
@@ -48,6 +48,8 @@ typedef struct {
   PetscReal   k;       /* sliding parameter */
   PetscReal   Mfloat;  /* mass balance rate in floating ice */
   PetscReal   epsilon; /* regularization of viscosity, a strain rate */
+  PetscReal   Hscale, uscale;
+  PetscBool   noscale;
   Vec         Mstag;   /* surface mass balance on staggered grid */
   Vec         Bstag;   /* ice hardness on staggered grid*/
 } AppCtx;
@@ -58,8 +60,7 @@ extern PetscErrorCode FillInitial(AppCtx*,Vec*);
 extern PetscErrorCode FillDistributedParams(ExactCtx*,AppCtx*);
 extern PetscErrorCode FunctionLocal(DMDALocalInfo*,Node*,Node*,AppCtx*);
 extern PetscErrorCode scshell(DMDALocalInfo*,Node*,Node*,AppCtx*);
-/* extern PetscErrorCode JacobianMatrixLocal(DMDALocalInfo*,Node*,Mat,AppCtx*); */
-
+extern PetscErrorCode JacobianMatrixLocal(DMDALocalInfo*,Node*,Mat,Mat,MatStructure*,AppCtx*);
 
 int main(int argc,char **argv)
 {
@@ -116,6 +117,9 @@ int main(int argc,char **argv)
   /* regularize using strain rate of 1/(length) per year */
   user.epsilon = (1.0 / user.secpera) / (user.xc - user.xa);
   /*user.epsilon = 0.0;*/
+  user.Hscale = 1000.0;
+  user.uscale = 100.0 / user.secpera;
+  user.noscale = PETSC_FALSE;
 
   user.dx = 10000.0;  /* default to coarse 10 km grid */
 
@@ -124,10 +128,11 @@ int main(int argc,char **argv)
   {
     ierr = PetscOptionsBool("-snes_mf","","",PETSC_FALSE,&snes_mf_set,NULL);CHKERRQ(ierr);
     ierr = PetscOptionsBool("-snes_fd","","",PETSC_FALSE,&snes_fd_set,NULL);CHKERRQ(ierr);
+    ierr = PetscOptionsBool("-noscale","","",PETSC_FALSE,&user.noscale,NULL);CHKERRQ(ierr);
     snprintf(dxdocstr,80,"target grid spacing (m) on interval of length %.0f m",
              user.xc-user.xa);
     ierr = PetscOptionsReal("-dx",dxdocstr,"",user.dx,&user.dx,&dx_set);CHKERRQ(ierr);
-    ierr = PetscOptionsBool("-exact_init",
+    ierr = PetscOptionsBool("-exactinit",
              "initialize using exact solution instead of default linear function","",
              PETSC_FALSE,&exactinitial,NULL);CHKERRQ(ierr);
     ierr = PetscOptionsString("-dump",
@@ -138,13 +143,6 @@ int main(int argc,char **argv)
     if (eps_set)  user.epsilon *= 1.0 / user.secpera;
   }
   ierr = PetscOptionsEnd();CHKERRQ(ierr);
-
-  if (!snes_mf_set && !snes_fd_set) {
-    PetscPrintf(PETSC_COMM_WORLD,
-       "\n***ERROR: marine needs one or zero of '-snes_mf', '-snes_fd'***\n\n"
-       "USAGE FOLLOWS ...\n\n%s",help);
-    PetscEnd();
-  }
 
   if (snes_fd_set) {
     ierr = PetscPrintf(PETSC_COMM_WORLD,
@@ -221,8 +219,7 @@ int main(int argc,char **argv)
   ierr = SNESSetDM(snes,user.da);CHKERRQ(ierr);
 
   ierr = DMDASNESSetFunctionLocal(user.da,INSERT_VALUES,(DMDASNESFunction)scshell,&user);CHKERRQ(ierr);
-
-  /*ierr = DMDASNESSetJacobianLocal(user.da,(DMDASNESJacobian)JacobianMatrixLocal,&user);CHKERRQ(ierr);*/
+  ierr = DMDASNESSetJacobianLocal(user.da,(DMDASNESJacobian)JacobianMatrixLocal,&user);CHKERRQ(ierr);
 
   ierr = SNESSetFromOptions(snes);CHKERRQ(ierr);
 
@@ -242,8 +239,12 @@ int main(int argc,char **argv)
 
   /************ SOLVE NONLINEAR SYSTEM  ************/
   /* recall that RHS  r  is used internally by KSP, and is set by the SNES */
-  scaleNode[0] = 1000.0;
-  scaleNode[1] = (100.0 / user.secpera);
+  if (user.noscale) {
+      user.Hscale = 1.0;
+      user.uscale = 1.0;
+  }
+  scaleNode[0] = user.Hscale;
+  scaleNode[1] = user.uscale;
   for (i = 0; i < 2; i++)  descaleNode[i] = 1.0 / scaleNode[i];
   ierr = VecStrideScaleAll(Hu,descaleNode); CHKERRQ(ierr); /* de-dimensionalize initial guess */
   ierr = SNESSolve(snes,PETSC_NULL,Hu);CHKERRQ(ierr);
@@ -455,10 +456,9 @@ PetscErrorCode FunctionLocal(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *use
 
   /* we need stencil width on Bstag and Mstag */
   ierr = DMGetLocalVector(user->stagda,&locBstag);CHKERRQ(ierr);  /* do NOT destroy it */
-  ierr = DMGetLocalVector(user->stagda,&locMstag);CHKERRQ(ierr);  /* do NOT destroy it */
-
   ierr = DMGlobalToLocalBegin(user->stagda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
   ierr = DMGlobalToLocalEnd(user->stagda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
+  ierr = DMGetLocalVector(user->stagda,&locMstag);CHKERRQ(ierr);  /* do NOT destroy it */
   ierr = DMGlobalToLocalBegin(user->stagda,user->Mstag,INSERT_VALUES,locMstag); CHKERRQ(ierr);
   ierr = DMGlobalToLocalEnd(user->stagda,user->Mstag,INSERT_VALUES,locMstag); CHKERRQ(ierr);
 
@@ -520,22 +520,24 @@ PetscErrorCode FunctionLocal(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *use
 PetscErrorCode scshell(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
 {
   PetscErrorCode ierr;
+  if (user->noscale) {
+      ierr = FunctionLocal(info, Hu, f, user); CHKERRQ(ierr);
+      PetscFunctionReturn(0);
+  }
+
   PetscInt i,
            start = PetscMax(info->xs - 1,            0),
            end   = PetscMin(info->xs + info->xm + 1, user->Mx);
-  /* variable scaling coeffs */
-  PetscReal scaleH = 1000.0,
-            scaleu = 100.0 / user->secpera;
   /* residual scaling coeffs; motivation at right */
-  PetscReal rscHa     = 1.0 / scaleH,   /* Dirichlet cond for H */
-            rscua     = 1.0 / scaleu,   /* Dirichlet cond for u */
-            rscuH     = user->dx / (scaleH * scaleu),  /* flux derivative  d(uH)/dx */
-            rscstress = 1.0 / (user->k * user->rho * user->g * scaleH * scaleu),  /* beta term in SSA */
-            rsccalv   = 1.0 / (0.025 * user->rho * user->g * scaleH);  /* 0.5 * omega * overburden */
+  PetscReal rscHa     = 1.0 / user->Hscale,   /* Dirichlet cond for H */
+            rscua     = 1.0 / user->uscale,   /* Dirichlet cond for u */
+            rscuH     = user->dx / (user->Hscale * user->uscale),  /* flux derivative  d(uH)/dx */
+            rscstress = 1.0 / (user->k * user->rho * user->g * user->Hscale * user->uscale),  /* beta term in SSA */
+            rsccalv   = 1.0 / (0.025 * user->rho * user->g * user->Hscale);  /* 0.5 * omega * overburden */
   /* dimensionalize unknowns (put in "real" scale), including the ghost values */
   for (i = start; i < end; i++) {
-    Hu[i].H *= scaleH;
-    Hu[i].u *= scaleu;
+    Hu[i].H *= user->Hscale;
+    Hu[i].u *= user->uscale;
   }
   /* compute residual in dimensional units */
   ierr = FunctionLocal(info, Hu, f, user); CHKERRQ(ierr);
@@ -554,8 +556,8 @@ PetscErrorCode scshell(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
   }
   /* de-dimensionalize unknowns */
   for (i = start; i < end; i++) {
-    Hu[i].H /= scaleH;
-    Hu[i].u /= scaleu;
+    Hu[i].H /= user->Hscale;
+    Hu[i].u /= user->uscale;
   }
   return 0;
 }
@@ -571,76 +573,87 @@ static inline PetscReal GSR(PetscReal dx, PetscReal eps, PetscReal n,
 }
 
 
-#if 0
-
-/* Evaluate analytical Jacobian matrix. */
-/* FIXME:  this is not fully implemented */
-PetscErrorCode JacobianMatrixLocal(DMDALocalInfo *info, Node *Hu, Mat jac, AppCtx *user)
+/* Evaluate analytical Jacobian matrix.
+When debugging Jacobian:
+  ./marine -noscale -dx 60000 -mat_view |tail -n 18
+versus
+  ./marine -noscale -dx 60000 -mat_view -snes_fd |tail -n 18
+and do
+  ./marine -noscale -dx 60000 -snes_type test
+*/
+PetscErrorCode JacobianMatrixLocal(DMDALocalInfo *info, Node *Hu,
+                                   Mat A, Mat jac, MatStructure *str, AppCtx *user)
 {
   PetscErrorCode ierr;
-  PetscInt       i;
+  PetscReal      rg = user->rho * user->g,
+                 dx = user->dx,
+                 Hg = user->zocean * (user->rhow / user->rho);
+  PetscReal      *Bstag, Gl;
+  PetscInt       i, Mx = info->mx;
+  Vec            locBstag;
+
   PetscReal      v[6];
   MatStencil     row,col[6];
 
   PetscFunctionBegin;
+  ierr = DMGetLocalVector(user->stagda,&locBstag);CHKERRQ(ierr);  /* do NOT destroy it */
+  ierr = DMGlobalToLocalBegin(user->stagda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
+  ierr = DMGlobalToLocalEnd(user->stagda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
+
+  ierr = DMDAVecGetArray(user->stagda,locBstag,&Bstag);CHKERRQ(ierr);
   for (i=info->xs; i<info->xs+info->xm; i++) {
 
     /* MASS CONT */
-    row.i = i; row.c = 0;
+    row.i = i; row.c = 0;  /* ".c=0" is H component */
     if (i == 0) {
-      col[0].i = i; col[0].c = 0;   v[0] = scentry(user,row,col[0],1.0);
-      ierr = MatSetValuesStencil(jac,1,&row,1,col,v,INSERT_VALUES);CHKERRQ(ierr);
+        col[0].i = i; col[0].c = 0;   v[0] = 1.0;
+        ierr = MatSetValuesStencil(jac,1,&row,1,col,v,INSERT_VALUES);CHKERRQ(ierr);
     } else {
-      if (user->upwind1) {
-        /* 1st-order upwind */
-        col[0].i = i; col[0].c = 0;   v[0] = scentry(user,row,col[0], - Hu[i].u);
-        col[1].i = i; col[1].c = 1;   v[1] = scentry(user,row,col[1], - Hu[i].H);
         if (i == 1) {
-          ierr = MatSetValuesStencil(jac,1,&row,2,col,v,INSERT_VALUES);CHKERRQ(ierr);      
+            col[0].i = i;   col[0].c = 0;   v[0] =   Hu[i].u / dx;
+            col[1].i = i;   col[1].c = 1;   v[1] =   Hu[i].H / dx;
+            ierr = MatSetValuesStencil(jac,1,&row,2,col,v,INSERT_VALUES);CHKERRQ(ierr);
         } else {
-          col[2].i = i-1; col[2].c = 0;   v[2] = scentry(user,row,col[2], + Hu[i-1].u);
-          col[3].i = i-1; col[3].c = 1;   v[3] = scentry(user,row,col[3], + Hu[i-1].H);
-          ierr = MatSetValuesStencil(jac,1,&row,4,col,v,INSERT_VALUES);CHKERRQ(ierr);      
-        }
-      } else {
-        /* 2nd-order upwind */
-        if (i == 1) {
-          col[0].i = i; col[0].c = 0;   v[0] = scentry(user,row,col[0], - 2.0 * Hu[i].u);
-          col[1].i = i; col[1].c = 1;   v[1] = scentry(user,row,col[1], - 2.0 * Hu[i].H);
-          ierr = MatSetValuesStencil(jac,1,&row,2,col,v,INSERT_VALUES);CHKERRQ(ierr);      
-        } else {
-          col[0].i = i;   col[0].c = 0;   v[0] = scentry(user,row,col[0], - 1.5 * Hu[i].u);
-          col[1].i = i;   col[1].c = 1;   v[1] = scentry(user,row,col[1], - 1.5 * Hu[i].H);
-          col[2].i = i-1; col[2].c = 0;   v[2] = scentry(user,row,col[2], + 2.0 * Hu[i-1].u);
-          col[3].i = i-1; col[3].c = 1;   v[3] = scentry(user,row,col[3], + 2.0 * Hu[i-1].H);
-          if (i == 2) {
+            col[0].i = i-1; col[0].c = 0;   v[0] = - Hu[i-1].u / dx;
+            col[1].i = i;   col[1].c = 0;   v[1] =   Hu[i].u / dx;
+            col[2].i = i-1; col[2].c = 1;   v[2] = - Hu[i-1].H / dx;
+            col[3].i = i;   col[3].c = 1;   v[3] =   Hu[i].H / dx;
             ierr = MatSetValuesStencil(jac,1,&row,4,col,v,INSERT_VALUES);CHKERRQ(ierr);
-          } else {
-            col[4].i = i-2; col[4].c = 0;   v[4] = scentry(user,row,col[4], - 0.5 * Hu[i-2].u);
-            col[5].i = i-2; col[5].c = 1;   v[5] = scentry(user,row,col[5], - 0.5 * Hu[i-2].H);
-            ierr = MatSetValuesStencil(jac,1,&row,6,col,v,INSERT_VALUES);CHKERRQ(ierr);
-          }
         }
-      }
     }  /* done with MASS CONT */
 
     /* SSA */
-    row.i = i; row.c = 1;
+    row.i = i; row.c = 1;  /* ".c=1" is u component */
     if (i == 0) {
-      col[0].i = i; col[0].c = 1;   v[0] = scentry(user,row,col[0],1.0);
-      ierr = MatSetValuesStencil(jac,1,&row,1,col,v,INSERT_VALUES);CHKERRQ(ierr);
+        col[0].i = i; col[0].c = 1;   v[0] = 1.0;
+        ierr = MatSetValuesStencil(jac,1,&row,1,col,v,INSERT_VALUES);CHKERRQ(ierr);
+    } else if (i == Mx - 1) {
+        col[0].i = i-1; col[0].c = 0;   v[0] = 0.25 * user->omega * rg;
+        col[1].i = i;   col[1].c = 0;   v[1] = 0.25 * user->omega * rg;
+        Gl = GSR(dx,user->epsilon,user->n,Hu[i-1].u,Hu[i].u);
+        col[2].i = i-1; col[2].c = 1;   v[2] =   2.0 * Bstag[i-1] * Gl / dx;
+        col[3].i = i;   col[3].c = 1;   v[3] = - 2.0 * Bstag[i-1] * Gl / dx;
+        ierr = MatSetValuesStencil(jac,1,&row,4,col,v,INSERT_VALUES);CHKERRQ(ierr);
     } else {
-      /* FIXME implement */
+        /* FIXME implement */
     }
   }
+  ierr = DMDAVecRestoreArray(user->stagda,locBstag,&Bstag);CHKERRQ(ierr);
+
+  ierr = DMRestoreLocalVector(user->stagda,&locBstag);CHKERRQ(ierr);
 
   /* assemble matrix, using the 2-step process */
   ierr = MatAssemblyBegin(jac,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
   ierr = MatAssemblyEnd(jac,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+  if (A != jac) {
+    ierr = MatAssemblyBegin(jac,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+    ierr = MatAssemblyEnd(jac,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
+  }
+  *str = SAME_NONZERO_PATTERN;
   /* tell matrix we will never add a new nonzero location; if we do then gives error  */
   ierr = MatSetOption(jac,MAT_NEW_NONZERO_LOCATION_ERR,PETSC_TRUE);CHKERRQ(ierr);
 
   PetscFunctionReturn(0);
 }
 
-#endif
+
