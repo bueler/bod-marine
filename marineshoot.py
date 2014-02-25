@@ -203,7 +203,7 @@ print "COMPARE Tcalvc = %.6e Pa m" % Tcalvc
 hh, bb = surfaces(H)
 fig = plt.figure(figsize=(6,4))
 ax1fig1, ax2fig1 = plottwo(fig,(x-xa)/1000.0,hh,u * exactsolns.secpera,
-                           "z   (m, solid)",
+                           "z   (m)",
                            "ice velocity   (m a-1, dashed)",
                            y1min=0.0)
 ax1fig1.set_xlim(0.0,(xoceanend-xa)/1000.0)
@@ -230,23 +230,16 @@ print '  image file %s saved' % imagename
 fig = plt.figure(figsize=(6,4))
 detail = (x > 0.95*exactsolns.xg)
 ax1fig1, ax2fig1 = plottwo(fig,(x[detail]-xa)/1000.0,hh[detail],u[detail] * exactsolns.secpera,
-                           "z   (m, solid)",
+                           "z   (m)",
                            "ice velocity   (m a-1, dashed)",
                            y1min=0.0)
-#ax1fig1.set_xlim(0.0,(xoceanend-xa)/1000.0)
-#ax2fig1.set_xlim(0.0,(xoceanend-xa)/1000.0)
 ax1fig1.hold(True)
 ax1fig1.plot((x[detail]-xa)/1000.0,bb[detail],'k',lw=2.0)
 ax1fig1.plot([(xc-xa)/1000.0,(xc-xa)/1000.0],[bb[-1],hh[-1]],'k',linewidth=lw)
 # show water height as waves
-xl = np.linspace(xc,xoceanend,101)
-ax1fig1.plot((xl-xa)/1000.0, exactsolns.bedg - 30.0 * abs(np.sin(xl / 2.0e3)),'k',linewidth=0.7*lw)
-#y1, y2 = ax1fig1.get_ylim()
-#ax1fig1.set_ylim(0.0,3000.0)
-#ax1fig1.set_yticks([0.0,500.0,1000.0,1500.0,2000.0,2500.0,3000.0])
+xl = np.linspace(xc,1.01*exactsolns.L0,101)
+ax1fig1.plot((xl-xa)/1000.0, exactsolns.bedg - 15.0 * abs(np.sin(xl / 0.8e3)),'k',linewidth=0.7*lw)
 ax1fig1.hold(False)
-#y1, y2 = ax2fig1.get_ylim()
-#ax2fig1.set_ylim(0.0,1.05*y2)
 plt.axis('tight')
 imagename = nameroot + '-geometry-detail.pdf'
 plt.savefig(imagename)

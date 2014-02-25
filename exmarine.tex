@@ -111,16 +111,16 @@ Given data $B(x)$, $b$, $k>0$, $M(x)$, $x_c>0$, $z_o$, along with physical const
 Symbol & Description & Units \\ \hline
 $B$ & ice hardness; $=A^{-1/n}$ & $\text{Pa}\,\text{s}^{1/3}$  \\
 $b$ & bedrock elevation & m \\
-$\beta$ & linear sliding coefficient; $=0$ if floating & $\text{Pa}\,\text{s}\,\text{m}^{-1}$ \\
+$\beta$ & sliding coefficient & $\text{Pa}\,\text{s}\,\text{m}^{-1}$ \\
 $g$ & acceleration of gravity  & 9.81 $\text{m}\,\text{s}^{-2}$\\
 $H$ & ice thickness & m \\
 $h$ & ice surface elevation & m \\
-$k$ & overburden-pressure-scaled coefficient  & $\text{s}\,\text{m}^{-1}$ \\
+$k$ & pressure-scaled sliding coefficient  & $\text{s}\,\text{m}^{-1}$ \\
 $M$ & mass balance & $\text{m}\,\text{s}^{-1}$ \\
 $n$ & Glen exponent in ice flow law & 3 \\
 $\rho$ & density of ice & 910 $\text{kg}\,\text{m}^{-3}$ \\
 $\rho_w$ & density of sea water & 1028 $\text{kg}\,\text{m}^{-3}$ \\
-$T$ & vertically-integrated longitudinal stress & $\text{Pa}\,\text{m}$ \\
+$T$ & $z$-integrated longitudinal stress & $\text{Pa}\,\text{m}$ \\
 $\tau_{b}$ & basal shear stress applied to ice & Pa \\
 $u$ & horizontal velocity & $\text{m}\,\text{s}^{-1}$ \\
 $(x,z)$ & flow-line cartesian coordinates & m  \\
@@ -133,13 +133,13 @@ $\omega$ & Archimedean factor; $=1 - \rho/\rho_w$ & $0.115$
 
 \subsection*{Bodvardsson's parabola}
 
-The \cite{Bodvardsson} solution for a grounded glacier was apparently first cited by \cite{Weertman61stability}, who decided that the physics chosen by Bodvardsson should be replaced by more shallow ice approximation (``SIA'')-like shear deformation, though Weertman allowed sliding as well, and this seems to have influenced readers from then on.  Bodvardsson does not solve the SIA, however, and instead solves a plug-flow model with a basal velocity which is proportional to the glaciological driving stress.  He first states an equation having both shear and longitudinal stress but he says about this equation that it ``is quite tedious and very difficult to handle especially because of the [shear] term in the parentheses.  It is therefore fortunate that [the shear] term appears to be small compared to the [basal sliding] term.''  Then he drops the shear term and writes an equation in which driving stress is balanced entirely by basal resistance.
+\cite{Bodvardsson} initially states an equation for the ice sheet surface elevation which has both shear and longitudinal stress within the ice.  However, he says about this equation that it ``is quite tedious and very difficult to handle especially because of the [shear] term in the parentheses.  It is therefore fortunate that [the shear] term appears to be small compared to the [basal sliding] term.''  Then he drops the shear term and writes an equation in which driving stress is balanced entirely by basal resistance.  He solves and analyzes this plug flow model.
 
-Describing this plug flow in his terms, he chooses the shear stress applied to the base of the ice to have a coefficient which scales with the overburden pressure
+For basal resistance he chooses a coefficient which scales with the overburden pressure, so that the basal shear stress is
 \begin{equation}
 \tau_b = - k \rho g H u  \label{eq:bodstresschoice}
 \end{equation}
-He then writes that the ice flux is $uH=-(H/k) H_x$, or equivalently that the ice velocity is
+He then writes that the ice flux as $uH=-(H/k) H_x$, or equivalently that the ice velocity is
 \begin{equation}
 u = - \frac{1}{k} H_x. \label{eq:bodvelocity}
 \end{equation}
@@ -151,7 +151,7 @@ for a mass balance gradient $a>0$ and equilibrium-line altitude $H_{ela}$.  Comb
 \begin{equation}
 a (H - H_{ela}) + (k^{-1} H H_x)_x = 0.  \label{eq:bodsteady}
 \end{equation}
-The offered solution \citep[\emph{equivalent} equations (18) and (23)]{Bodvardsson} is
+The offered solution \citep[equivalent equations (18) and (23)]{Bodvardsson} is
 \begin{equation}
 H(x) = H_0 (1 - (x/L_0)^2)  \label{eq:bodsoln}
 \end{equation}
@@ -159,9 +159,12 @@ where $H_0 = 1.5 H_{ela}$ and $a k L_0^2 = 9 H_{ela}$ \citep[equation (24)]{Bodv
 
 Equation \eqref{eq:bodsoln} is an exact solution to equation \eqref{eq:bodsteady} with boundary condition $H(0)=H_0$, as the reader may verify!  Bodvardsson does not offer a reason why there should be such a simple quadratic solution, and his solution seems to be a not-well-known result for certain nonlinear second-order ODEs; see Appendix A.  Formula \eqref{eq:bodsoln} defines the solid parabola shown in Figure \ref{fig:twoparabolas}.
 
+Bodvardsson explicitly considers solution \eqref{eq:bodsoln} to solve a free boundary problem, in the sense that the single boundary condition $H(0)=H_0$ plus the equation \eqref{eq:bodsteady}, determines the quadratic solution \eqref{eq:bodsoln}.  Solving \eqref{eq:bodsteady} with one boundary condition generates a value $L_0$ from the hypothesis that the flux and the thickness at $x=L_0$ are both zero.
+
+The \cite{Bodvardsson} solution for a grounded glacier was apparently first cited by \cite{Weertman61stability}.  Weertman who decided that the physics chosen by Bodvardsson should be replaced by more shallow ice approximation (``SIA'')-like shear deformation, though he allowed sliding as well, and this seems to have influenced readers from then on.
+
 The surface balance parameterization \eqref{eq:bodmassbalance} reappears in \cite{Weertman61stability}, among many other places.  It realistically parameterizes a potential climatic instability, which was Bodvardsson's, Weertman's, and most readers', major interest.  We are, however, interested in Bodvardsson's solution of the ice flow equations themselves.
 
-Bodvardsson explicitly considers solution \eqref{eq:bodsoln} to solve a free boundary problem.  Specifically, the sense is that the single boundary condition $H(0)=H_0$, in the equation \eqref{eq:bodsteady}, determines the quadratic solution \eqref{eq:bodsoln}, which generates a value for $L_0$ from the hypothesis that the flux and the thickness at $x=L_0$ are both zero.
 
 \subsection{A re-interpretation}  We now claim that the solution \eqref{eq:bodsoln} exactly solves a combination of the steady flow-line mass-continuity equation \eqref{eq:steadymass} and SSA stress balance equation \eqref{eq:steadySSA}, but with contrived (``manufactured'') ice softness.
 
