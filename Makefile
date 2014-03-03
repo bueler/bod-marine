@@ -1,6 +1,6 @@
 all: exmarine.pdf
 
-otherexmfigs = exactmarine-M-B.pdf exactmarine-beta.pdf \
+otherexmfigs = exactmarine-M-B.pdf exactmarine-beta-T.pdf \
           exactmarine-geometry-detail.pdf exactmarine-good-error.pdf
 figures = twoparabolas.pdf verifN.pdf exactmarine-geometry.pdf
 

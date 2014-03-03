@@ -276,13 +276,14 @@ for j in range(len(H)):
        bbeta[j] = exactsolns.k * exactsolns.rho * exactsolns.g * Hexact
    else:
        bbeta[j] = 0.0
-plt.plot((x-xa)/1000.0,bbeta/1.0e10,'k',lw=2.0)
+ax1fig3, ax2fig3 = plottwo(fig,(x-xa)/1000.0,bbeta/1.0e10,T/1.0e8,
+                           r"$\beta$(x)   ($10^{10}$  Pa s m-1, solid)",
+                           r"$T$(x)   ($10^8$ Pa m, dashed)")
+ax1fig3.set_ylim(-0.1,2.1)
+ax2fig3.set_ylim(0.0,2.0)
 bbeta[x > exactsolns.xg] = 0.0
-plt.plot((x-xa)/1000.0,bbeta/1.0e10,'k--',lw=1.5)
-plt.axis([0.0,(xoceanend-xa)/1000.0,-0.1,2.1])
-plt.ylabel(r"$\beta$(x)   ($10^{10}$  Pa s m-1)")
-plt.xlabel("x   (km)")
-imagename = nameroot + '-beta.pdf'
+ax1fig3.plot((x-xa)/1000.0,bbeta/1.0e10,'k:',lw=1.5)
+imagename = nameroot + '-beta-T.pdf'
 plt.savefig(imagename)
 print '  image file %s saved' % imagename
 #plt.show()
