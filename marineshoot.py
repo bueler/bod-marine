@@ -10,7 +10,7 @@ from scipy.linalg import solve
 from scipy.integrate import odeint
 
 import exactsolns
-from plottool import lw, plottwo
+from plottwo import lw, plottwo
 
 desc='''Solve ODE system for marine ice sheet, for which an exact solution
 is known.  By default, does shooting to solve for the right value.
