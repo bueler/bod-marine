@@ -9,7 +9,7 @@ shelf_num.pdf: shelf_num.aux shelf_num.bbl shelf_num.tex $(figures)
 shelf_num.aux: shelf_num.tex $(figures)
 	pdflatex shelf_num
 
-shelf_num.bbl: shelf_num.aux ice_bib.bib
+shelf_num.bbl: shelf_num.aux ice-bib.bib
 	bibtex shelf_num
 
 .PHONY: clean
