@@ -62,6 +62,8 @@
 
 % macros for this paper only
 
+\newcommand{\rhoi}{\ensuremath{\rho_{\text{ice}}}}
+\newcommand{\rhosw}{\ensuremath{\rho_{\text{sw}}}}
 
 \begin{document}
 \title[Computing velocity for ice shelves and streams]{On computing the velocity \\ of shallow ice shelves and ice streams}
@@ -90,8 +92,8 @@ $H_0$ & constant in subsection \ref{subsect:ex1} & m\,[500] \\
 $\nu$ & vertically-averaged effective & M Pa a \\
  & \quad viscosity of ice &  \\
 $\nu_0$ & constant in subsection \ref{subsect:ex1} & M Pa a\,[30] \\
-$\rho$ & density of ice & kg\,$\text{m}^{-3}$\,[910] \\
-$\rho_{\text{sw}}$ & density of sea water & kg\,$\text{m}^{-3}$\,[1028] \\
+$\rhoi$ & density of ice & kg\,$\text{m}^{-3}$\,[910] \\
+$\rhosw$ & density of sea water & kg\,$\text{m}^{-3}$\,[1028] \\
 $u$ & $x$-component of velocity & m\,$\text{a}^{-1}$ \\
 $v$ & $y$-component of velocity & m\,$\text{a}^{-1}$ \\
 $x$ & horizontal coordinate & km \\
@@ -100,7 +102,7 @@ $y$ & horizontal coordinate & km \\
 \normalsize \end{tabular}
 \end{table}
 
-Let $T_{ij}$ be the depth-integrated viscous stress tensor defined by equation (2.6) in \cite{SchoofStream} [AND REFERENCE \cite{Morland}].  Let $\tau_{(b)i}$ be the components of the basal shear stress applied to the base of the ice.  Let $f_i$ be the driving stress $f_i = - \rho g H \partial h/\partial x_i$ where $\rho$ is the density of ice, $g$ the acceleration of gravity, $H$ the thickness of the ice, and $h$ the elevation of the ice surface.  The balance of momentum equations in the SSA are, in their cleanest form, and roughly speaking, that the sum of non-inertial forces in the horizontal directions on each column of the ice is zero,
+Let $T_{ij}$ be the depth-integrated viscous stress tensor defined by equation (2.6) in \cite{SchoofStream} [AND REFERENCE \cite{Morland}].  Let $\tau_{(b)i}$ be the components of the basal shear stress applied to the base of the ice.  Let $f_i$ be the driving stress $f_i = - \rhoi g H \partial h/\partial x_i$ where $\rhoi$ is the density of ice, $g$ the acceleration of gravity, $H$ the thickness of the ice, and $h$ the elevation of the ice surface.  The balance of momentum equations in the SSA are, in their cleanest form, and roughly speaking, that the sum of non-inertial forces in the horizontal directions on each column of the ice is zero,
 \begin{equation}\label{deepSSA}
   0 = \frac{\partial T_{ij}}{\partial x_j} + \tau_{(b)i} + f_i
 \end{equation}
@@ -116,10 +118,10 @@ We have not defined the ``depth-integrated viscous stress tensor'' $T_{ij}$ whic
 \begin{align}\label{SSA}
  - 2 \ddx{}\left[\nu H \left(2 \ddx{u} + \ddy{v}\right)\right]
  - \ddy{}\left[\nu H \left(\ddy{u} + \ddx{v}\right)\right] - \tau_{(b)x}
-        &= - \rho g H \frac{\partial h}{\partial x}, \\
+        &= - \rhoi g H \frac{\partial h}{\partial x}, \\
  - \ddx{}\left[\nu H \left(\ddy{u} + \ddx{v}\right)\right]
  - 2 \ddy{}\left[\nu H \left(\ddx{u} + 2 \ddy{v}\right)\right] - \tau_{(b)y}
-        &= - \rho g H \frac{\partial h}{\partial y}.\notag
+        &= - \rhoi g H \frac{\partial h}{\partial y}.\notag
 \end{align}
 
 We will consider exact and numerical solutions to equations \eqref{SSA} and so, of necessity, we will assume that the associated boundary value problem is well-posed.  In the case of a plasticity assumption for ice streams this is actually proven in \cite{SchoofStream}, but further work would be required to show the well-posedness of the boundary problem in the generality considered here (e.g.~with periodic and Dirichlet boundary conditions, and with grounding line and calving conditions).
@@ -137,10 +139,10 @@ We also make the more severe assumption that the product of the thickness and th
 Here $\nu_0$ and $H_0$ are positive constants to be chosen.  In this case equations \eqref{SSA} can be analyzed by Fourier series (next).  Of course assuming this product is exactly constant is severe for practical modelling.  But, at least in floating ice shelves, the variation of this product is limited in practice.  For instance, in the Ross ice shelf [GIVE RANGE AS average +- percent OR THE LIKE].  Ritz and others \cite{Ritzetal2001} note that linearized equations are effective for modelling the floating ice shelves attached to Antarctica.
 
 Now, for a floating ice shelf 
-	$$h(x,y) = \left(1-\frac{\rho}{\rho_{\text{sw}}}\right)\, H(x,y)$$
-where $\rho_{\text{sw}}$ is the density of sea water.  Therefore we define
+	$$h(x,y) = \left(1-\frac{\rhoi}{\rhosw}\right)\, H(x,y)$$
+where $\rhosw$ is the density of sea water.  Therefore we define
 \begin{equation}\label{Gdefn}
-G(x,y) = - \frac{1}{2}\, \rho g \left(1-\frac{\rho}{\rho_{\text{sw}}}\right)\,  H(x,y)^2.
+G(x,y) = - \frac{1}{2}\, \rhoi g \left(1-\frac{\rhoi}{\rhosw}\right)\,  H(x,y)^2.
 \end{equation}
 (This function $G$ is a kind of potential for the driving stress of floating ice, but mostly we define $G$ to clean up the appearance of the equations which follow.)  Under assumption \eqref{nuHconstant} and using definition \eqref{Gdefn}, we can rewrite equations \eqref{SSA} as
 \begin{align}\label{constantSSA}
@@ -174,7 +176,7 @@ Coefficients $\alpha_{00}$ and $\beta_{00}$ are not determined by equations \eqr
 \end{equation}
 At the level of coefficients this zero-motion-at-center condition requires $\alpha_{00} = - \sum_{k,l \ne 0} \alpha_{kl}$ and $\beta_{00} = - \sum_{k,l \ne 0} \beta_{kl}$.  One could also require zero average motion over the whole region, which is to choose $\alpha_{00} = \beta_{00} = 0$.
 
-\subsection{An example. An exact solution for verification.}\label{subsect:ex1}  For illustration and verification purposes we specify all constants to yield a completely concrete example.  Regarding the basic physical constants let $\rho_{\text{ice}} = 910\,\text{kg}\,\text{m}^{-3}$, $\rho_{\text{sw}} = 1028\,\text{kg}\,\text{m}^{-3}$, and $g = 9.81\,\text{m}\,\text{s}^{-2}$ \cite{Paterson}.  Let $L=300$ km so that our ice shelf has side with $2L = 600$\,km and area $3.6 \times 10^5\,\text{km}^2$.  The area is comparable to, but a bit smaller than, the Ross ice shelf (with area $4.65 \times 10^5\,\text{km}^2$ \cite{MacAyealetal}).
+\subsection{An example. An exact solution for verification.}\label{subsect:ex1}  For illustration and verification purposes we specify all constants to yield a completely concrete example.  Regarding the basic physical constants let $\rhoi = 910\,\text{kg}\,\text{m}^{-3}$, $\rhosw = 1028\,\text{kg}\,\text{m}^{-3}$, and $g = 9.81\,\text{m}\,\text{s}^{-2}$ \cite{Paterson}.  Let $L=300$ km so that our ice shelf has side with $2L = 600$\,km and area $3.6 \times 10^5\,\text{km}^2$.  The area is comparable to, but a bit smaller than, the Ross ice shelf (with area $4.65 \times 10^5\,\text{km}^2$ \cite{MacAyealetal}).
 
 For the thickness, let $H_0 = 500$~m and define
 \begin{equation}\label{Hexact}
@@ -242,7 +244,7 @@ G(x,y) = \sum_{k,l = -\infty}^\infty \gamma_{kl}\, e^{i k \pi x/L}\,e^{i l \pi y
 The nonzero coefficients $\gamma_{kl}$ are given in table \ref{tab:coeffs}.  They are all real because $H(x,y) = H(-x,y) = H(x,-y) = H(-x,-y)$ and the same symmetries hold for $G$.  Coefficients with $|k|>2$ or $|l|>2$ are zero. Note $\gamma_{k,l} = \gamma_{-k,l} = \gamma_{k,-1} = \gamma_{-k,-l}$, so only $|k|$ and $|l|$ are used as indexes into the table.  There are a total of 25 nonzero coefficients $\gamma_{kl}$.
 
 \begin{table}[h] \small
-\caption{Nonzero Fourier coefficients $\gamma_{kl}$ of $G$.  The value of $\gamma_{kl}$ is $\rho_{\text{ice}} g (1 - \rho_{\text{ice}}/\rho_{\text{sw}}) H_0 / (2 \nu_0)$ times the given number.  These coefficients are not rounded; they are exact decimal expansions!}\label{tab:coeffs}
+\caption{Nonzero Fourier coefficients $\gamma_{kl}$ of $G$; \mbox{$\gamma_{kl} = -\frac{1}{2}\,g\,\rhoi\,\left(1-\frac{\rhoi}{\rhosw}\right)\,H_0^2\, C_{kl}$}, where $C_{kl}$ are listed in this table. These coefficients are not rounded; they are exact decimal expansions!}\label{tab:coeffs}
 \begin{tabular}{r|c|c|c|c|c}
 $\mathbf{|l|}$ \Large $\backslash$ \normalsize $\mathbf{|k|}$ & \textbf{0} & \textbf{1} & \textbf{2} \\ \hline
 \textbf{0} & 1.0854 & 0.402 & 0.0402 \\ \hline
