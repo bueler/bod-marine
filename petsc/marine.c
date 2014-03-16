@@ -493,14 +493,14 @@ PetscErrorCode FunctionLocal(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *use
     } else {
       /* T = vertically-integrated longitudinal stress */
       ul = (i == 1) ? user->ua : Hu[i-1].u;
+      Hl = (i == 1) ? user->Ha : Hu[i-1].H;
       Fl = GetFSR(dx,user->epsilon,user->n, ul,     Hu[i].u);
       Fr = GetFSR(dx,user->epsilon,user->n, Hu[i].u,Hu[i+1].u);
-      Tl = Bstag[i-1] * (Hu[i-1].H + Hu[i].H  ) * Fl;
-      Tr = Bstag[i]   * (Hu[i].H   + Hu[i+1].H) * Fr;
+      Tl = Bstag[i-1] * (Hl      + Hu[i].H  ) * Fl;
+      Tr = Bstag[i]   * (Hu[i].H + Hu[i+1].H) * Fr;
       /* sliding coefficient */
       beta = user->k * rg * Hu[i].H * GLREG(Hu[i].H,Hg,0.0);
       /* surface elevations */
-      Hl = (i == 1) ? user->Ha : Hu[i-1].H;
       hl = getsurf(Hl,Hg,user->omega,user->zocean,0.0);
       hr = getsurf(Hu[i+1].H,Hg,user->omega,user->zocean,0.0);
       /**** residual for SSA ****/
@@ -574,15 +574,15 @@ static inline PetscReal GSR(PetscReal dx, PetscReal eps, PetscReal n,
 
 /* d(getsurf(H))/dH */
 static inline PetscReal dsurfdH(PetscReal H, PetscReal Hg, PetscReal omega, PetscReal eps) {
-  return omega + GLREG(H,Hg,eps) * (1.0 - omega) * H;
+  return omega + GLREG(H,Hg,eps) * (1.0 - omega);
 }
 
 
 /* Evaluate analytical Jacobian matrix.
 When debugging Jacobian:
-  ./marine -noscale -dx 60000 -mat_view |tail -n 18
+  ./marine -noscale -dx 60000 -mat_view -exactinit |tail -n 18
 versus
-  ./marine -noscale -dx 60000 -mat_view -snes_fd |tail -n 18
+  ./marine -noscale -dx 60000 -mat_view -exactinit -snes_fd |tail -n 18
 and do
   ./marine -noscale -dx 60000 -snes_type test
   ./marine -noscale -dx 60000 -snes_type test -snes_test_display
@@ -594,7 +594,7 @@ PetscErrorCode JacobianMatrixLocal(DMDALocalInfo *info, Node *Hu,
   PetscReal      rg = user->rho * user->g,
                  dx = user->dx,
                  Hg = user->zocean * (user->rhow / user->rho);
-  PetscReal      *Bstag, Gl, Hl, hr, hl;
+  PetscReal      *Bstag, Hl, ul, Fl, Fr, Gl, Gr, hr, hl;
   PetscInt       i, Mx = info->mx;
   Vec            locBstag;
 
@@ -610,26 +610,22 @@ PetscErrorCode JacobianMatrixLocal(DMDALocalInfo *info, Node *Hu,
   for (i=info->xs; i<info->xs+info->xm; i++) {
 
     /* MASS CONT */
-    row.i = i; row.c = 0;  /* ".c=0" is H component */
+    row.i = i; row.c = 0;  /* "row.c=0" means H component of f */
     if (i == 0) {
         col[0].i = i; col[0].c = 0;   v[0] = 1.0;
         ierr = MatSetValuesStencil(jac,1,&row,1,col,v,INSERT_VALUES);CHKERRQ(ierr);
     } else {
-        if (i == 1) {
-            col[0].i = i;   col[0].c = 0;   v[0] =   Hu[i].u / dx;
-            col[1].i = i;   col[1].c = 1;   v[1] =   Hu[i].H / dx;
-            ierr = MatSetValuesStencil(jac,1,&row,2,col,v,INSERT_VALUES);CHKERRQ(ierr);
-        } else {
-            col[0].i = i-1; col[0].c = 0;   v[0] = - Hu[i-1].u / dx;
-            col[1].i = i;   col[1].c = 0;   v[1] =   Hu[i].u / dx;
-            col[2].i = i-1; col[2].c = 1;   v[2] = - Hu[i-1].H / dx;
-            col[3].i = i;   col[3].c = 1;   v[3] =   Hu[i].H / dx;
-            ierr = MatSetValuesStencil(jac,1,&row,4,col,v,INSERT_VALUES);CHKERRQ(ierr);
+        col[0].i = i; col[0].c = 0;   v[0] = Hu[i].u / dx;
+        col[1].i = i; col[1].c = 1;   v[1] = Hu[i].H / dx;
+        if (i > 1) {
+            col[2].i = i-1; col[2].c = 0;   v[2] = - Hu[i-1].u / dx;
+            col[3].i = i-1; col[3].c = 1;   v[3] = - Hu[i-1].H / dx;
         }
+        ierr = MatSetValuesStencil(jac,1,&row,(i > 1) ? 4 : 2,col,v,INSERT_VALUES);CHKERRQ(ierr);
     }  /* done with MASS CONT */
 
     /* SSA */
-    row.i = i; row.c = 1;  /* ".c=1" is u component */
+    row.i = i; row.c = 1;  /* "row.c=1" means u component of f */
     if (i == 0) {
         col[0].i = i; col[0].c = 1;   v[0] = 1.0;
         ierr = MatSetValuesStencil(jac,1,&row,1,col,v,INSERT_VALUES);CHKERRQ(ierr);
@@ -641,44 +637,38 @@ PetscErrorCode JacobianMatrixLocal(DMDALocalInfo *info, Node *Hu,
         col[3].i = i;   col[3].c = 1;   v[3] = - 2.0 * Bstag[i-1] * Gl / dx;
         ierr = MatSetValuesStencil(jac,1,&row,4,col,v,INSERT_VALUES);CHKERRQ(ierr);
     } else {
-/*
-      ul = (i == 1) ? user->ua : Hu[i-1].u;
-      Fl = GetFSR(dx,user->epsilon,user->n, ul,Hu[i].u);
-      Tl = Bstag[i-1] * (Hu[i-1].H + Hu[i].H) * Fl;
-      Fr = GetFSR(dx,user->epsilon,user->n, Hu[i].u,Hu[i+1].u);
-      Tr = Bstag[i] * (Hu[i].H + Hu[i+1].H) * Fr;
-      beta = user->k * rg * Hu[i].H * GLREG(Hu[i].H,Hg,0.0);
-      Hl = (i == 1) ? user->Ha : Hu[i-1].H;
-      hl = getsurf(Hl,Hg,user->omega,user->zocean,0.0);
-      hr = getsurf(Hu[i+1].H,Hg,user->omega,user->zocean,0.0);
-      f[i].u = (Tr - Tl) / dx - beta * Hu[i].u - rg * Hu[i].H * (hr - hl) / (2.0 * dx);
-*/
+        ul = (i == 1) ? user->ua : Hu[i-1].u;
+        Hl = (i == 1) ? user->Ha : Hu[i-1].H;
+        Fl = GetFSR(dx,user->epsilon,user->n,ul,Hu[i].u);
+        Fr = GetFSR(dx,user->epsilon,user->n,Hu[i].u,Hu[i+1].u);
+        Gl = GSR(dx,user->epsilon,user->n,ul,Hu[i].u);
+        Gr = GSR(dx,user->epsilon,user->n,Hu[i].u,Hu[i+1].u);
+        // df^u / dH
         col[0].i = i-1; col[0].c = 0;
         if (i == 1)
            v[0] = 0.0;
         else {
-           v[0] = ( - Bstag[i-1] * GetFSR(dx,user->epsilon,user->n,Hu[i-1].u,Hu[i].u)
-                    + 0.5 * rg * Hu[i].H * dsurfdH(Hu[i-1].H,Hg,user->omega,0.0) ) / dx;
+           v[0] = ( - Bstag[i-1] * Fl ) / dx
+                    - rg * Hu[i].H * ( - dsurfdH(Hl,Hg,user->omega,0.0) ) / (2.0 * dx);
         }
         col[1].i = i;   col[1].c = 0;
-        Hl = (i == 1) ? user->Ha : Hu[i-1].H;
         hl = getsurf(Hl,Hg,user->omega,user->zocean,0.0);
         hr = getsurf(Hu[i+1].H,Hg,user->omega,user->zocean,0.0);
-        v[1] = (  Bstag[i]   * GetFSR(dx,user->epsilon,user->n,Hu[i].u,Hu[i+1].u)
-                - Bstag[i-1] * GetFSR(dx,user->epsilon,user->n,Hu[i-1].u,Hu[i].u) )
+        v[1] = ( Bstag[i] * Fr - Bstag[i-1] * Fl ) / dx
                - user->k * rg * GLREG(Hu[i].H,Hg,0.0) * Hu[i].u
                - rg * (hr - hl) / (2.0 * dx);
         col[2].i = i+1; col[2].c = 0;
-        v[2] = (   Bstag[i] * GetFSR(dx,user->epsilon,user->n,Hu[i].u,Hu[i+1].u)
-                 - 0.5 * rg * Hu[i].H * dsurfdH(Hu[i+1].H,Hg,user->omega,0.0) ) / dx;
-        Gl = GSR(dx,user->epsilon,user->n,Hu[i-1].u,Hu[i].u);
-        /* FIXME implement */
+        v[2] = ( Bstag[i] * Fr ) / dx
+                 - rg * Hu[i].H * ( dsurfdH(Hu[i+1].H,Hg,user->omega,0.0) ) / (2.0 * dx);
+        // df^u / du
         col[3].i = i-1; col[3].c = 1;
-        v[3] = 9999.9;
+        v[3] = ( - Bstag[i-1] * (Hl + Hu[i].H) * (-1.0/dx) * Gl ) / dx;
         col[4].i = i;   col[4].c = 1;
-        v[4] = 9999.9;
+        v[4] = (   Bstag[i]   * (Hu[i].H + Hu[i+1].H) * (-1.0/dx) * Gr 
+                 - Bstag[i-1] * (Hl + Hu[i].H)        * (1.0/dx)  * Gl ) / dx
+               - user->k * rg * Hu[i].H * GLREG(Hu[i].H,Hg,0.0);
         col[5].i = i+1; col[5].c = 1;
-        v[5] = 9999.9;
+        v[5] = ( Bstag[i] * (Hu[i].H + Hu[i+1].H) * (1.0/dx) * Gr ) / dx;
         ierr = MatSetValuesStencil(jac,1,&row,6,col,v,INSERT_VALUES);CHKERRQ(ierr);
     }
   }
