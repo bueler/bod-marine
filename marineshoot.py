@@ -203,7 +203,7 @@ print "COMPARE Tcalvc = %.6e Pa m" % Tcalvc
 hh, bb = surfaces(H)
 fig = plt.figure(figsize=(6,4))
 ax1fig1, ax2fig1 = plottwo(fig,(x-xa)/1000.0,hh,u * exactsolns.secpera,
-                           "z   (m)",
+                           "z   (m, solid)",
                            "ice velocity   (m a-1, dashed)",
                            y1min=0.0)
 ax1fig1.set_xlim(0.0,(xoceanend-xa)/1000.0)
@@ -230,7 +230,7 @@ print '  image file %s saved' % imagename
 fig = plt.figure(figsize=(6,4))
 detail = (x > 0.95*exactsolns.xg)
 ax1fig1, ax2fig1 = plottwo(fig,(x[detail]-xa)/1000.0,hh[detail],u[detail] * exactsolns.secpera,
-                           "z   (m)",
+                           "z   (m, solid)",
                            "ice velocity   (m a-1, dashed)",
                            y1min=0.0)
 ax1fig1.hold(True)
