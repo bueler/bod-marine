@@ -4,7 +4,7 @@ static const char help[] =
 "scheme to approximate the coupled mass continuity and SSA stress balance PDEs.\n"
 "\n"
 "IT WORKS!: this one is with a 'fair' initial condition:\n"
-"  ./marine -snes_fd -dx 2000 -snes_monitor -snes_monitor_solution -draw_pause 0.1 -snes_max_funcs 1000000\n"
+"  ./marine -snes_fd -dx 1000 -snes_monitor -snes_monitor_solution -draw_pause 0.1 -snes_max_funcs 1000000\n"
 "A refinement path:\n"
 "  for DX in 8000 4000 2000 1000 500 250; do ./marine -snes_fd -dx $DX -snes_max_funcs 100000 -exactinit; done\n"
 "Dump result in matlab:\n"
@@ -191,7 +191,8 @@ int main(int argc,char **argv)
                    CHKERRQ(ierr);
 
   /* another DMDA for scalar staggered parameters; one fewer point */
-  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,user.Mx-1,1,1,PETSC_NULL,&user.stagda);CHKERRQ(ierr);
+  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,user.Mx-1,1,1,PETSC_NULL,&user.stagda);
+            CHKERRQ(ierr);
 
   /* establish geometry on grid; note xa = x_0 and xc = x_{N+1/2} */
   ierr = DMDASetUniformCoordinates(user.da,    user.xa,            user.xc+0.5*user.dx,
@@ -492,10 +493,10 @@ PetscErrorCode FunctionLocal(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *use
     } else {
       /* T = vertically-integrated longitudinal stress */
       ul = (i == 1) ? user->ua : Hu[i-1].u;
-      Fl = GetFSR(dx,user->epsilon,user->n, ul,Hu[i].u);
-      Tl = Bstag[i-1] * (Hu[i-1].H + Hu[i].H) * Fl;
+      Fl = GetFSR(dx,user->epsilon,user->n, ul,     Hu[i].u);
       Fr = GetFSR(dx,user->epsilon,user->n, Hu[i].u,Hu[i+1].u);
-      Tr = Bstag[i] * (Hu[i].H + Hu[i+1].H) * Fr;
+      Tl = Bstag[i-1] * (Hu[i-1].H + Hu[i].H  ) * Fl;
+      Tr = Bstag[i]   * (Hu[i].H   + Hu[i+1].H) * Fr;
       /* sliding coefficient */
       beta = user->k * rg * Hu[i].H * GLREG(Hu[i].H,Hg,0.0);
       /* surface elevations */

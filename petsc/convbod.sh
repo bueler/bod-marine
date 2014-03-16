@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# run as 
-#   $ ./conv.sh >& conv.txt
+# run as
+#   $ ./convbod.sh >& conv.txt
 # then do this to see errors:
 #   $ cat conv.txt |grep errHinf
 #   (dx,errHinf,erruinf) 10000.000 2.2529e+00 7.1132e-01
