@@ -3,10 +3,13 @@ static const char help[] =
 "holding both thickness H and velocity u, and a 2nd-order finite difference\n"
 "scheme to approximate the coupled mass continuity and SSA stress balance PDEs.\n"
 "\n"
-"IT WORKS!: this one is with a 'fair' initial condition:\n"
+"This one is with analytical jacobian and no equation/variable scaling:\n"
+"   ./marine -dx 1000 -snes_monitor -snes_monitor_solution -draw_pause 0.5 -exactinit -noscale\n"
+"Incredibly, one can get convergence on a 1 m grid:\n"
+"   ./marine -dx 1 -snes_monitor -snes_max_funcs 1000000 -exactinit -noscale\n"
+"This one is with -snes_fd and a 'fair' initial condition:\n"
 "  ./marine -snes_fd -dx 1000 -snes_monitor -snes_monitor_solution -draw_pause 0.1 -snes_max_funcs 1000000\n"
-"A refinement path:\n"
-"  for DX in 8000 4000 2000 1000 500 250; do ./marine -snes_fd -dx $DX -snes_max_funcs 100000 -exactinit; done\n"
+"See convmarine.sh for a refinement path.\n"
 "Dump result in matlab:\n"
 "  ./marine -snes_fd -dx 250 -dump result250.m -exactinit -snes_max_funcs 100000\n"
 "\n\n";
@@ -48,7 +51,8 @@ typedef struct {
   PetscReal   k;       /* sliding parameter */
   PetscReal   Mfloat;  /* mass balance rate in floating ice */
   PetscReal   epsilon; /* regularization of viscosity, a strain rate */
-  PetscReal   Hscale, uscale;
+  PetscReal   Hscale, uscale;  /* variable scaling coeffs */
+  PetscReal   rscHa, rscua, rscuH, rscstress, rsccalv;  /* residual scaling coeffs */
   PetscBool   noscale;
   Vec         Mstag;   /* surface mass balance on staggered grid */
   Vec         Bstag;   /* ice hardness on staggered grid*/
@@ -170,6 +174,13 @@ int main(int argc,char **argv)
        "            ... probably uncomputable!\n\n",
        user.dx,user.Mx);
   }
+
+  /* residual scaling coeffs; motivation at right */
+  user.rscHa     = 1.0 / user.Hscale,   /* Dirichlet cond for H */
+  user.rscua     = 1.0 / user.uscale,   /* Dirichlet cond for u */
+  user.rscuH     = user.dx / (user.Hscale * user.uscale),  /* flux derivative  d(uH)/dx */
+  user.rscstress = 1.0 / (user.k * user.rho * user.g * user.Hscale * user.uscale),  /* beta term in SSA */
+  user.rsccalv   = 1.0 / (0.025 * user.rho * user.g * user.Hscale);  /* 0.5 * omega * overburden */
 
   /* Create machinery for parallel grid management (DMDA), nonlinear solver (SNES),
      and Vecs for fields (solution, RHS).  Degrees of freedom = 2 (thickness and
@@ -516,7 +527,7 @@ PetscErrorCode FunctionLocal(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *use
 }
 
 
-/* Apply scalings to variables and equations to make it all possible! */
+/* Apply scalings to variables and equations.  Certainly essential with -snes_fd. */
 PetscErrorCode scshell(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
 {
   PetscErrorCode ierr;
@@ -528,12 +539,6 @@ PetscErrorCode scshell(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
   PetscInt i,
            start = PetscMax(info->xs - 1,            0),
            end   = PetscMin(info->xs + info->xm + 1, user->Mx);
-  /* residual scaling coeffs; motivation at right */
-  PetscReal rscHa     = 1.0 / user->Hscale,   /* Dirichlet cond for H */
-            rscua     = 1.0 / user->uscale,   /* Dirichlet cond for u */
-            rscuH     = user->dx / (user->Hscale * user->uscale),  /* flux derivative  d(uH)/dx */
-            rscstress = 1.0 / (user->k * user->rho * user->g * user->Hscale * user->uscale),  /* beta term in SSA */
-            rsccalv   = 1.0 / (0.025 * user->rho * user->g * user->Hscale);  /* 0.5 * omega * overburden */
   /* dimensionalize unknowns (put in "real" scale), including the ghost values */
   for (i = start; i < end; i++) {
     Hu[i].H *= user->Hscale;
@@ -544,14 +549,14 @@ PetscErrorCode scshell(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
   /* scale the residual to be O(1) */
   for (i = info->xs; i < info->xs + info->xm; i++) {
     if (i == 0) {
-      f[0].H *= rscHa;
-      f[0].u *= rscua;
+      f[0].H *= user->rscHa;
+      f[0].u *= user->rscua;
     } else if (i == user->Mx - 1) {
-      f[i].H *= rscuH;
-      f[i].u *= rsccalv;
+      f[i].H *= user->rscuH;
+      f[i].u *= user->rsccalv;
     } else {
-      f[i].H *= rscuH;
-      f[i].u *= rscstress;
+      f[i].H *= user->rscuH;
+      f[i].u *= user->rscstress;
     }
   }
   /* de-dimensionalize unknowns */
