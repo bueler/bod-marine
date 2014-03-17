@@ -124,7 +124,7 @@ Here $x=0$ is an upstream location where Dirichlet boundary conditions are appli
 
 Indeed, suppose that, for physical reasons, the mass balance $M(x)$ and ice hardness $B(x)$ are bounded, and further that $B(x)$ is bounded below by a positive constant.  From integrating $M$, equation \eqref{eq:steadymass} implies that the flux $q=uH$ is absolutely-continuous and thus bounded.  If there is a positive lower bound on thickness $H$, then we can conclude that the magnitude of $u$ is bounded because $u=q/H$.  If the magnitude of the driving stress $-\rho g H h_x$ is bounded then equation \eqref{eq:steadySSA} implies $T$ is absolutely-continuous.  By equation \eqref{eq:Tstress} this implies $u$ has a bounded and integrable derivative, and thus that $u$ is also absolutely-continuous.  From these facts we could then return to the flux and write $H=q/u$ which shows $H$ is absolutely-continuous away from locations where $u=0$ (e.g.~divides).  In summary, assuming \emph{(i)} that an integrable solution $(H,u,T)$ to \eqref{eq:steadymass}--\eqref{eq:xgregularity} exists, \emph{(ii)} that the functions $M,B$ are bounded and integrable, \emph{(iii)} that $B$ is bounded below by a positive constant, \emph{(iv)} that a positive lower bound on thickness exists, and \emph{(v)} that an upper bound on the magnitude of the driving stress exists, then we can regard condition \eqref{eq:xgregularity}, giving the continuity at the grounding line, as properties of the solution instead of as part of the ``imposed'' problem statement.
 
-\small
+%\small
 \begin{table}
 \caption{Notation and SI units, including physical constants.}\label{tab:notation}
 
@@ -152,6 +152,7 @@ $z_o$ & ocean surface elevation & m \\
 $\omega$ & Archimedean factor; $=1 - \rho/\rho_w$ & $0.115$
 \end{tabular}
 \end{table}
+%\normalsize
 
 \subsection*{Bodvardsson's parabola}  \cite{Bodvardsson} built, from minimal existing literature of course, to a rigorous initial theory of the flow of glaciers and ice sheets.  His test case was Br\'uarj\"okull, a glacier on the northern margin of Vatnaj\"okull in Iceland.  It flows over a smooth bed for 20 km, from a location where its thickness is 600 m, to a zero thickness margin.  This glacier is entirely grounded.  He shows that a good fit to measured surface elevations can be made using his model.
 
@@ -198,9 +199,50 @@ B(x) = \frac{T_0}{2 H |u_x|^{(1/n)-1} u_x}. \label{eq:hardnessdefine}
 \end{equation}
 
 
-\subsection*{Extending the exact solution to floating ice}
+\subsection*{Extending the exact solution to floating ice}  The value $T_0$ in \eqref{eq:hardnessdefine} can be set by a downstream stress condition, just as it is in many models for flowline ice shelves \citep[e.g.][]{MISMIP2012,SchoofMarine1}.  Two well-known observations are relevant:  \emph{(i)}  For floating ice with $\beta=0$, equations \eqref{eq:steadymass}--\eqref{eq:rightbc} also have a known exact solution, specifically in the case where the mass balance $M$ and the ice hardness $B$ are constant \citep{vanderVeen83,vanderVeen}.  \emph{(ii)}  The vertically-integrated longitudinal stress $T$ in a flowline ice shelf (i.e.~one without lateral stresses) satisfies equation \eqref{eq:rightbc} at each location $x$ in the shelf, that is $T(x) = \frac{1}{2} \omega \rho g H(x)^2$, because this is a first integral of equation \eqref{eq:steadySSA} if $\beta=0$.
 
-The value $T_0$ in \eqref{eq:hardnessdefine} can be set by a downstream stress condition.  FIXME
+Based on these observations we can construct a marine ice sheet exact solution by extending Bodvardsson's grounded solution above to the floating ice.  First taking $b=0$ as the flat bed elevation, we suppose the ocean has surface elevation $z_o>0$, thus determining the grounding-line thickness by $H(x_g) = (\rho_w/\rho) (z_o - b)$.  Then from Bodvardsson's thickness solution \eqref{eq:bodsoln} we can determine $x_g$.  At $x_g$, from \eqref{eq:bodvelocity} and \eqref{eq:bodsoln}, we know $u(x_g)$ as well.  For $x_g \le x \le x_c$, the floating ice shelf, we then set $M(x) = M(x_g)$ as constant from the formula \eqref{eq:bodmassbalance}, thus making $M(x)$ continuous across the grounding line.  The equation $T(x) = \frac{1}{2} \omega \rho g H(x)^2$ determines $T_o=T(x_g)$ for use in equation \eqref{eq:hardnessdefine}, which determines $B(x_g)$ in particular, and so then we set $B(x)=B(x_g)$ for $x_g \le x \le x_c$.
+
+The result of the above construction is the following set of formulas for an exact marine ice sheet satisfying our steady model equations \eqref{eq:steadymass}--\eqref{eq:xgregularity}.  The velocity comes from combining the Bodvardsson and van der Veen results,
+\begin{equation}
+u(x) = \begin{cases} \frac{2 H_0}{k L_0^2}\,x, & 0 \le x \le x_g, \\
+                     u_s(x), & x_g \le x \le x_c.
+       \end{cases} \label{eq:marinevel}
+\end{equation}
+where
+\begin{equation}
+C_s = \left(\frac{\rho g \omega}{4 B(x_g)}\right)^n.  \label{eq:vanderveenconstant}
+\end{equation}
+and where $u_s(x)$ is defined by
+\begin{equation}
+u_s(x)^{n+1} = u(x_g)^{n+1} + \frac{C_s}{M(x_g)} \left(\left[Q_g + M(x_g) (x-x_g)\right]^{n+1} - Q_g^{n+1}\right) \label{eq:vanderveenvel}
+\end{equation}
+where $Q_g = u(x_g) H(x_g)$.  Similarly the thickness comes from combining the results:
+\begin{equation}
+H(x) = \begin{cases} H_0 \left(1 - (\frac{x}{L_0})^2\right), & 0 \le x \le x_g, \\
+                     \frac{Q_g + M(x_g) (x-x_g)}{u_s(x)}, & x_g \le x \le x_c.
+       \end{cases} \label{eq:marinethickness}
+\end{equation}
+Formulas \eqref{eq:marinevel} and \eqref{eq:marinethickness} define the continuous functions which are shown in Figure \ref{fig:exactmarine}, using the specific values in Table \ref{tab:exactsolnnotation}.
+
+%\small
+\begin{table}
+\caption{Additional specific values used in the exact solution shown in Figures \ref{fig:exactmarine}--\eqref{fig:exactmarine-detail}.}\label{tab:exactsolnnotation}
+
+\medskip
+\begin{tabular}{llll}
+Symbol & Description & Units \\ \hline
+FIXME $x_g$ & grounding line & m  \\
+FIXME $z_o$ & ocean surface elevation & m \\
+\end{tabular}
+\end{table}
+%\normalsize
+
+From the thickness $H(x)$ and the velocity $u(x)$ we can find continuous functions $M(x)$ and $B(x)$ for the full marine flowline by using equations \eqref{eq:bodmassbalance} and \eqref{eq:hardnessdefine}.  These functions are shown in Figure \ref{fig:exactMB}.  Then we can use equation \eqref{eq:Tstress} to find $T(x)$; this is shown in Figure \ref{fig:exactbetaT}.  In Figure \ref{fig:exactbetaT} we also show the sliding coefficient $\beta(x)$, which drops to zero discontinuously at $x_g$.  Finally Figure \ref{fig:exactmarine-detail} shows a detail of the grounding line and floating ice in the exact solution.
+
+Note that, because this paper is focussed on ice flow dynamics and grounding lines, we treat $M(x)$ as a predetermined field (i.e.~the one shown in Figure \ref{fig:exactMB}).  This removes the climatically-interesting elevation--accumulation feedback, and the associated instability, which was considered by Bodvardsson, Weertman, and others.  This feedback can be added back by restorig the elevation-dependence of the mass balance, that is, by using equation \eqref{eq:bodmassbalance} to determine $M$ from $H(x)$.
+
+FIXME
 
 \begin{figure}[ht]
 \onecol{exactmarine-M-B}
