@@ -19,33 +19,19 @@ If options '--noshoot' are given then generates plots.'''
 # process command-line arguments
 parser = argparse.ArgumentParser(description=desc,
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-xa_default = 0.2
-xc_default = 0.98
 xocean_default = 1.05
-Mdrop_default = 1.0
-parser.add_argument('--xa', default=xa_default,
-                    help='left endpoint, as fraction of L0 = %.1f km' % (exactsolns.L0/1000.0))
-parser.add_argument('--xc', default=xc_default,
-                    help='right (calving) endpoint, as fraction of L0 = %.1f km' % (exactsolns.L0/1000.0))
 parser.add_argument('--xocean', default=xocean_default,
                     help='end of ocean in plots, , as fraction of L0 = %.1f km' % (exactsolns.L0/1000.0))
-parser.add_argument('--Mdrop', default=Mdrop_default,
-                    help='factor by which mass balance M(x) drops in magnitude across grounding line')
 parser.add_argument('--saveroot', metavar='NAME', default='unnamed',
                     help='if given, save plots in NAME-geometry.pdf and NAME-other.pdf')
 parser.add_argument('--noshoot', action='store_true',
                     help='do not do shooting with bisection and instead plot one case')
 args = parser.parse_args()
-M0 = float(args.Mdrop) * exactsolns.Mg
 doshoot = not(bool(args.noshoot))
 if not doshoot:
     nameroot = str(args.saveroot)
 
-# decide on interval: xa is where Dirichlet (Ha,ua) will apply
-#                     xc is where calving front condition will apply
-#                     xoceanend is only relevant to plots
-xa = float(args.xa) * exactsolns.L0
-xc = float(args.xc) * exactsolns.L0
+# only relevant to plots
 xoceanend = float(args.xocean) * exactsolns.L0
 
 # define the model
@@ -58,7 +44,7 @@ def M(x):       # compute mass balance for location
       _, _, Mexact = exactsolns.exactBod(x)
       return Mexact
   else:
-      return M0
+      return exactsolns.Mg
 
 def B(x):       # get contrived ice hardness for location
   if x <= exactsolns.xg:
@@ -122,17 +108,16 @@ def f(v,x):
   return vp.flatten()
 
 rr = exactsolns.rho / exactsolns.rhow
-Ha, ua, _ = exactsolns.exactBod(xa)
 
 def objective(Tinit):
-    v0 = np.array([ua, Ha, Tinit])  # initial values at x[0] = xa
-    x = np.linspace(xa,xc,2)
+    v0 = np.array([exactsolns.ua, exactsolns.Ha, Tinit])  # initial values at x[0] = xa
+    x = np.linspace(exactsolns.xa,exactsolns.xc,2)
     v = odeint(f,v0,x)              # solve ODE system to determine v[1,2] = T
     Tcalvc = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * v[1,1]**2
     return (v[1,2] - Tcalvc) / Tcalvc
 
 uxcheat = (1.0/exactsolns.k) * (2.0 * exactsolns.H0 / exactsolns.L0**2)
-Tcheat = 2.0 * Ha * B(xa) * uxcheat**(1.0/exactsolns.n)  # the cheat is to use B()
+Tcheat = 2.0 * exactsolns.Ha * B(exactsolns.xa) * uxcheat**(1.0/exactsolns.n)  # the cheat is to use B()
 
 if doshoot:  # run bisection
     Tlow = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * 100.0**2
@@ -161,14 +146,14 @@ if doshoot:  # run bisection
 
 Tinit = Tcheat
 print "initial conditions:"
-print "  at xa = %.3f km we have initial values" % (xa/1000.0)
-print "  u = %7.2f m a-1, H = %.2f m" % (ua*exactsolns.secpera, Ha)
+print "  at xa = %.3f km we have initial values" % (exactsolns.xa/1000.0)
+print "  u = %7.2f m a-1, H = %.2f m" % (exactsolns.ua*exactsolns.secpera, exactsolns.Ha)
 print "  and  Tinit = %.6e Pa m (which is cheating, for plot purpose)" % Tinit
 
-x = np.linspace(xa,xc,1001)
+x = np.linspace(exactsolns.xa,exactsolns.xc,1001)
 dx = x[1] - x[0]
 
-v0 = np.array([ua, Ha, Tinit])  # initial values at x[0] = xa
+v0 = np.array([exactsolns.ua, exactsolns.Ha, Tinit])  # initial values at x[0] = xa
 #v, info = odeint(f,v0,x,full_output=True)          # solve ODE system
 v = odeint(f,v0,x)          # solve ODE system
 #Tcalvc = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * v[-1,1]**2
@@ -184,7 +169,7 @@ Hbod, ubod, _ = exactsolns.exactBod(xgnd)
 Hboderror = abs(H[(x <= exactsolns.xg)] - Hbod).max()
 uboderror = abs(u[(x <= exactsolns.xg)] - ubod).max()
 xveen = x[(x > exactsolns.xg)]
-Hveen, uveen = exactsolns.exactVeen(xveen,M0)
+Hveen, uveen = exactsolns.exactVeen(xveen,exactsolns.Mg)
 Hveenerror = abs(H[(x > exactsolns.xg)] - Hveen).max()
 uveenerror = abs(u[(x > exactsolns.xg)] - uveen).max()
 print "results:"
@@ -202,18 +187,18 @@ print "COMPARE Tcalvc = %.6e Pa m" % Tcalvc
 # geometry and velocity in figure 1 (two-axis)
 hh, bb = surfaces(H)
 fig = plt.figure(figsize=(6,4))
-ax1fig1, ax2fig1 = plottwo(fig,(x-xa)/1000.0,hh,u * exactsolns.secpera,
+ax1fig1, ax2fig1 = plottwo(fig,(x-exactsolns.xa)/1000.0,hh,u * exactsolns.secpera,
                            "z   (m, solid)",
                            "ice velocity   (m a-1, dashed)",
                            y1min=0.0)
-ax1fig1.set_xlim(0.0,(xoceanend-xa)/1000.0)
-ax2fig1.set_xlim(0.0,(xoceanend-xa)/1000.0)
+ax1fig1.set_xlim(0.0,(xoceanend-exactsolns.xa)/1000.0)
+ax2fig1.set_xlim(0.0,(xoceanend-exactsolns.xa)/1000.0)
 ax1fig1.hold(True)
-ax1fig1.plot((x-xa)/1000.0,bb,'k',lw=2.0)
-ax1fig1.plot([(xc-xa)/1000.0,(xc-xa)/1000.0],[bb[-1],hh[-1]],'k',linewidth=lw)
+ax1fig1.plot((x-exactsolns.xa)/1000.0,bb,'k',lw=2.0)
+ax1fig1.plot([(exactsolns.xc-exactsolns.xa)/1000.0,(exactsolns.xc-exactsolns.xa)/1000.0],[bb[-1],hh[-1]],'k',linewidth=lw)
 # show water height as waves
-xl = np.linspace(xc,xoceanend,101)
-ax1fig1.plot((xl-xa)/1000.0, exactsolns.bedg - 30.0 * abs(np.sin(xl / 2.0e3)),'k',linewidth=0.7*lw)
+xl = np.linspace(exactsolns.xc,xoceanend,101)
+ax1fig1.plot((xl-exactsolns.xa)/1000.0, exactsolns.bedg - 30.0 * abs(np.sin(xl / 2.0e3)),'k',linewidth=0.7*lw)
 y1, y2 = ax1fig1.get_ylim()
 ax1fig1.set_ylim(0.0,3000.0)
 ax1fig1.set_yticks([0.0,500.0,1000.0,1500.0,2000.0,2500.0,3000.0])
@@ -229,16 +214,16 @@ print '  image file %s saved' % imagename
 # geometry and velocity DETAIL in figure 2 (two-axis)
 fig = plt.figure(figsize=(6,4))
 detail = (x > 0.95*exactsolns.xg)
-ax1fig1, ax2fig1 = plottwo(fig,(x[detail]-xa)/1000.0,hh[detail],u[detail] * exactsolns.secpera,
+ax1fig1, ax2fig1 = plottwo(fig,(x[detail]-exactsolns.xa)/1000.0,hh[detail],u[detail] * exactsolns.secpera,
                            "z   (m, solid)",
                            "ice velocity   (m a-1, dashed)",
                            y1min=0.0)
 ax1fig1.hold(True)
-ax1fig1.plot((x[detail]-xa)/1000.0,bb[detail],'k',lw=2.0)
-ax1fig1.plot([(xc-xa)/1000.0,(xc-xa)/1000.0],[bb[-1],hh[-1]],'k',linewidth=lw)
+ax1fig1.plot((x[detail]-exactsolns.xa)/1000.0,bb[detail],'k',lw=2.0)
+ax1fig1.plot([(exactsolns.xc-exactsolns.xa)/1000.0,(exactsolns.xc-exactsolns.xa)/1000.0],[bb[-1],hh[-1]],'k',linewidth=lw)
 # show water height as waves
-xl = np.linspace(xc,1.01*exactsolns.L0,101)
-ax1fig1.plot((xl-xa)/1000.0, exactsolns.bedg - 15.0 * abs(np.sin(xl / 0.8e3)),'k',linewidth=0.7*lw)
+xl = np.linspace(exactsolns.xc,1.01*exactsolns.L0,101)
+ax1fig1.plot((xl-exactsolns.xa)/1000.0, exactsolns.bedg - 15.0 * abs(np.sin(xl / 0.8e3)),'k',linewidth=0.7*lw)
 ax1fig1.hold(False)
 plt.axis('tight')
 imagename = nameroot + '-geometry-detail.pdf'
@@ -255,11 +240,11 @@ BB = np.zeros(np.shape(x))
 for j in range(len(x)):
    BB[j] = B(x[j])
 fig = plt.figure(figsize=(6,4))
-ax1fig2, ax2fig2 = plottwo(fig,(x-xa)/1000.0,MM * exactsolns.secpera,BB/1.0e8,
+ax1fig2, ax2fig2 = plottwo(fig,(x-exactsolns.xa)/1000.0,MM * exactsolns.secpera,BB/1.0e8,
                            "M(x)   (m a-1, solid)",
                            r"B(x)   ($10^8$ Pa s-1/3, dashed)")
-ax1fig2.set_xlim(0.0,(xoceanend-xa)/1000.0)
-ax2fig2.set_xlim(0.0,(xoceanend-xa)/1000.0)
+ax1fig2.set_xlim(0.0,(xoceanend-exactsolns.xa)/1000.0)
+ax2fig2.set_xlim(0.0,(xoceanend-exactsolns.xa)/1000.0)
 ax1fig2.set_ylim(-5.0,5.0)
 ax2fig2.set_ylim(0.0,5.0)
 imagename = nameroot + '-M-B.pdf'
@@ -276,13 +261,13 @@ for j in range(len(H)):
        bbeta[j] = exactsolns.k * exactsolns.rho * exactsolns.g * Hexact
    else:
        bbeta[j] = 0.0
-ax1fig3, ax2fig3 = plottwo(fig,(x-xa)/1000.0,bbeta/1.0e10,T/1.0e8,
+ax1fig3, ax2fig3 = plottwo(fig,(x-exactsolns.xa)/1000.0,bbeta/1.0e10,T/1.0e8,
                            r"$\beta$(x)   ($10^{10}$  Pa s m-1, solid)",
                            r"$T$(x)   ($10^8$ Pa m, dashed)")
 ax1fig3.set_ylim(-0.1,2.1)
 ax2fig3.set_ylim(0.0,2.0)
 bbeta[x > exactsolns.xg] = 0.0
-ax1fig3.plot((x-xa)/1000.0,bbeta/1.0e10,'k:',lw=1.5)
+ax1fig3.plot((x-exactsolns.xa)/1000.0,bbeta/1.0e10,'k:',lw=1.5)
 imagename = nameroot + '-beta-T.pdf'
 plt.savefig(imagename)
 print '  image file %s saved' % imagename
@@ -295,18 +280,18 @@ for j in range(len(x)):
   if x[j] < exactsolns.xg:
     Hexact[j], uexact[j], _ = exactsolns.exactBod(x[j])
   else:
-    Hexact[j], uexact[j] = exactsolns.exactVeen(x[j],M0)
+    Hexact[j], uexact[j] = exactsolns.exactVeen(x[j],exactsolns.Mg)
 fig = plt.figure(figsize=(6,5))
 plt.subplot(2,1,1)
-plt.semilogy((x-xa)/1000.0,abs(H-Hexact),'k',lw=2.0)
+plt.semilogy((x-exactsolns.xa)/1000.0,abs(H-Hexact),'k',lw=2.0)
 ax1 = plt.gca()
-ax1.set_xlim([0.0,(xoceanend-xa)/1000.0])
+ax1.set_xlim([0.0,(xoceanend-exactsolns.xa)/1000.0])
 plt.grid(True)
 plt.ylabel(r"$|H - H_{exact}|$   (m)")
 plt.subplot(2,1,2)
-plt.semilogy((x-xa)/1000.0,abs(u-uexact) * exactsolns.secpera,'k',lw=2.0)
+plt.semilogy((x-exactsolns.xa)/1000.0,abs(u-uexact) * exactsolns.secpera,'k',lw=2.0)
 ax2 = plt.gca()
-ax2.set_xlim([0.0,(xoceanend-xa)/1000.0])
+ax2.set_xlim([0.0,(xoceanend-exactsolns.xa)/1000.0])
 plt.grid(True)
 plt.ylabel(r"$|u - u_{exact}|$   (m a-1)")
 plt.xlabel("x   (km)")
