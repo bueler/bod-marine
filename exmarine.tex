@@ -272,12 +272,14 @@ The floating ice shelf is a relatively short 40 km; see Figures \ref{fig:exactma
 
 \subsection*{Numerical results}
 
-FIXME:  When one does nonlinear shooting using the exact correct $T$ value, one gets the best-case adaptive-grid error in Figure \ref{fig:shoot-good-error}.
+FIXME:  When one does nonlinear shooting using the exact correct $T$ value, one gets the best-case adaptive-grid error in Figure \ref{fig:shoot-error}.
 
 \begin{figure}[ht]
-\onecol{exactmarine-good-error}
-\caption{FIXME: FIGURE.  Pointwise error from an adaptive numerical ODE scheme in the ``good'' case where we use the exactly-correct initial value for $T$ (solid) and in the ``realistic'' cases where the shooting method converges on the correct initial value by the bisection method.} \label{fig:shoot-good-error}
+\onecol{exactmarine-error}
+\caption{Pointwise error in thickness (upper panel) and in velocity (lower panel) from an adaptive numerical ODE scheme.  Both the ``cheating'' case (solid), where we use the exactly-correct initial value for $T$, and the ``realistic'' case (dashed), where the shooting method converges on the correct initial value for $T$ by the bisection method, are shown.} \label{fig:shoot-error}
 \end{figure}
+
+FIXME: FIGURE SHOWING GRID(s)
 
 A special-purpose, stand-alone C code implementing a second-order finite difference scheme is described in the appendix.  It is also available as part of the PISM source code.  It has a parallel implementation using the PETSc \citep{petsc-user-ref} library and it uses a Newton scheme to achieve observed quadratic convergence of the iteration.
 

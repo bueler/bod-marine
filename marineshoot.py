@@ -24,12 +24,11 @@ parser.add_argument('--xocean', default=xocean_default,
                     help='end of ocean in plots, , as fraction of L0 = %.1f km' % (exactsolns.L0/1000.0))
 parser.add_argument('--saveroot', metavar='NAME', default='unnamed',
                     help='if given, save plots in NAME-geometry.pdf and NAME-other.pdf')
-parser.add_argument('--noshoot', action='store_true',
-                    help='do not do shooting with bisection and instead plot one case')
+parser.add_argument('--figures', action='store_true',
+                    help='generate figures in addition to shooting')
 args = parser.parse_args()
-doshoot = not(bool(args.noshoot))
-if not doshoot:
-    nameroot = str(args.saveroot)
+genfigs = bool(args.figures)
+nameroot = str(args.saveroot)
 
 # only relevant to plots
 xoceanend = float(args.xocean) * exactsolns.L0
@@ -119,49 +118,53 @@ def objective(Tinit):
 uxcheat = (1.0/exactsolns.k) * (2.0 * exactsolns.H0 / exactsolns.L0**2)
 Tcheat = 2.0 * exactsolns.Ha * B(exactsolns.xa) * uxcheat**(1.0/exactsolns.n)  # the cheat is to use B()
 
-if doshoot:  # run bisection
-    Tlow = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * 100.0**2
-    Thigh = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * 600.0**2
-    olow = objective(Tlow)
-    ohigh = objective(Thigh)
-    "  [Tlow,Thigh] = [%.7e,%.7e]  gives  [%2.3e,%2.3e]" % (Tlow,Thigh,olow,ohigh)
-    for j in range(25):
-        Tmid = (Tlow + Thigh) / 2.0
-        omid = objective(Tmid)
-        if omid * olow > 0.0:
-            olow = omid
-            Tlow = Tmid
-        else:
-            ohigh = omid
-            Thigh = Tmid
-        print "  T range [%.7e,%.7e]  gives  objective range [%2.3e,%2.3e]" \
-            % (Tlow,Thigh,olow,ohigh)
+# run bisection
+Tlow = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * 100.0**2
+Thigh = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * 600.0**2
+olow = objective(Tlow)
+ohigh = objective(Thigh)
+"  [Tlow,Thigh] = [%.7e,%.7e]  gives  [%2.3e,%2.3e]" % (Tlow,Thigh,olow,ohigh)
+for j in range(25):
     Tmid = (Tlow + Thigh) / 2.0
     omid = objective(Tmid)
-    print "final:   Tmid   = %.7e  gives  omid = %2.3e" % (Tmid,omid)
-    print "[compare Tcheat = %.7e]" % Tcheat
+    if omid * olow > 0.0:
+        olow = omid
+        Tlow = Tmid
+    else:
+        ohigh = omid
+        Thigh = Tmid
+    print "  T range [%.7e,%.7e]  gives  objective range [%2.3e,%2.3e]" \
+        % (Tlow,Thigh,olow,ohigh)
+Tmid = (Tlow + Thigh) / 2.0
+omid = objective(Tmid)
+print "final:   Tmid   = %.7e  gives  omid = %2.3e" % (Tmid,omid)
+print "[compare Tcheat = %.7e]" % Tcheat
+
+if not(genfigs):
     exit(0)
 
-# proceed to make figure if not doshoot
+# proceed to make figures
 
-Tinit = Tcheat
 print "initial conditions:"
 print "  at xa = %.3f km we have initial values" % (exactsolns.xa/1000.0)
 print "  u = %7.2f m a-1, H = %.2f m" % (exactsolns.ua*exactsolns.secpera, exactsolns.Ha)
-print "  and  Tinit = %.6e Pa m (which is cheating, for plot purpose)" % Tinit
+print "  and  Tinit = %.6e Pa m (which is cheating, for plot purpose)" % Tcheat
 
+# solve ODES: first with cheating initial, then with result of bisection
+# get result on reasonably fine grid
 x = np.linspace(exactsolns.xa,exactsolns.xc,1001)
-dx = x[1] - x[0]
-
-v0 = np.array([exactsolns.ua, exactsolns.Ha, Tinit])  # initial values at x[0] = xa
+v0 = np.array([exactsolns.ua, exactsolns.Ha, Tcheat])  # initial values at x[0] = xa
 #v, info = odeint(f,v0,x,full_output=True)          # solve ODE system
 v = odeint(f,v0,x)          # solve ODE system
-#Tcalvc = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * v[-1,1]**2
-#print "Tinit = %.6e,  (Tfinal - Tcalvc)/Tcalvc = %.6e" % ( Tinit, (v[-1,2]-Tcalvc)/Tcalvc )
+v0mid = np.array([exactsolns.ua, exactsolns.Ha, Tmid])
+vmid = odeint(f,v0mid,x)              # solve ODE system to determine v[1,2] = T
 
 u = v[:,0]
 H = v[:,1]
 T = v[:,2]
+umid = vmid[:,0]
+Hmid = vmid[:,1]
+Tmid = vmid[:,2]
 
 # compute and report errors
 xgnd = x[(x <= exactsolns.xg)]
@@ -284,18 +287,20 @@ for j in range(len(x)):
 fig = plt.figure(figsize=(6,5))
 plt.subplot(2,1,1)
 plt.semilogy((x-exactsolns.xa)/1000.0,abs(H-Hexact),'k',lw=2.0)
+plt.semilogy((x-exactsolns.xa)/1000.0,abs(Hmid-Hexact),'k--',lw=3.0)
 ax1 = plt.gca()
 ax1.set_xlim([0.0,(xoceanend-exactsolns.xa)/1000.0])
 plt.grid(True)
-plt.ylabel(r"$|H - H_{exact}|$   (m)")
+plt.ylabel("H error   (m)", fontsize=14)
 plt.subplot(2,1,2)
 plt.semilogy((x-exactsolns.xa)/1000.0,abs(u-uexact) * exactsolns.secpera,'k',lw=2.0)
+plt.semilogy((x-exactsolns.xa)/1000.0,abs(umid-uexact) * exactsolns.secpera,'k--',lw=3.0)
 ax2 = plt.gca()
 ax2.set_xlim([0.0,(xoceanend-exactsolns.xa)/1000.0])
 plt.grid(True)
-plt.ylabel(r"$|u - u_{exact}|$   (m a-1)")
+plt.ylabel("u error   (m a-1)", fontsize=14)
 plt.xlabel("x   (km)")
-imagename = nameroot + '-good-error.pdf'
+imagename = nameroot + '-error.pdf'
 plt.savefig(imagename)
 print '  image file %s saved' % imagename
 #plt.show()
