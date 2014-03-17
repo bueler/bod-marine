@@ -12,10 +12,11 @@
 #MPIDO="mpiexec -n 4"
 MPIDO="mpiexec -n 1"
 
-#for dx in 10000  5000  2000  1000  500  200  100
-for dx in 10000  5000  2000  1000  500  200
+#for dx in 10000  5000  2000  1000  500
+for dx in 10000  5000  2000  1000  500 200 100 50 20 10
 do
   # use exact soln as initial guess:
-  $MPIDO ./marine -snes_fd -snes_max_funcs 100000 -dx $dx -snes_monitor -snes_rtol 1.0e-8 -exactinit
+  #$MPIDO ./marine -snes_fd -snes_max_funcs 100000 -dx $dx -snes_monitor -snes_rtol 1.0e-8 -exactinit
+  $MPIDO ./marine -snes_max_funcs 100000 -dx $dx -snes_monitor -snes_rtol 1.0e-8 -exactinit -noscale
 done
 

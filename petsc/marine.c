@@ -176,10 +176,17 @@ int main(int argc,char **argv)
   }
 
   /* residual scaling coeffs; motivation at right */
-  user.rscHa     = 1.0 / user.Hscale,   /* Dirichlet cond for H */
-  user.rscua     = 1.0 / user.uscale,   /* Dirichlet cond for u */
-  user.rscuH     = user.dx / (user.Hscale * user.uscale),  /* flux derivative  d(uH)/dx */
-  user.rscstress = 1.0 / (user.k * user.rho * user.g * user.Hscale * user.uscale),  /* beta term in SSA */
+  if (user.noscale) {
+      user.Hscale = 1.0;
+      user.uscale = 1.0;
+  }
+  user.rscHa     = 1.0 / user.Hscale;   /* Dirichlet cond for H */
+  user.rscua     = 1.0 / user.uscale;   /* Dirichlet cond for u */
+  if (user.noscale)
+      user.rscuH = 1.0 / (user.Hscale * user.uscale);
+  else
+      user.rscuH = user.dx / (user.Hscale * user.uscale);  /* flux derivative  d(uH)/dx */
+  user.rscstress = 1.0 / (user.k * user.rho * user.g * user.Hscale * user.uscale);  /* beta term in SSA */
   user.rsccalv   = 1.0 / (0.025 * user.rho * user.g * user.Hscale);  /* 0.5 * omega * overburden */
 
   /* Create machinery for parallel grid management (DMDA), nonlinear solver (SNES),
@@ -251,10 +258,6 @@ int main(int argc,char **argv)
 
   /************ SOLVE NONLINEAR SYSTEM  ************/
   /* recall that RHS  r  is used internally by KSP, and is set by the SNES */
-  if (user.noscale) {
-      user.Hscale = 1.0;
-      user.uscale = 1.0;
-  }
   scaleNode[0] = user.Hscale;
   scaleNode[1] = user.uscale;
   for (i = 0; i < 2; i++)  descaleNode[i] = 1.0 / scaleNode[i];
@@ -531,11 +534,6 @@ PetscErrorCode FunctionLocal(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *use
 PetscErrorCode scshell(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
 {
   PetscErrorCode ierr;
-  if (user->noscale) {
-      ierr = FunctionLocal(info, Hu, f, user); CHKERRQ(ierr);
-      PetscFunctionReturn(0);
-  }
-
   PetscInt i,
            start = PetscMax(info->xs - 1,            0),
            end   = PetscMin(info->xs + info->xm + 1, user->Mx);
@@ -600,7 +598,7 @@ PetscErrorCode JacobianMatrixLocal(DMDALocalInfo *info, Node *Hu,
                  dx = user->dx,
                  Hg = user->zocean * (user->rhow / user->rho);
   PetscReal      *Bstag, Hl, ul, Fl, Fr, Gl, Gr, hr, hl;
-  PetscInt       i, Mx = info->mx;
+  PetscInt       i, k, Mx = info->mx;
   Vec            locBstag;
 
   PetscReal      v[6];
@@ -610,14 +608,23 @@ PetscErrorCode JacobianMatrixLocal(DMDALocalInfo *info, Node *Hu,
   ierr = DMGetLocalVector(user->stagda,&locBstag);CHKERRQ(ierr);  /* do NOT destroy it */
   ierr = DMGlobalToLocalBegin(user->stagda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
   ierr = DMGlobalToLocalEnd(user->stagda,user->Bstag,INSERT_VALUES,locBstag); CHKERRQ(ierr);
-
   ierr = DMDAVecGetArray(user->stagda,locBstag,&Bstag);CHKERRQ(ierr);
+
+  PetscInt start = PetscMax(info->xs - 1,            0),
+           end   = PetscMin(info->xs + info->xm + 1, Mx);
+  /* dimensionalize unknowns (put in "real" scale), including the ghost values */
+  for (i = start; i < end; i++) {
+    Hu[i].H *= user->Hscale;
+    Hu[i].u *= user->uscale;
+  }
+
   for (i=info->xs; i<info->xs+info->xm; i++) {
 
     /* MASS CONT */
     row.i = i; row.c = 0;  /* "row.c=0" means H component of f */
     if (i == 0) {
         col[0].i = i; col[0].c = 0;   v[0] = 1.0;
+        v[0] *= user->rscHa;
         ierr = MatSetValuesStencil(jac,1,&row,1,col,v,INSERT_VALUES);CHKERRQ(ierr);
     } else {
         col[0].i = i; col[0].c = 0;   v[0] = Hu[i].u / dx;
@@ -626,6 +633,7 @@ PetscErrorCode JacobianMatrixLocal(DMDALocalInfo *info, Node *Hu,
             col[2].i = i-1; col[2].c = 0;   v[2] = - Hu[i-1].u / dx;
             col[3].i = i-1; col[3].c = 1;   v[3] = - Hu[i-1].H / dx;
         }
+        for (k=0; k<4; k++)  v[k] *= user->rscuH;
         ierr = MatSetValuesStencil(jac,1,&row,(i > 1) ? 4 : 2,col,v,INSERT_VALUES);CHKERRQ(ierr);
     }  /* done with MASS CONT */
 
@@ -633,6 +641,7 @@ PetscErrorCode JacobianMatrixLocal(DMDALocalInfo *info, Node *Hu,
     row.i = i; row.c = 1;  /* "row.c=1" means u component of f */
     if (i == 0) {
         col[0].i = i; col[0].c = 1;   v[0] = 1.0;
+        v[0] *= user->rscua;
         ierr = MatSetValuesStencil(jac,1,&row,1,col,v,INSERT_VALUES);CHKERRQ(ierr);
     } else if (i == Mx - 1) {
         col[0].i = i-1; col[0].c = 0;   v[0] = 0.25 * user->omega * rg;
@@ -640,6 +649,7 @@ PetscErrorCode JacobianMatrixLocal(DMDALocalInfo *info, Node *Hu,
         Gl = GSR(dx,user->epsilon,user->n,Hu[i-1].u,Hu[i].u);
         col[2].i = i-1; col[2].c = 1;   v[2] =   2.0 * Bstag[i-1] * Gl / dx;
         col[3].i = i;   col[3].c = 1;   v[3] = - 2.0 * Bstag[i-1] * Gl / dx;
+        for (k=0; k<4; k++)  v[k] *= user->rsccalv;
         ierr = MatSetValuesStencil(jac,1,&row,4,col,v,INSERT_VALUES);CHKERRQ(ierr);
     } else {
         ul = (i == 1) ? user->ua : Hu[i-1].u;
@@ -652,10 +662,9 @@ PetscErrorCode JacobianMatrixLocal(DMDALocalInfo *info, Node *Hu,
         col[0].i = i-1; col[0].c = 0;
         if (i == 1)
            v[0] = 0.0;
-        else {
+        else
            v[0] = ( - Bstag[i-1] * Fl ) / dx
                     - rg * Hu[i].H * ( - dsurfdH(Hl,Hg,user->omega,0.0) ) / (2.0 * dx);
-        }
         col[1].i = i;   col[1].c = 0;
         hl = getsurf(Hl,Hg,user->omega,user->zocean,0.0);
         hr = getsurf(Hu[i+1].H,Hg,user->omega,user->zocean,0.0);
@@ -667,16 +676,27 @@ PetscErrorCode JacobianMatrixLocal(DMDALocalInfo *info, Node *Hu,
                  - rg * Hu[i].H * ( dsurfdH(Hu[i+1].H,Hg,user->omega,0.0) ) / (2.0 * dx);
         // df^u / du
         col[3].i = i-1; col[3].c = 1;
-        v[3] = ( - Bstag[i-1] * (Hl + Hu[i].H) * (-1.0/dx) * Gl ) / dx;
+        if (i == 1)
+           v[3] = 0.0;
+        else
+           v[3] = ( - Bstag[i-1] * (Hl + Hu[i].H) * (-1.0/dx) * Gl ) / dx;
         col[4].i = i;   col[4].c = 1;
         v[4] = (   Bstag[i]   * (Hu[i].H + Hu[i+1].H) * (-1.0/dx) * Gr 
                  - Bstag[i-1] * (Hl + Hu[i].H)        * (1.0/dx)  * Gl ) / dx
                - user->k * rg * Hu[i].H * GLREG(Hu[i].H,Hg,0.0);
         col[5].i = i+1; col[5].c = 1;
         v[5] = ( Bstag[i] * (Hu[i].H + Hu[i+1].H) * (1.0/dx) * Gr ) / dx;
+        for (k=0; k<6; k++)  v[k] *= user->rscstress;
         ierr = MatSetValuesStencil(jac,1,&row,6,col,v,INSERT_VALUES);CHKERRQ(ierr);
     }
   }
+
+  /* de-dimensionalize unknowns */
+  for (i = start; i < end; i++) {
+    Hu[i].H /= user->Hscale;
+    Hu[i].u /= user->uscale;
+  }
+
   ierr = DMDAVecRestoreArray(user->stagda,locBstag,&Bstag);CHKERRQ(ierr);
 
   ierr = DMRestoreLocalVector(user->stagda,&locBstag);CHKERRQ(ierr);
