@@ -77,3 +77,30 @@ def exactVeen(x,M0):
   H = tmp / u
   return H, u
 
+
+xa = 0.2 * L0
+xc = 0.98 * L0
+Ha, ua, _ = exactBod(xa)
+Tg = 0.5 * rho * g * omega * Hg**2
+Hc, uc = exactVeen(xc,Mg)
+Tc = 0.5 * rho * g * omega * Hc**2
+
+def printtable():
+  print 'important constants and values for exact solution:'
+  print '  H0    = %10.3f m' % H0
+  print '  L0    = %10.3f km' % (L0 / 1000.0)
+  print '  zo    = %10.3f m' % bedg
+  print '  [xa   = %10.3f km]' % (xa / 1000.0)
+  print '  H(0)  = %10.3f m' % Ha
+  print '  u(0)  = %10.3f m/a' % (ua * secpera)
+  print '  xg    = %10.3f km   (from start xa)' % ((xg - xa) / 1000.0)
+  print '  H(xg) = %10.3f m' % Hg
+  print '  u(xg) = %10.3f m/a' % (ug * secpera)
+  print '  T(xg) = %10.3f 10^8 Pa m' % (1.0e-8 * Tg)
+  print '  B(xg) = %10.3f 10^8 Pa s^(1/3)' % (1.0e-8 * Bg)
+  print '  M(xg) = %10.3f m/a' % (Mg * secpera)
+  print '  xc    = %10.3f km   (from start xa)' % ((xc - xa) / 1000.0)
+  print '  H(xc) = %10.3f m' % Hc
+  print '  u(xc) = %10.3f m/a' % (uc * secpera)
+  print '  T(xc) = %10.3f 10^8 Pa m' % (1.0e-8 * Tc)
+

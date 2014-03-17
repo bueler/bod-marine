@@ -79,6 +79,8 @@ E-mail: \emph{\texttt{elbueler\@@alaska.edu}}}
 
 \maketitle
 
+\sectionsize
+
 \subsection*{Introduction}  Early theoretical glaciology created two parabolic profiles as the shapes of steady flow-line ice sheets lying on flat beds, as in Figure \ref{fig:twoparabolas}.  One was the profile of an ice sheet with perfectly-plasticity \citep{Orowan,Nye52plastic} and the other the profile for a sliding ``plug'' flow investigated by \cite{Bodvardsson}.  These are global views of free surface flows in glaciology.  They focus on different aspects of the global problem and they come to rather different conclusions.\footnote{Draft date \emph{\today}.}
 
 These parabolas exactly solve their respective nonlinear equations which determine ice thickness.  Up to scaling, one is of the form $x=1-y^2$ (Orowan-Nye) and the other is of the form $y=1-x^2$ (Bodvardsson).  The former perfect-plasticity solution has a central peak at the highest point of the ice sheet, and a margin with unbounded surface gradient.  The plug flow solution has a smooth dome and a finite-slope, wedge-shaped margin.
@@ -203,46 +205,50 @@ B(x) = \frac{T_0}{2 H |u_x|^{(1/n)-1} u_x}. \label{eq:hardnessdefine}
 
 Based on these observations we can construct a marine ice sheet exact solution by extending Bodvardsson's grounded solution above to the floating ice.  First taking $b=0$ as the flat bed elevation, we suppose the ocean has surface elevation $z_o>0$, thus determining the grounding-line thickness by $H(x_g) = (\rho_w/\rho) (z_o - b)$.  Then from Bodvardsson's thickness solution \eqref{eq:bodsoln} we can determine $x_g$.  At $x_g$, from \eqref{eq:bodvelocity} and \eqref{eq:bodsoln}, we know $u(x_g)$ as well.  For $x_g \le x \le x_c$, the floating ice shelf, we then set $M(x) = M(x_g)$ as constant from the formula \eqref{eq:bodmassbalance}, thus making $M(x)$ continuous across the grounding line.  The equation $T(x) = \frac{1}{2} \omega \rho g H(x)^2$ determines $T_o=T(x_g)$ for use in equation \eqref{eq:hardnessdefine}, which determines $B(x_g)$ in particular, and so then we set $B(x)=B(x_g)$ for $x_g \le x \le x_c$.
 
-The result of the above construction is the following set of formulas for an exact marine ice sheet satisfying our steady model equations \eqref{eq:steadymass}--\eqref{eq:xgregularity}.  The velocity comes from combining the Bodvardsson and van der Veen results,
+The result of the above construction is the following set of formulas for an exact marine ice sheet satisfying our steady model equations \eqref{eq:steadymass}--\eqref{eq:xgregularity}.  The velocity comes from combining the Bodvardsson (1955) and van der Veen (1983) results,
 \begin{equation}
 u(x) = \begin{cases} \frac{2 H_0}{k L_0^2}\,x, & 0 \le x \le x_g, \\
                      u_s(x), & x_g \le x \le x_c.
        \end{cases} \label{eq:marinevel}
 \end{equation}
-where
-\begin{equation}
-C_s = \left(\frac{\rho g \omega}{4 B(x_g)}\right)^n.  \label{eq:vanderveenconstant}
-\end{equation}
-and where $u_s(x)$ is defined by
+where $u_s(x)$ is defined by
 \begin{equation}
 u_s(x)^{n+1} = u(x_g)^{n+1} + \frac{C_s}{M(x_g)} \left(\left[Q_g + M(x_g) (x-x_g)\right]^{n+1} - Q_g^{n+1}\right) \label{eq:vanderveenvel}
 \end{equation}
-where $Q_g = u(x_g) H(x_g)$.  Similarly the thickness comes from combining the results:
+and $C_s = \left(\rho g \omega/(4 B(x_g))\right)^n$ and $Q_g = u(x_g) H(x_g)$.  Similarly the thickness is:
 \begin{equation}
 H(x) = \begin{cases} H_0 \left(1 - (\frac{x}{L_0})^2\right), & 0 \le x \le x_g, \\
                      \frac{Q_g + M(x_g) (x-x_g)}{u_s(x)}, & x_g \le x \le x_c.
        \end{cases} \label{eq:marinethickness}
 \end{equation}
-Formulas \eqref{eq:marinevel} and \eqref{eq:marinethickness} define the continuous functions which are shown in Figure \ref{fig:exactmarine}, using the specific values in Table \ref{tab:exactsolnnotation}.
+Formulas \eqref{eq:marinevel} and \eqref{eq:marinethickness} define the continuous functions which are shown in Figure \ref{fig:exactmarine}, using the specific values in Table \ref{tab:exactsoln}.
 
 %\small
 \begin{table}
-\caption{Additional specific values used in the exact solution shown in Figures \ref{fig:exactmarine}--\eqref{fig:exactmarine-detail}.}\label{tab:exactsolnnotation}
+\caption{Specific values of the exact solution shown in Figures \ref{fig:exactmarine}--\ref{fig:exactmarine-detail}; ``g.l.'' = grounding line and ``c.f.'' = calving front.}\label{tab:exactsoln}
 
 \medskip
 \begin{tabular}{llll}
 Symbol & Description & Units \\ \hline
-FIXME $x_g$ & grounding line & m  \\
-FIXME $z_o$ & ocean surface elevation & m \\
+$H(0)$ & thickness at $x=0$ & 2880 m  \\
+$u(0)$ & ice velocity at $x=0$ & 100 $\text{m}\,\text{a}^{-1}$  \\ \hline
+$x_g$ & location of g.l. & 350 km  \\
+$B(x_g)$ & ice hardness at g.l. & $4.614 \times 10^{8}$ $\text{Pa}\,\text{s}^{1/3}$  \\
+$H(x_g)$ & thickness at g.l. & 570 m  \\
+$M(x_g)$ & mass balance at g.l. & -4.290 $\text{m}\,\text{a}^{-1}$  \\
+$T(x_g)$ & stress at g.l. & $1.665 \times 10^{8}$ $\text{Pa}\,\text{m}$  \\
+$u(x_g)$ & ice velocity at g.l. & 450 $\text{m}\,\text{a}^{-1}$  \\ \hline
+$x_c$ & location of c.f. & 390 km  \\
+$H(x_c)$ & thickness at c.f. & 182.938 m  \\
+$T(x_c)$ & stress at c.f. & $0.171 \times 10^{8}$ $\text{Pa}\,\text{m}$  \\
+$u(x_c)$ & ice velocity at c.f. & 464.092 $\text{m}\,\text{a}^{-1}$  \\ \hline
+$b$ & bedrock elevation & 0 m \\
+$z_o$ & ocean surface elevation & 504.572 m \\
 \end{tabular}
 \end{table}
 %\normalsize
 
 From the thickness $H(x)$ and the velocity $u(x)$ we can find continuous functions $M(x)$ and $B(x)$ for the full marine flowline by using equations \eqref{eq:bodmassbalance} and \eqref{eq:hardnessdefine}.  These functions are shown in Figure \ref{fig:exactMB}.  Then we can use equation \eqref{eq:Tstress} to find $T(x)$; this is shown in Figure \ref{fig:exactbetaT}.  In Figure \ref{fig:exactbetaT} we also show the sliding coefficient $\beta(x)$, which drops to zero discontinuously at $x_g$.  Finally Figure \ref{fig:exactmarine-detail} shows a detail of the grounding line and floating ice in the exact solution.
-
-Note that, because this paper is focussed on ice flow dynamics and grounding lines, we treat $M(x)$ as a predetermined field (i.e.~the one shown in Figure \ref{fig:exactMB}).  This removes the climatically-interesting elevation--accumulation feedback, and the associated instability, which was considered by Bodvardsson, Weertman, and others.  This feedback can be added back by restorig the elevation-dependence of the mass balance, that is, by using equation \eqref{eq:bodmassbalance} to determine $M$ from $H(x)$.
-
-FIXME
 
 \begin{figure}[ht]
 \onecol{exactmarine-M-B}
@@ -251,13 +257,17 @@ FIXME
 
 \begin{figure}[ht]
 \onecol{exactmarine-beta-T}
-\caption{The sliding coefficient $\beta(x)$ (solid) and the vertically-integrated longitudinal stress $T(x)$ (dashed) for the exact solution.  The solid curve shows $\beta = k \rho g H$ on both sides of the grounding line, but the actual basal resistance experienced by the shelf drops to zero at the grounding line (dotted).} \label{fig:exactbetaT}
+\caption{The sliding coefficient $\beta(x)$ (solid) and the vertically-integrated longitudinal stress $T(x)$ (dashed) for the exact solution.  The solid curve shows $\beta = k \rho g H$ on both sides of the grounding line.  The actual basal resistance experienced by the shelf drops to zero at the grounding line (dotted).} \label{fig:exactbetaT}
 \end{figure}
+
+Note that, because this paper is focussed on ice flow dynamics and grounding lines, we treat $M(x)$ as a predetermined field (i.e.~the one shown in Figure \ref{fig:exactMB}).  This removes the climatically-interesting elevation--accumulation feedback, and the associated instability, which was considered by Bodvardsson, Weertman, and others.  This feedback can be added back by restoring the elevation-dependence of the mass balance, that is, by using equation \eqref{eq:bodmassbalance} to determine $M$ from $H$.
 
 \begin{figure}[ht]
 \onecol{exactmarine-geometry-detail}
 \caption{Detail of Figure \ref{fig:exactmarine}, showing the floating ice shelf geometry and velocity.} \label{fig:exactmarine-detail}
 \end{figure}
+
+The floating ice shelf is a relatively short 40 km; see Figures \ref{fig:exactmarine} and \ref{fig:exactmarine-detail}.  To explain, note that the equilibrium line $H_{ela}$ in Bodvardsson's (1955) solution is high on the ice sheet because of its relation to the upstream ice thickness in the construction of the exact solution (i.e.~$H_{ela} = (2/3) H_0$).  This in turn implies $M(x_g)$ is quite negative (equation \eqref{eq:bodmassbalance}; see Figure \ref{fig:exactMB}).  Because van der Veen's (1983) solution uses constant mass balance, and because we want continuity for $M(x)$, we therefore have an ice shelf experiencing rapid melting.  The location of the calving front $x_c$ must be put before the location where the ice has melted away.  As a result of these same factors we can also see a rapid decline in the stress $T(x)$ from its constant grounded value to its small value at $x_c$ (Figure \ref{fig:exactbetaT} and Table \ref{tab:exactsoln}).  Though the ice shelf shown here is very wedge-like, the thickness $H(x)$ for floating ice comes from formula \eqref{eq:marinethickness} and thus it is not a simple linear function.
 
 
 \subsection*{Numerical results}
