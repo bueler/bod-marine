@@ -31,8 +31,10 @@ typedef struct {
   Vec         Hu;  /* exact thickness (Hu[i][0]) and exact velocity (Hu[i][1]) on regular grid */
   PetscReal   xg;  /* exact grounding line location */
   PetscReal   Hg;  /* exact thickness at grounding line location */
-  PetscReal   Mg;  /* exact mass balance at grounding line location */
-  PetscReal   Bg;  /* exact ice hardness at grounding line location */
+  PetscReal   Mg;  /* exact mass balance at grounding line location;
+                      extended by constant in floating */
+  PetscReal   Bg;  /* exact ice hardness at grounding line location;
+                      extended by constant in floating */
 } ExactCtx;
 
 /* User-defined application context.  Filled by Fill...() and used by
@@ -49,7 +51,6 @@ typedef struct {
   PetscReal   ua;      /* velocity at x=xa, for Dirichlet condition on mass cont */
   PetscReal   zocean;  /* surface elevation of ocean; bedrock is at zero elevation */
   PetscReal   k;       /* sliding parameter */
-  PetscReal   Mfloat;  /* mass balance rate in floating ice */
   PetscReal   epsilon; /* regularization of viscosity, a strain rate */
   PetscReal   Hscale, uscale;  /* variable scaling coeffs */
   PetscReal   rscHa, rscua, rscuH, rscstress, rsccalv;  /* residual scaling coeffs */
@@ -108,7 +109,6 @@ int main(int argc,char **argv)
 /* see ../marineshoot.py: */
 #define xa_default    0.2
 #define xc_default    0.98
-#define Mdrop_default 1.0
 
   /* define interval [xa,xc] */
   user.xa = xa_default * exact.L0;
@@ -116,7 +116,6 @@ int main(int argc,char **argv)
 
   /* get Dirichlet boundary conditions, and mass balance on shelf */
   ierr = exactBod(user.xa, &(user.Ha), &(user.ua), &tmp1); CHKERRQ(ierr);
-  user.Mfloat = Mdrop_default * exact.Mg;
 
   /* regularize using strain rate of 1/(length) per year */
   user.epsilon = (1.0 / user.secpera) / (user.xc - user.xa);
@@ -353,7 +352,7 @@ PetscErrorCode FillExactSoln(ExactCtx *exact, AppCtx *user)
       ierr = exactBod(x[i], &(Hu[i].H), &(Hu[i].u), &dum1); CHKERRQ(ierr);
     } else {
       /* floating part: van der Veen formula */
-      ierr = exactVeen(x[i], user->Mfloat, &(Hu[i].H), &(Hu[i].u));
+      ierr = exactVeen(x[i], exact->Mg, &(Hu[i].H), &(Hu[i].u));
       if (ierr) PetscPrintf(PETSC_COMM_WORLD,"WARNING:  exactVeen() returns error %d at i=%d, x[i]=%.3f km\n",
                             ierr,i,x[i]/1000.0);
     }
@@ -419,7 +418,7 @@ PetscErrorCode FillDistributedParams(ExactCtx *exact, AppCtx *user)
       ierr = exactBod(xstag[i], &dum1, &dum2, &(Mstag[i])); CHKERRQ(ierr);
       ierr = exactBodBueler(xstag[i], &dum1, &(Bstag[i])); CHKERRQ(ierr);
     } else  {
-      Mstag[i] = user->Mfloat;
+      Mstag[i] = exact->Mg;
       Bstag[i] = exact->Bg;
     }
   }
