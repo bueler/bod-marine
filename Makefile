@@ -1,7 +1,9 @@
 all: exmarine.pdf
 
 otherexmfigs = exactmarine-M-B.pdf exactmarine-beta-T.pdf \
-          exactmarine-geometry-detail.pdf exactmarine-error.pdf
+          exactmarine-geometry-detail.pdf exactmarine-error.pdf \
+          exactmarine-dt-adaptive.pdf
+
 figures = twoparabolas.pdf verifN.pdf exactmarine-geometry.pdf
 
 twoparabolas.pdf: twoparabolas.py

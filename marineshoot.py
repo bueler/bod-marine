@@ -123,8 +123,9 @@ Tlow = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * 100.0**2
 Thigh = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * 600.0**2
 olow = objective(Tlow)
 ohigh = objective(Thigh)
-"  [Tlow,Thigh] = [%.7e,%.7e]  gives  [%2.3e,%2.3e]" % (Tlow,Thigh,olow,ohigh)
-for j in range(25):
+"  [Tlow,Thigh] = [%.11e,%.11e]  gives  [%2.3e,%2.3e]" % (Tlow,Thigh,olow,ohigh)
+Ttol = 1.0e-4   # compare T(x_g) = 1.6e8
+for j in range(50):
     Tmid = (Tlow + Thigh) / 2.0
     omid = objective(Tmid)
     if omid * olow > 0.0:
@@ -133,31 +134,49 @@ for j in range(25):
     else:
         ohigh = omid
         Thigh = Tmid
-    print "  T range [%.7e,%.7e]  gives  objective range [%2.3e,%2.3e]" \
+    print "  T range [%.11e,%.11e]  gives  objective range [%2.3e,%2.3e]" \
         % (Tlow,Thigh,olow,ohigh)
+    if (abs(Thigh - Tlow) < Ttol):
+        print "  |Thigh-Tlow| < tol = %.2e satisfied at j = %d " % (Ttol,j)
+        break
 Tmid = (Tlow + Thigh) / 2.0
 omid = objective(Tmid)
-print "final:   Tmid   = %.7e  gives  omid = %2.3e" % (Tmid,omid)
-print "[compare Tcheat = %.7e]" % Tcheat
+print "final:   Tmid   = %.11e  gives  omid = %2.3e" % (Tmid,omid)
+print "[compare Tcheat = %.11e]" % Tcheat
+
 
 if not(genfigs):
     exit(0)
-
 # proceed to make figures
 
-print "initial conditions:"
-print "  at xa = %.3f km we have initial values" % (exactsolns.xa/1000.0)
-print "  u = %7.2f m a-1, H = %.2f m" % (exactsolns.ua*exactsolns.secpera, exactsolns.Ha)
-print "  and  Tinit = %.6e Pa m (which is cheating, for plot purpose)" % Tcheat
+print ""
+print "solve ODEs again for figures: first with cheating initial, then with result of bisection"
+print ""
 
-# solve ODES: first with cheating initial, then with result of bisection
 # get result on reasonably fine grid
 x = np.linspace(exactsolns.xa,exactsolns.xc,1001)
 v0 = np.array([exactsolns.ua, exactsolns.Ha, Tcheat])  # initial values at x[0] = xa
-#v, info = odeint(f,v0,x,full_output=True)          # solve ODE system
-v = odeint(f,v0,x)          # solve ODE system
+v = odeint(f,v0,x,rtol=1.0e-12,atol=1.0e-14)                              # solve ODE system
 v0mid = np.array([exactsolns.ua, exactsolns.Ha, Tmid])
-vmid = odeint(f,v0mid,x)              # solve ODE system to determine v[1,2] = T
+vmid, info = odeint(f,v0mid,x,rtol=1.0e-12,atol=1.0e-14,full_output=True) # solve ODE system
+
+# stepsize and method type in figure 0
+# see http://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.odeint.html
+mused = info['mused']
+tcur  = (info['tcur'] - exactsolns.xa) / 1000.0
+hu    = info['hu'] / 1000.0
+fig = plt.figure(figsize=(6,4))
+# star   = (mused==1) = non-stiff Adams
+plt.semilogy(tcur[mused==1],hu[mused==1],'k*',ms=12)
+# circle = (mused==2) = stiff BDF
+plt.semilogy(tcur[mused==2],hu[mused==2],'ko',ms=8,markerfacecolor='w')
+plt.xlabel('x  (km)')
+plt.ylabel('stepsize  (km)')
+plt.grid(True)
+plt.ylim(1.0e-2,2.0e1)
+imagename = nameroot + '-dt-adaptive.pdf'
+plt.savefig(imagename)
+print '  image file %s saved' % imagename
 
 u = v[:,0]
 H = v[:,1]
@@ -165,27 +184,6 @@ T = v[:,2]
 umid = vmid[:,0]
 Hmid = vmid[:,1]
 Tmid = vmid[:,2]
-
-# compute and report errors
-xgnd = x[(x <= exactsolns.xg)]
-Hbod, ubod, _ = exactsolns.exactBod(xgnd)
-Hboderror = abs(H[(x <= exactsolns.xg)] - Hbod).max()
-uboderror = abs(u[(x <= exactsolns.xg)] - ubod).max()
-xveen = x[(x > exactsolns.xg)]
-Hveen, uveen = exactsolns.exactVeen(xveen,exactsolns.Mg)
-Hveenerror = abs(H[(x > exactsolns.xg)] - Hveen).max()
-uveenerror = abs(u[(x > exactsolns.xg)] - uveen).max()
-print "results:"
-print "  max |H-Hexact| = %.2e m      for grounded ice" % Hboderror
-print "  max |u-uexact| = %.2e m a-1  for grounded ice" % (uboderror * exactsolns.secpera)
-print "  max |H-Hexact| = %.2e m      for floating ice" % Hveenerror
-print "  max |u-uexact| = %.2e m a-1  for floating ice" % (uveenerror * exactsolns.secpera)
-
-print "calving front results:"
-print "  at %.3f km we have values" % (x[-1]/1000.0)
-print "  u = %7.2f m a-1, H = %.2f m, T = %.6e Pa m" % (u[-1]*exactsolns.secpera, H[-1], T[-1])
-Tcalvc = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * H[-1]**2
-print "COMPARE Tcalvc = %.6e Pa m" % Tcalvc
 
 # geometry and velocity in figure 1 (two-axis)
 hh, bb = surfaces(H)
@@ -297,6 +295,7 @@ plt.semilogy((x-exactsolns.xa)/1000.0,abs(u-uexact) * exactsolns.secpera,'k',lw=
 plt.semilogy((x-exactsolns.xa)/1000.0,abs(umid-uexact) * exactsolns.secpera,'k--',lw=3.0)
 ax2 = plt.gca()
 ax2.set_xlim([0.0,(xoceanend-exactsolns.xa)/1000.0])
+ax2.set_yticks([1.0e-14,1.0e-12,1.0e-10,1.0e-8,1.0e-6,1.0e-4,1.0e-2])
 plt.grid(True)
 plt.ylabel("u error   (m a-1)", fontsize=14)
 plt.xlabel("x   (km)")

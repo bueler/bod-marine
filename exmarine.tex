@@ -272,14 +272,19 @@ The floating ice shelf is a relatively short 40 km; see Figures \ref{fig:exactma
 
 \subsection*{Numerical results}
 
-FIXME:  When one does nonlinear shooting using the exact correct $T$ value, one gets the best-case adaptive-grid error in Figure \ref{fig:shoot-error}.
+FIXME:  When one does nonlinear shooting using the exact correct $T$ value, one gets the best-case adaptive-grid error in Figure \ref{fig:shoot-error}.  Used with high tolerances: rtol = $10^{-12}$ and atol = $10^{-14}$.  The ode solver detects that the grounding line should involve shorter steps, but more importantly the grounded ice requires a stiff method while the floating is nonstiff; see Figure \ref{fig:shoot-dt-adaptive}.
 
 \begin{figure}[ht]
 \onecol{exactmarine-error}
 \caption{Pointwise error in thickness (upper panel) and in velocity (lower panel) from an adaptive numerical ODE scheme.  Both the ``cheating'' case (solid), where we use the exactly-correct initial value for $T$, and the ``realistic'' case (dashed), where the shooting method converges on the correct initial value for $T$ by the bisection method, are shown.} \label{fig:shoot-error}
 \end{figure}
 
-FIXME: FIGURE SHOWING GRID(s)
+\begin{figure}[ht]
+\onecol{exactmarine-dt-adaptive}
+\caption{The adaptive numerical ODE scheme in the ``realistic'' case makes steps of up to 10 km in grounded ice, but at the grounding line $x_g=350$ km the step size is reduced to a few hundred meters.  The adaptive mechanism automatically switches from stiff when grounded (circles) to non-stiff when floating (stars).} \label{fig:shoot-dt-adaptive}
+\end{figure}
+
+FIXME: why stiff when grounded and non-stiff when floating?  look at linearization
 
 A special-purpose, stand-alone C code implementing a second-order finite difference scheme is described in the appendix.  It is also available as part of the PISM source code.  It has a parallel implementation using the PETSc \citep{petsc-user-ref} library and it uses a Newton scheme to achieve observed quadratic convergence of the iteration.
 
