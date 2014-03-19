@@ -106,21 +106,19 @@ def f(v,x):
   vp = solve(A,g)
   return vp.flatten()
 
-rr = exactsolns.rho / exactsolns.rhow
-
 def objective(Tinit):
     v0 = np.array([exactsolns.ua, exactsolns.Ha, Tinit])  # initial values at x[0] = xa
     x = np.linspace(exactsolns.xa,exactsolns.xc,2)
     v = odeint(f,v0,x)              # solve ODE system to determine v[1,2] = T
-    Tcalvc = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * v[1,1]**2
+    Tcalvc = 0.5 * exactsolns.rho * exactsolns.g * exactsolns.omega * v[1,1]**2
     return (v[1,2] - Tcalvc) / Tcalvc
 
 uxcheat = (1.0/exactsolns.k) * (2.0 * exactsolns.H0 / exactsolns.L0**2)
 Tcheat = 2.0 * exactsolns.Ha * B(exactsolns.xa) * uxcheat**(1.0/exactsolns.n)  # the cheat is to use B()
 
 # run bisection
-Tlow = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * 100.0**2
-Thigh = 0.5 * exactsolns.rho * exactsolns.g * (1.0 - rr) * 600.0**2
+Tlow = 0.5 * exactsolns.rho * exactsolns.g * exactsolns.omega * 100.0**2
+Thigh = 0.5 * exactsolns.rho * exactsolns.g * exactsolns.omega * 600.0**2
 olow = objective(Tlow)
 ohigh = objective(Thigh)
 "  [Tlow,Thigh] = [%.11e,%.11e]  gives  [%2.3e,%2.3e]" % (Tlow,Thigh,olow,ohigh)
