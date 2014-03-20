@@ -4,11 +4,11 @@ from sys import exit
 import numpy as np
 import scipy.linalg as la
 
-from exactsolns import *
-# n, xg
+from exactsolns import H0, L0, rho, g, omega, Bg, ug, Hg, Mg, xg, n,
+                       exactBod, exactBodBueler, exactVeen
 # H, u, M = exactBod(x)
 # T, B = exactBodBueler(x)
-# H, u = exactVeen(x,M0)
+# H, u = exactVeen(x)
 
 def ddx_exactBod(x):
     hxx = - 2.0 * H0 / (L0 * L0)
@@ -16,16 +16,16 @@ def ddx_exactBod(x):
     dudx  = - hxx / k
     return dHdx, dudx
 
-def ddx_exactVeen(x,M0):
-    C = (rho * g * omega / (4.0 * Bg))**n
-    tmp = ug * Hg + M0 * (x - xg)
-    uspow = ug**(n+1) + (C / M0) * ( tmp**(n+1) - (ug * Hg)**(n+1) )
+def ddx_exactVeen(x):
+    Cs = (rho * g * omega / (4.0 * Bg))**n
+    Qg = ug * Hg
+    tmp = Qg + Mg * (x - xg)
+    u = ( ug**(n+1) + (Cs / Mg) * ( tmp**(n+1) - Qg**(n+1) ) )**(1.0/(n+1))
     if np.any(u <= 0):
         print "ERROR:  non-positive u detected in ddx_exactVeen()" 
         exit(1)
-    H = tmp / u
-    return H, u
-    FIXME
+    dudx = C * tmp**n / u**n
+    dHdx = (Mg * u - tmp * dudx) / u**2
     return dHdx, dudx
 
 # linear ODE system for v = (u1(x),H1(x),T1(x)).T is of form

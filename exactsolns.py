@@ -65,12 +65,13 @@ def exactBodBueler(x):
 
 _, Bg   = exactBodBueler(xg)
 
-def exactVeen(x,M0):
+def exactVeen(x):
   # van der Veen: get thickness and velocity for floating ice shelf, given
   #   Mg, Bg, xg, Hg, ug computed above from Bodvardsson
-  C = (rho * g * omega / (4.0 * Bg))**n
-  tmp = ug * Hg + M0 * (x - xg)
-  u = ( ug**(n+1) + (C / M0) * ( tmp**(n+1) - (ug * Hg)**(n+1) ) )**(1.0/(n+1))
+  Cs = (rho * g * omega / (4.0 * Bg))**n
+  Qg = ug * Hg
+  tmp = Qg + Mg * (x - xg)
+  u = ( ug**(n+1) + (Cs / Mg) * ( tmp**(n+1) - Qg**(n+1) ) )**(1.0/(n+1))
   if np.any(u <= 0):
     print "ERROR:  non-positive u detected in exactVeen()" 
     exit(1)
@@ -82,7 +83,7 @@ xa = 0.2 * L0
 xc = 0.98 * L0
 Ha, ua, _ = exactBod(xa)
 Tg = 0.5 * rho * g * omega * Hg**2
-Hc, uc = exactVeen(xc,Mg)
+Hc, uc = exactVeen(xc)
 Tc = 0.5 * rho * g * omega * Hc**2
 
 def printtable():

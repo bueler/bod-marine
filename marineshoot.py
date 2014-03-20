@@ -279,7 +279,7 @@ for j in range(len(x)):
   if x[j] < exactsolns.xg:
     Hexact[j], uexact[j], _ = exactsolns.exactBod(x[j])
   else:
-    Hexact[j], uexact[j] = exactsolns.exactVeen(x[j],exactsolns.Mg)
+    Hexact[j], uexact[j] = exactsolns.exactVeen(x[j])
 fig = plt.figure(figsize=(6,5))
 plt.subplot(2,1,1)
 plt.semilogy((x-exactsolns.xa)/1000.0,abs(H-Hexact),'k',lw=2.0)

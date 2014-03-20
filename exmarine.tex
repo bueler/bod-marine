@@ -83,9 +83,7 @@ E-mail: \emph{\texttt{elbueler\@@alaska.edu}}}
 
 \section*{Introduction}
 
-Early theoretical glaciology created two parabolic profiles as the shapes of steady flow-line ice sheets lying on flat beds, as in Figure \ref{fig:twoparabolas}.  One was the profile of an ice sheet with perfectly-plasticity \citep{Orowan,Nye52plastic} and the other the profile for a sliding ``plug'' flow investigated by \cite{Bodvardsson}.  These are global views of free surface flows in glaciology.  They focus on different aspects of the global problem and they come to rather different conclusions.\footnote{Draft date \emph{\today}.}
-
-These parabolas exactly solve their respective nonlinear equations which determine ice thickness.  Up to scaling, one is of the form $x=1-y^2$ (Orowan-Nye) and the other is of the form $y=1-x^2$ (Bodvardsson).  The former perfect-plasticity solution has a central peak at the highest point of the ice sheet, and a margin with unbounded surface gradient.  The plug flow solution has a smooth dome and a finite-slope, wedge-shaped margin.
+Early\footnote{Draft date \emph{\today}.} theoretical glaciology created two parabolic profiles as the shapes of steady flow-line ice sheets lying on flat beds, as in Figure \ref{fig:twoparabolas}.  One was the profile of an ice sheet with perfectly-plasticity \citep{Orowan,Nye52plastic} and the other the profile for a sliding ``plug'' flow investigated by \cite{Bodvardsson}.  These global views of free surface flows in glaciology focus on different aspects of the  problem and they come to rather different conclusions.  Up to scaling, one is of the form $x=1-y^2$ (Orowan-Nye) and the other is of the form $y=1-x^2$ (Bodvardsson).  The former perfect-plasticity solution has a central peak at the highest point of the ice sheet, and a margin with unbounded surface gradient.  The plug flow solution has a smooth dome and a finite-slope, wedge-shaped margin.
 
 \begin{figure}[ht]
 \onecol{twoparabolas}
@@ -112,7 +110,7 @@ h = \begin{cases} H+b,            & \rho H \ge \rho_w (z_o - b) \\
 \beta = \begin{cases} k \rho g H,    & \rho H \ge \rho_w (z_o - b) \\
                       0,          & \rho H < \rho_w (z_o - b) \end{cases}. \label{eq:betafull}
 \end{gather}
-Equations \eqref{eq:steadymass}--\eqref{eq:betafull} apply on an interval $0 < x < x_c$ where $x_c$ is the floating calving-front.  The grounded ice rests on flat bedrock at elevation $b$, a constant in this context.  Note $M(x)$ combines the surface and basal mass balance and $B(x)$ is the ice hardness, and these may depend on location.  In grounded ice the basal shear stress satisfies $\tau_b = - \beta u$ \citep{MacAyeal}, but we will scale the coefficient with the ice overburden pressure so that $\beta = k \rho g H$ \citep{Bodvardsson}.  The ``Archimedean factor'' $\omega = 1 - \rho/\rho_w$ relates surface elevation and thickness in floating ice.  Note $z=z_o$ is the elevation of the ocean surface.
+Equations \eqref{eq:steadymass}--\eqref{eq:betafull} apply on an interval $0 < x < x_c$ where $x_c$ is the floating calving-front.  The grounded ice rests on flat bedrock at elevation $b$, a constant in this context.  Note $M(x)$ combines the surface and basal mass balance and $B(x)$ is the ice hardness, and these may depend on location.  In grounded ice the basal shear stress satisfies $\tau_b = - \beta u$ \citep{MacAyeal}, but we will scale the coefficient with the ice overburden pressure so that $\beta = k \rho g H$ \citep{Bodvardsson}.  The ``Archimedean factor'' $\omega = 1 - \rho/\rho_w$ relates surface elevation to thickness in floating ice.  Note $z_o$ is the elevation of the ocean surface.
 
 \begin{figure}[ht]
 \onecol{exactmarine-geometry}
@@ -282,15 +280,15 @@ The floating ice shelf is a relatively short 40 km; see Figures \ref{fig:exactma
 
 \section{Numerical Results}
 
-\subsection*{Verification of a grid-free ``shooting'' numerical method}  In our steady flowline case the model equations have the form of a two-point boundary value problem for ordinary differential equations (ODEs).  Specifically, the system of three first-order ODEs \eqref{eq:steadymass}--\eqref{eq:Tstress} has two boundary conditions at $x=0$, namely equations \eqref{eq:leftbc}, and one at $x=x_c$, the calving-front stress condition \eqref{eq:rightbc}.  
+\subsection*{Verification of a grid-free ``shooting'' numerical method}  In our steady flowline case the model equations form a two-point boundary value problem (BVP) for ordinary differential equations (ODEs).  Specifically, the three first-order ODEs \eqref{eq:steadymass}--\eqref{eq:Tstress} are subject to two boundary conditions at $x=0$, namely equations \eqref{eq:leftbc}, and one at $x=x_c$, the calving-front stress condition \eqref{eq:rightbc}.  
 
-Such a problem allows a nonlinear ``shooting'' method \citep[section 17.1]{Pressetal}.  For this technique we use the correct values for $u(0)$ and $H(0)$ from \eqref{eq:leftbc} and guess an additional value $T_0$ for $T(0)$.  Then we apply a standard ODE initial value problem (IVP) solver to compute solutions $(\tilde u(x),\tilde H(x),\tilde T(x))$ from $x=0$ to $x=x_c$.  The failure of these ODE IVP solutions to fit boundary condition \eqref{eq:rightbc} is a measure of the wrongness of $T_0$.  If we define this function
+A nonlinear ``shooting'' method \citep[section 17.1]{Pressetal} applies to this problem.  We use the correct values for $u(0)$ and $H(0)$ from \eqref{eq:leftbc} and guess an additional value $T_0$ for $T(0)$.  Then we use a numerical ODE initial value problem (IVP) solver to compute a solution $(\tilde u(x),\tilde H(x),\tilde T(x))$ from $x=0$ to $x=x_c$.  The failure of an ODE IVP solution to fit boundary condition \eqref{eq:rightbc} is a measure of the wrongness of $T_0$.  In fact, if we define this function
 \begin{equation}
-F(T_0) = \tilde T(x_c) - \frac{1}{2} \omega \rho g \tilde H(x_c)^2
+F(T_0) = \tilde T(x_c) - \frac{1}{2} \omega \rho g \tilde H(x_c)^2  \label{eq:Fbisection}
 \end{equation}
-we can apply a numerical method to find the root $\hat T_0$ to the problem $F(T_0)=0$.  The solution $T_0$ to the problem $F(T_0)=0$ gives us initial conditions so that the ODE IVP solution $(u,H,T)$ solves the complete two-point boundary value problem \eqref{eq:steadymass}--\eqref{eq:rightbc}.
+then we can apply a numerical method to find the root $\hat T_0$ to the problem $F(T_0)=0$.  This root gives us complete initial conditions so that the ODE IVP solution also solves the complete two-point BVP \eqref{eq:steadymass}--\eqref{eq:rightbc}.
 
-A robust root-finding method, which avoids computing $F'$, is bisection \citep[section 9.1]{Pressetal}.  Note $F'$ may not exist in this case because of the low regularity of the solution at the interior point $x=x_g$.  Observe that in this case it is easy to get an initial bracket, that is, values of $T_0$ which make $F$ have different signs, for starting the bisection iteration.  We will see, because we have an exact solution, clear evidence that the bisection iteration succeeds despite the low reqularity of the ODE solution.
+A robust root-finding method is bisection \citep[section 9.1]{Pressetal}.  It is guaranteed to converge if $F$ is continuous and if an initial bracket is given, which is easy to find in this case.  Note $F'$ may not exist because of the low regularity of the solution at the interior point $x=x_g$.  We will see, by using our exact solution, clear evidence that the bisection iteration succeeds despite the uncertain smoothness of $F$ in \eqref{eq:Fbisection}.
 
 \begin{figure}[ht]
 \onecol{exactmarine-error}
