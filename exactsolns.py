@@ -28,7 +28,7 @@ def exactBod(x):
   # Bodvardsson: get geometry and velocity from mass continuity and
   #   T_x = 0  and assumption  beta = k rho g H;  grounded only
   if np.any((x < 0.0) | (x > L0)):
-    print "ERROR in exactN(): x out of range [0,L0]"
+    print "ERROR in exactBod(): x out of range [0,L0]"
     return 1
   hxx = - 2.0 * H0 / (L0 * L0)
   q   = (1.0 / n) - 1.0
