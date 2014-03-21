@@ -4,7 +4,7 @@ otherexmfigs = exactmarine-M-B.pdf exactmarine-beta-T.pdf \
           exactmarine-geometry-detail.pdf exactmarine-error.pdf \
           exactmarine-dt-adaptive.pdf
 
-figures = twoparabolas.pdf verifN.pdf exactmarine-geometry.pdf
+figures = twoparabolas.pdf verifN.pdf exactmarine-geometry.pdf exactmarine-stiffness-ratio.pdf
 
 twoparabolas.pdf: twoparabolas.py
 	./twoparabolas.py
@@ -12,6 +12,9 @@ twoparabolas.pdf: twoparabolas.py
 # also generates $(otherexmfigs)
 exactmarine-geometry.pdf : marineshoot.py
 	./marineshoot.py --saveroot exactmarine --figures
+
+exactmarine-stiffness-ratio.pdf : linearization.py
+	./linearization.py
 
 verifN.pdf: conv.txt verifNfigure.py
 	./verifNfigure.py conv.txt verifN.pdf

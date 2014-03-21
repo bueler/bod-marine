@@ -43,8 +43,9 @@
 \newcommand{\bq}{\hat{\mathbf{q}}}
 \newcommand{\br}{\hat{\mathbf{r}}}
 \newcommand{\bU}{\mathbf{U}}
-\newcommand{\hatx}{\hat{\mathbf{x}}}
+\newcommand{\bw}{\mathbf{w}}
 \newcommand{\bx}{\mathbf{x}}
+
 \newcommand{\CC}{\mathbb{C}}
 \newcommand{\Div}{\nabla\cdot}
 \newcommand{\ddx}[1]{\frac{\partial #1}{\partial x}}
@@ -301,14 +302,63 @@ We apply this grid-free procedure to the same problem and data in the previous s
 
   In our case FIXME:  When one does nonlinear shooting using the exact correct $T$ value, one gets the best-case adaptive-grid error in Figure \ref{fig:shoot-error}.  Used with high tolerances: rtol = $10^{-12}$ and atol = $10^{-14}$.  The ode solver detects that the grounding line should involve shorter steps, but more importantly the grounded ice requires a stiff method while the floating is nonstiff; see Figure \ref{fig:shoot-dt-adaptive}.
 
-
 \begin{figure}[ht]
 \onecol{exactmarine-dt-adaptive}
 \caption{The adaptive numerical ODE scheme in the ``realistic'' case makes steps of up to 10 km in grounded ice, but at the grounding line $x_g=350$ km the step size is reduced to a few hundred meters.  The adaptive mechanism automatically switches from stiff when grounded (circles) to non-stiff when floating (stars).} \label{fig:shoot-dt-adaptive}
 \end{figure}
 
-\subsection*{Linearization around the exact solution}
-FIXME: why stiff when grounded and non-stiff when floating?  look at linearization
+\newcommand{\tu}{\tilde u}
+\newcommand{\tH}{\tilde H}
+\newcommand{\tT}{\tilde T}
+
+\subsection*{Linearization around the exact solution}  The numerical evidence suggests that a change in stiffness occurs at the grounding line.  To analyze this we linearize the model equations around the exact solution.
+
+For this analysis we denote the exact solution $(u_0,H_0,T_0)$ and we consider a small perturbation $u = u_0 + \eps \tu, H = H_0 + \eps \tH, T = T_0 + \eps \tT$.  Denote the column vector of perturbations by $\bw = [\tu, \tH, \tT]^T$.  Assuming $u_x > 0$, equations \eqref{eq:steadymass}--\eqref{eq:Tstress} imply that, to first order in $\eps$, the perturbation solves these linear ODE system in grounded ice,
+\begin{equation}
+\begin{bmatrix}
+\frac{2}{n} B H_0 (u_0)_x^q & 0 & 0 \\
+H_0 & u_0 & 0 \\
+0 & -\rho g H_0 & 1
+\end{bmatrix}
+\bw_x
+=
+\begin{bmatrix}
+0 & - 2 B (u_0)_x^{1/n} & 1 \\
+- (H_0)_x & - (u_0)_x & 0 \\
+-k \rho g H_0 & - k \rho g u_0 + \rho g (H_0)_x & 0
+\end{bmatrix}
+\bw
+\label{eq:earlylinearization}
+\end{equation}
+where $q = \frac{1}{n} - 1$.  In floating ice only the last rows of $L(x)$ and $R(x)$ differ from that given in \eqref{eq:earlylinearization}:
+\begin{equation}
+\begin{bmatrix}
+ & \dots & \\
+0 & - \omega \rho g H_0 & 1
+\end{bmatrix}
+\bw_x
+=
+\begin{bmatrix}
+ & \dots & \\
+0 & \omega \rho g (H_0)_x & 0
+\end{bmatrix}
+\bw
+\label{eq:floatinglinearization}
+\end{equation}
+
+If we use $L(x)$ and $R(x)$ for the left- and right-side matrices in \eqref{eq:earlylinearization} or \eqref{eq:floatinglinearization}, the perturbation $\bw$ solves
+\begin{equation}
+\bw_x = A(x) \bw, \label{eq:linearization}
+\end{equation}
+where $A(x) = L(x)^{-1} R(x)$.  Note that in \eqref{eq:earlylinearization} and \eqref{eq:floatinglinearization} we have ordered the equations so that $L(x)$ is lower triangular.  Thus its inverse is defined (and trivial to compute) when the entries on its diagonal are nonzero.
+
+The linear ODE system \eqref{eq:linearization} is stiff if there is a large ratio of magnitudes in the eigenvalues of $A(x)$ \citep{Pressetal}.  The entries and eigenvalues of $A(x)$ are exactly computable using the exact solution values $(u_0,H_0,T_0)$.  Thus we can plot the $x$-dependent eigenvalues of $A(x)$ along the whole length of the flowline, as we do in Figure \ref{fig:stiffness}.
+
+\begin{figure}[ht]
+\onecol{exactmarine-stiffness-ratio}
+\caption{FIXME} \label{fig:stiffness}
+\end{figure}
+
 
 \subsection*{Verification of a fixed-grid finite difference numerical method}  A special-purpose, stand-alone C code implementing a second-order finite difference scheme is described in the appendix.  It is also available as part of the PISM source code.  It has a parallel implementation using the PETSc \citep{petsc-user-ref} library and it uses a Newton scheme to achieve observed quadratic convergence of the iteration.
 
