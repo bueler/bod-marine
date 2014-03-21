@@ -46,26 +46,21 @@
 \newcommand{\bw}{\mathbf{w}}
 \newcommand{\bx}{\mathbf{x}}
 
+\newcommand{\hu}{\hat u}
+\newcommand{\hH}{\hat H}
+\newcommand{\hT}{\hat T}
+
+\newcommand{\tu}{\tilde u}
+\newcommand{\tH}{\tilde H}
+\newcommand{\tT}{\tilde T}
+
 \newcommand{\CC}{\mathbb{C}}
-\newcommand{\Div}{\nabla\cdot}
-\newcommand{\ddx}[1]{\frac{\partial #1}{\partial x}}
-\newcommand{\ddy}[1]{\frac{\partial #1}{\partial y}}
-\newcommand{\pp}[2]{\frac{\partial #1}{\partial #2}}
-\newcommand{\ppt}[1]{\frac{\partial #1}{\partial t}}
-\newcommand{\ppT}[1]{\frac{\partial #1}{\partial T}}
-\newcommand{\ppx}[1]{\frac{\partial #1}{\partial x}}
-\newcommand{\ppy}[1]{\frac{\partial #1}{\partial y}}
-\newcommand{\ppz}[1]{\frac{\partial #1}{\partial z}}
-\newcommand{\ppzz}[1]{\frac{\partial^2 #1}{\partial z^2}}
 \newcommand{\eps}{\epsilon}
 \newcommand{\grad}{\nabla}
 \newcommand{\hh}{\hat h}
-\newcommand{\ip}[2]{\left(#1,#2\right)}
 \newcommand{\lam}{\lambda}
 \newcommand{\lap}{\triangle}
-\newcommand{\mtt}{\texttt}
 \newcommand{\RR}{\mathbb{R}}
-\newcommand{\vf}{\varphi}
 
 \begin{document}
 
@@ -91,9 +86,9 @@ Early\footnote{Draft date \emph{\today}.} theoretical glaciology created two par
 \caption{The parabolas by Orowan and Nye (1949, 1952; dotted) and by Bodvardsson (1955; solid) for steady, flowline ice sheets on flat beds.  A dome thickness of $H_0=3000$ m and a length of $L_0=500$ km are chosen for concreteness.} \label{fig:twoparabolas}
 \end{figure}
 
-This paper shows how to combine Bodvardsson's solution with the better-known exact solution for an ice shelf \citep{vanderVeen83,vanderVeen} to generate an exact solution for a flowline, steady marine ice sheet.  The result, shown in Figure \ref{fig:exactmarine}, is an exact solution of the steady equations for the rapidly-sliding marine ice sheet case \citep{SchoofMarine1}.  This is the model addressed by the MISMIP intercomparison \citep{MISMIP2012}.  This exact solution simultaneously solves the steady mass continuity equation and the so-called shallow shelf approximation (``SSA''; Weis and others, 1999)\nocite{WeisGreveHutter} stress balance.
+This paper shows how to combine Bodvardsson's solution with the better-known exact solution for an ice shelf \citep{vanderVeen83,vanderVeen} to generate an exact solution for a flowline, steady marine ice sheet.  The result, shown in Figure \ref{fig:exactmarine}, is an exact solution of the steady equations for the rapidly-sliding marine ice sheet case \citep{SchoofMarine1}.  This is the model addressed by the MISMIP intercomparison \citep{MISMIP2012}, and in the comparison of grounding line treatments by \cite{Gladstoneetal2010}.  This exact solution simultaneously solves the steady mass continuity equation and the so-called shallow shelf approximation (``SSA''; Weis and others, 1999)\nocite{WeisGreveHutter} stress balance.
 
-After presenting the model equations and 
+After presenting the model equations and constructing the exact solution in the next section, we consider errors made by numerical methods.  These analyses, based on the availability of a new exact solution, reveal the role of the stiffness contrast at the grounding line in understanding the errors made by numerical methods.
 
 
 \section{Continuum model}
@@ -281,83 +276,86 @@ The floating ice shelf is a relatively short 40 km; see Figures \ref{fig:exactma
 
 \section{Numerical Results}
 
-\subsection*{Verification of a grid-free ``shooting'' numerical method}  In our steady flowline case the model equations form a two-point boundary value problem (BVP) for ordinary differential equations (ODEs).  Specifically, the three first-order ODEs \eqref{eq:steadymass}--\eqref{eq:Tstress} are subject to two boundary conditions at $x=0$, namely equations \eqref{eq:leftbc}, and one at $x=x_c$, the calving-front stress condition \eqref{eq:rightbc}.  
+\subsection*{Verification of a grid-free ``shooting'' numerical method}  In our steady flowline case the model equations form a two-point boundary value problem (BVP) for ordinary differential equations (ODEs).  Specifically, the three first-order ODEs \eqref{eq:steadymass}--\eqref{eq:Tstress} are subject to two boundary conditions \eqref{eq:leftbc} at $x=0$ and one at $x=x_c$, the calving-front stress condition \eqref{eq:rightbc}.  
 
-A nonlinear ``shooting'' method \citep[section 17.1]{Pressetal} applies to this problem.  We use the correct values for $u(0)$ and $H(0)$ from \eqref{eq:leftbc} and guess an additional value $T_0$ for $T(0)$.  Then we use a numerical ODE initial value problem (IVP) solver to compute a solution $(\tilde u(x),\tilde H(x),\tilde T(x))$ from $x=0$ to $x=x_c$.  The failure of an ODE IVP solution to fit boundary condition \eqref{eq:rightbc} is a measure of the wrongness of $T_0$.  In fact, if we define this function
+A nonlinear ``shooting'' method \citep[section 17.1]{Pressetal} applies to this problem.  We use the correct values for $u(0)$ and $H(0)$ from \eqref{eq:leftbc} and guess an additional value $T_0$ for $T(0)$.  Then we use a numerical ODE initial value problem (IVP) solver to compute a solution $(\tilde u(x),\tilde H(x),\tilde T(x))$ from $x=0$ to $x=x_c$.  The failure of the ODE IVP solution to satisfy boundary condition \eqref{eq:rightbc} is a measure of the wrongness of $T_0$.  In fact, we define the function
 \begin{equation}
 F(T_0) = \tilde T(x_c) - \frac{1}{2} \omega \rho g \tilde H(x_c)^2  \label{eq:Fbisection}
 \end{equation}
-then we can apply a numerical method to find the root $\hat T_0$ to the problem $F(T_0)=0$.  This root gives us complete initial conditions so that the ODE IVP solution also solves the complete two-point BVP \eqref{eq:steadymass}--\eqref{eq:rightbc}.
+and then we can apply a numerical method to find the root $\hat T_0$ to the problem $F(T_0)=0$.  This root gives us complete initial conditions so that the ODE IVP solution also solves the complete two-point BVP \eqref{eq:steadymass}--\eqref{eq:rightbc}.
 
-A robust root-finding method is bisection \citep[section 9.1]{Pressetal}.  It is guaranteed to converge if $F$ is continuous and if an initial bracket is given, which is easy to find in this case.  Note $F'$ may not exist because of the low regularity of the solution at the interior point $x=x_g$.  We will see, by using our exact solution, clear evidence that the bisection iteration succeeds despite the uncertain smoothness of $F$ in \eqref{eq:Fbisection}.
+A robust root-finding method is bisection \citep[section 9.1]{Pressetal}.  It is guaranteed to converge if $F$ is continuous and if an initial bracket is given, which is easy to find in this case.  Regarding faster root-finding methods than bisection, such as Newton's method, we observe that $F'$ may not exist because of the low regularity of the solution at the interior point $x=x_g$. However, by using our exact solution we will see clear evidence that the bisection iteration succeeds in finding the root $\hat T_0$ to many digits despite the uncertain smoothness of $F$.
 
 \begin{figure}[ht]
 \onecol{exactmarine-error}
 \caption{Pointwise error in thickness (upper panel) and in velocity (lower panel) from an adaptive numerical ODE scheme.  Both the ``cheating'' case (solid), where we use the exactly-correct initial value for $T$, and the ``realistic'' case (dashed), where the shooting method converges on the correct initial value for $T$ by the bisection method, are shown.} \label{fig:shoot-error}
 \end{figure}
 
-The advantage of such a procedure here is to allow the advanced stepsize control mechanism of an ODE IVP solver to determine the spatial grid points, with the goal of solving the ODEs to a desired tolerance.  Thereby we avoid \emph{a priori} choice of the grid.  In this case we use LSODA from the ODEPACK collection \citep{Hindmarsh1983ODEPACK} because it both automatically adjusts stepsize to achieve desired tolerance and because it automatically switches method when stiffness \citep[section 16.6]{Pressetal} is detected.
+This ``shooting'' method has the advantage that the advanced stepsize control mechanism of an ODE IVP solver determines the spatial grid points, so as to solve the ODEs to a desired tolerance.  Thereby we avoid \emph{a priori} choice of the grid.  In this case we use LSODA from the ODEPACK collection \citep{Hindmarsh1983ODEPACK} because it both automatically adjusts stepsize to achieve desired tolerance and because it automatically switches method when stiffness \citep[section 16.6]{Pressetal} is detected.
 
-We apply this grid-free procedure to the same problem and data in the previous section, to we have the exact solution.  Using relative tolerance $10^{-12}$ and absolute tolerance $10^{-14}$ for LSODA we get FIXME
+We apply this grid-free procedure to the same problem for which we have the exact solution.  Using relative tolerance $10^{-12}$ and absolute tolerance $10^{-14}$ for LSODA we get the results in Figure \ref{fig:shoot-error}.  We have show the error in two runs, one in which we have used the exactly-correct initial value $T_0$ (``cheating'') and one in which we start with a large initial bracket on $T_0$ and converge on the correct calving-front boundary condition through shooting and bisection (``realistic'').  In the ``cheating'' runs we see that the numerical error just from solving the ODE, i.e.~independent of errors in boundary conditions, is quite small, perhaps the 10th or 11th digit for $H$ and $u$.  The much larger error seen in the ``realistic'' case suggests, however, that $F$ in \eqref{eq:Fbisection} is significantly irregular.  Apparently matching the calving-front boundary condition by numerical shooting from upstream causes the loss of 4 or 5 digits of accuracy.  Nonetheless, in this ``realistic'' case our numerical method achieves 6 or 7 digit accuracy over the whole domain, including in the immediate vicinity of the grounding line.  Note that though the peak inaccuracy is near the grounding line, that error is only modestly large than errors elsewhere.
 
-  In our case FIXME:  When one does nonlinear shooting using the exact correct $T$ value, one gets the best-case adaptive-grid error in Figure \ref{fig:shoot-error}.  Used with high tolerances: rtol = $10^{-12}$ and atol = $10^{-14}$.  The ode solver detects that the grounding line should involve shorter steps, but more importantly the grounded ice requires a stiff method while the floating is nonstiff; see Figure \ref{fig:shoot-dt-adaptive}.
+The ODE solver also detects the grounding line as a point of transition to shorter (spatial) steps, as seen in Figure \ref{fig:shoot-dt-adaptive}.  More significantly, however, the grounded ice requires a stiff method while the floating ice allows a nonstiff one, according to the automatic switch mechanism in LSODA.  Note that high accuracy (e.g. 6 or 7 digits) is achieved in the ``realistic'' case despite rather large grid spacing in the grounded ice, with large portions at 5--10 km spacing.  The spacing drops to a minimum of 100 m just downstream of the grounding line at $x_g=350$ km.
 
 \begin{figure}[ht]
 \onecol{exactmarine-dt-adaptive}
 \caption{The adaptive numerical ODE scheme in the ``realistic'' case makes steps of up to 10 km in grounded ice, but at the grounding line $x_g=350$ km the step size is reduced to a few hundred meters.  The adaptive mechanism automatically switches from stiff when grounded (circles) to non-stiff when floating (stars).} \label{fig:shoot-dt-adaptive}
 \end{figure}
 
-\newcommand{\tu}{\tilde u}
-\newcommand{\tH}{\tilde H}
-\newcommand{\tT}{\tilde T}
+This numerical evidence shows that a distinct change in stiffness occurs at the grounding line.  To analyze this we linearize the model equations around the exact solution.
 
-\subsection*{Linearization around the exact solution}  The numerical evidence suggests that a change in stiffness occurs at the grounding line.  To analyze this we linearize the model equations around the exact solution.
 
-For this analysis we denote the exact solution $(u_0,H_0,T_0)$ and we consider a small perturbation $u = u_0 + \eps \tu, H = H_0 + \eps \tH, T = T_0 + \eps \tT$.  Denote the column vector of perturbations by $\bw = [\tu, \tH, \tT]^T$.  Assuming $u_x > 0$, equations \eqref{eq:steadymass}--\eqref{eq:Tstress} imply that, to first order in $\eps$, the perturbation solves these linear ODE system in grounded ice,
+\subsection*{Linearization around the exact solution}  For this analysis we denote the exact solution $(u_0,H_0,T_0)$ and we consider a small perturbation
+\begin{equation}
+u = \hu + \eps \tu, \qquad H = \hH + \eps \tH, \qquad T = \hT + \eps \tT. \label{eq:perturbation}
+\end{equation}
+Denote the column vector of perturbations by $\bw = [\tu, \tH, \tT]^T$.  Assuming $u_x > 0$, equations \eqref{eq:steadymass}--\eqref{eq:Tstress} imply that, to first order in $\eps$, the perturbation solves these linear ODE system in grounded ice,
 \begin{equation}
 \begin{bmatrix}
-\frac{2}{n} B H_0 (u_0)_x^q & 0 & 0 \\
-H_0 & u_0 & 0 \\
-0 & -\rho g H_0 & 1
+\frac{2}{n} B \hH (\hu_x)^q & 0 & 0 \\
+\hH & \hu & 0 \\
+0 & -\rho g \hH & 1
 \end{bmatrix}
 \bw_x
 =
 \begin{bmatrix}
-0 & - 2 B (u_0)_x^{1/n} & 1 \\
-- (H_0)_x & - (u_0)_x & 0 \\
--k \rho g H_0 & - k \rho g u_0 + \rho g (H_0)_x & 0
+0 & - 2 B (\hu_x)^{1/n} & 1 \\
+- \hH_x & - \hu_x & 0 \\
+-k \rho g \hH & - k \rho g \hu + \rho g \hH_x & 0
 \end{bmatrix}
 \bw
 \label{eq:earlylinearization}
 \end{equation}
-where $q = \frac{1}{n} - 1$.  In floating ice only the last rows of $L(x)$ and $R(x)$ differ from that given in \eqref{eq:earlylinearization}:
+where $q = \frac{1}{n} - 1$.  In floating ice only the last row of $L(x)$ and of $R(x)$ differs from that given in \eqref{eq:earlylinearization}:
 \begin{equation}
 \begin{bmatrix}
  & \dots & \\
-0 & - \omega \rho g H_0 & 1
+0 & - \omega \rho g \hH & 1
 \end{bmatrix}
 \bw_x
 =
 \begin{bmatrix}
  & \dots & \\
-0 & \omega \rho g (H_0)_x & 0
+0 & \omega \rho g \hH_x & 0
 \end{bmatrix}
 \bw
 \label{eq:floatinglinearization}
 \end{equation}
 
-If we use $L(x)$ and $R(x)$ for the left- and right-side matrices in \eqref{eq:earlylinearization} or \eqref{eq:floatinglinearization}, the perturbation $\bw$ solves
+If we use $L(x)$ and $R(x)$ for the left- and right-side matrices, respectively, in \eqref{eq:earlylinearization}, then $\bw$ for grounded ice solves
 \begin{equation}
 \bw_x = A(x) \bw, \label{eq:linearization}
 \end{equation}
-where $A(x) = L(x)^{-1} R(x)$.  Note that in \eqref{eq:earlylinearization} and \eqref{eq:floatinglinearization} we have ordered the equations so that $L(x)$ is lower triangular.  Thus its inverse is defined (and trivial to compute) when the entries on its diagonal are nonzero.
+where $A(x) = L(x)^{-1} R(x)$.  Equation \eqref{eq:linearization} also applies for floating ice if we use \eqref{eq:floatinglinearization} to redefine $L(x),R(x),$ and $A(x)$.  Note that in both \eqref{eq:earlylinearization} and \eqref{eq:floatinglinearization} we have ordered the equations so that $L(x)$ is lower triangular.  Thus its inverse is both defined and trivial to compute when the entries on its diagonal are nonzero, as they are in our case.
 
-The linear ODE system \eqref{eq:linearization} is stiff if there is a large ratio of magnitudes in the eigenvalues of $A(x)$ \citep{Pressetal}.  The entries and eigenvalues of $A(x)$ are exactly computable using the exact solution values $(u_0,H_0,T_0)$.  Thus we can plot the $x$-dependent eigenvalues of $A(x)$ along the whole length of the flowline, as we do in Figure \ref{fig:stiffness}.
+The linear ODE system \eqref{eq:linearization} is stiff if there is a large ratio of magnitudes in the eigenvalues of $A(x)$ \citep{Pressetal}.  The entries and eigenvalues of $A(x)$ are exactly computable using the exact solution values $(\hu(x),\hH(x),\hT(x))$.  Thus we can plot, along the whole length of the flowline, the $x$-dependent ``stiffness ratio'' for $A(x)$, namely the ratio of absolute values of the real parts of the largest and smallest (by real part) eigenvalues of $A(x)$.  See Figure \ref{fig:stiffness}.  This ratio is small in the nonstiff case, and it is independent of the direction of integration (i.e.~upstream versus downstream integration of the spatial ODEs).  This ratio is by no means the last word on quantifying stiffness, which turns out to be hard problem generally \citep{HighamTrefethen1993}.
 
 \begin{figure}[ht]
 \onecol{exactmarine-stiffness-ratio}
-\caption{FIXME} \label{fig:stiffness}
+\caption{Stiffness ratio for the linearized problem \eqref{eq:linearization}.  Specifically we plot $|\operatorname{Re}(\lambda_1)|/|\operatorname{Re}(\lambda_3)|$ where $\lambda_i$ are the ordered, $x$-dependent eigenvalues of $A(x)$ in \eqref{eq:linearization}.} \label{fig:stiffness}
 \end{figure}
+
+We believe that the strong stiffness contrast at the grounding line is significant in explaining large near-grounding-line errors made by gridded numerical methods \citep{Gladstoneetal2010,MISMIP2012}.  This ratio drops by a factor of almost ten at the grounding line, though it is largest in the interior part of the grounded ice.  It is possible that the benefit of modified basal stress models at the grounding line \citep[for example]{Leguyetal2014TCD} can be explained as a reduction in stiffness contrast.  In any case, in the next subsection we examine errors made by a pre-determined grid numerical method.
 
 
 \subsection*{Verification of a fixed-grid finite difference numerical method}  A special-purpose, stand-alone C code implementing a second-order finite difference scheme is described in the appendix.  It is also available as part of the PISM source code.  It has a parallel implementation using the PETSc \citep{petsc-user-ref} library and it uses a Newton scheme to achieve observed quadratic convergence of the iteration.
