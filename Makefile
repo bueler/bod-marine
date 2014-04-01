@@ -4,7 +4,7 @@ otherexmfigs = exactmarine-M-B.pdf exactmarine-beta-T.pdf \
           exactmarine-geometry-detail.pdf exactmarine-error.pdf \
           exactmarine-dt-adaptive.pdf
 
-figures = twoparabolas.pdf verifN.pdf exactmarine-geometry.pdf exactmarine-stiffness-ratio.pdf
+figures = twoparabolas.pdf convmarine.pdf exactmarine-geometry.pdf exactmarine-stiffness-ratio.pdf
 
 twoparabolas.pdf: twoparabolas.py
 	./twoparabolas.py
@@ -16,8 +16,8 @@ exactmarine-geometry.pdf : marineshoot.py
 exactmarine-stiffness-ratio.pdf : linearization.py
 	./linearization.py
 
-verifN.pdf: conv.txt verifNfigure.py
-	./verifNfigure.py conv.txt verifN.pdf
+convmarine.pdf: convfigure.py petsc/convmarine-exactinit.sh petsc/convmarine-realistic.sh
+	./convfigure.py petsc/convmarine-exactinit.sh petsc/convmarine-realistic.sh
 
 # TO BUILD exmarine.pdf:
 # (1) ice_bib.bib needs to be a link to the same object in pism-dev/doc/

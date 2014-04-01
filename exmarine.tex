@@ -357,20 +357,20 @@ The linear ODE system \eqref{eq:linearization} is stiff if there is a large rati
 
 We believe that the strong stiffness contrast at the grounding line is significant in explaining large near-grounding-line errors made by gridded numerical methods \citep{Gladstoneetal2010,MISMIP2012}.  This ratio drops by a factor of almost ten at the grounding line, though it is largest in the interior part of the grounded ice.  It is possible that the benefit of modified basal stress models at the grounding line \citep[for example]{Leguyetal2014TCD} can be explained as a reduction in stiffness contrast.  In any case, in the next subsection we examine errors made by a pre-determined grid numerical method.
 
+\subsection*{Verification of a fixed-grid finite difference numerical method}  We also implemented an equally-spaced, second-order, finite difference scheme using Newton iteration, as described in Appendix B.  The new exact solution allows us to measure, for the first time, the errors from this numerical scheme.  No regularization of the grounding line problem was applied in this first verification application of the exact solution, but, in particular, the grounding line interpolation methods of \cite{Gladstoneetal2010,Feldmannetal2014} can be explored in future work.
 
-\subsection*{Verification of a fixed-grid finite difference numerical method}  A special-purpose, stand-alone C code implementing a second-order finite difference scheme is described in the appendix.  It is also available as part of the PISM source code.  It has a parallel implementation using the PETSc \citep{petsc-user-ref} library and it uses a Newton scheme to achieve observed quadratic convergence of the iteration.
-
-Figure \ref{fig:verifNresult} shows the result of using this numerical scheme to approximate the exact solution.  Both the maximum numerical thickness error and the maximum numerical velocity error are observed to converge at essentially an $O(\Delta x^2)$ error as the grid spacing $\Delta x$ refines to zero.  
+Figure \ref{fig:convmarine} shows verification results.  Both the maximum numerical thickness error and velocity errors are observed to converge at much less than the optimal $O(\Delta x^2)$ rate \citep{MortonMayers}, essentially because of the low regularity (loss of smoothness) of the exact solution the grounding line.  By contrast, use of the \cite{Bodvardsson} exact solution alone, for an entirely grounded problem, confirms that the same equally-spaced finite difference method gives optimal $O(\Delta x^2)$ convergence; not shown.
 
 \begin{figure}[ht]
-\onecol{verifN}
-\caption{FIXME: REGENERATE USING marine.c.  Verification result for finite difference code on grounded-only problem.  The ice thickness error decays at rate $O(\Delta x^{1.97})$ (dotted).} \label{fig:verifNresult}
+\onecol{convmarine}
+\caption{Maximum errors in ice thickness (upper panel) and velocity (lower panel) on various grids.  When initialized with the exact solution, the numerical scheme converges at a rate $\Delta x^{1.08}$ for both thickness and velocity (dots).  For a more realistic initial iterate the convergence rate is reduced to $\Delta x^{0.58}$ for thickness and $\Delta x^{0.70}$ for velocity (stars); finer grids than 1 km do not show convergence.} \label{fig:convmarine}
 \end{figure}
 
+It is important to distinguish the errors attributable to the finite difference discretization itself from errors attributable to imperfect convergence of the nonlinear iterative solver (as applied to the discrete equations).  For the former we initialized the nonlinear solver with the exact solution values and we see converged solutions down to 5 m grids with thickness errors at the millimeter level and velocity errors at the millimeter per year level (see dots in Figure \ref{fig:convmarine}).  If we use a simple ``wedge'' initial iterate, which has linear thickness from the upstream initial condition $H(0)$ down to 300 m at the calving front, and a similar linear velocity profile increasing from $u(0)$ to 100 $\text{m}\,\text{a}^{-1}$, 
 
 \section{Conclusions}  FIXME BLAH BLAH
 
-\subsection*{Acknowledgements and erratum}  Thanks to Heinz Blatter and Helgi Bj\"ornsson for tracking down the original paper by Bodvardsson.  \cite{BLKCB} identify the constant accumulation SIA solution as ``Bodvarsson (1955)--Vialov (1958).''  This is incorrect as it is attributable only to Vialov.  Also, the spelling of Bodvardsson's name is ``Bodvarsson'' in many places, but the original paper in 1955 has ``Bodvardsson'' with a ``d''.  \cite{Weertman61stability}, an early response to Bodvardsson's work, drops the ``d''.
+\subsection*{Acknowledgements and erratum}  Thanks to Heinz Blatter and Helgi Bj\"ornsson for tracking down a copy of \cite{Bodvardsson}.  \cite{BLKCB} incorrectly identify the constant accumulation SIA solution as ``Bodvarsson (1955)--\cite{Vialov},'' but it is attributable only to Vialov.  Note finally that the spelling is ``Bodvarsson'' in many places, but the 1955 paper has ``Bodvardsson'' with a ``d''.
 
 
 %         References
@@ -406,14 +406,14 @@ In the main text, Bodvardsson's problem relates four numbers: the initial (upstr
 
 \subsection{Appendix B: A finite difference scheme}  The steady-state equations for mass continuity \eqref{eq:steadymass} and stress balance \eqref{eq:steadySSA} form a coupled system that can be approximately solved by the numerical scheme described here.  It uses centered, second-order finite differences for both equations.
 
-We define an equally-spaced grid on the domain $[x_a,x_c]$.  Because the boundary condition at the calving front evaluates the stress $T$, the right endpoint $x_c$ is at a ``staggered'' location halfway in-between grid points.  Let $L=x_c-x_a$.  If $N$ is an integer then we define $\Delta x = L / (N+1/2)$ and $x_j = x_a + j\Delta x$ for $j=0,\dots,N+1$.  Denote the numerical approximations $H_i\approx H(x_i)$ and $u_i \approx u(x_i)$.  Let $x_j^* = x_j + \Delta x/2$ be the staggered location, for $j=0,\dots,N$, and note $x_c = x_N^* < x_{N+1}$.  Denote $B_j^*=B(x_j^*)$ and $M_j^*=M(x_j^*)$.
+We define an equally-spaced grid on the domain $[0,x_c]$.  Because the boundary condition at the calving front evaluates the stress $T$, the right endpoint $x_c$ is at a ``staggered'' location halfway in-between grid points.  If $N$ is the number of spaces then we define $\Delta x = x_c / (N+1/2)$ and $x_j = j\Delta x$ for $j=0,\dots,N+1$.  Denote the numerical approximations $H_i\approx H(x_i)$ and $u_i \approx u(x_i)$.  Let $x_j^* = x_j + \Delta x/2$ be the staggered location, for $j=0,\dots,N$, and note $x_c = x_N^* < x_{N+1}$.  Denote $B_j^*=B(x_j^*)$ and $M_j^*=M(x_j^*)$.
 
 The mass continuity equation \eqref{eq:steadymass} is approximated by a second-order method centered at the staggered location.  For $j=0,\dots,N$,
 \begin{equation}
 \frac{u_{j+1} H_{j+1} - u_j H_j}{\Delta x} - M_j^* = 0 \label{eq:steadymassFD}
 \end{equation}
 
-In equation \eqref{eq:steadySSA} we avoid infinite viscosity by regularization \citep{SchoofStream}.  Let $\eps=1/L$ per year, i.e.~a strain rate corresponding to 1 m$/$a velocity change over the whole domain, $q = (1-n)/n$, and define
+In equation \eqref{eq:steadySSA} we avoid infinite viscosity by regularization \citep{SchoofStream}.  Let $\eps=1/x_c$ per year, i.e.~a strain rate corresponding to 1 m$/$a velocity change over the whole domain.  Also let $q = (1-n)/n$, and define
 \begin{equation}
 F(u_l,u_r) = \left(\left(\frac{u_r-u_l}{\Delta x}\right)^2 + \eps^2\right)^{q/2} \frac{u_r-u_l}{\Delta x}. \label{eq:viscregFD}
 \end{equation}
@@ -427,14 +427,12 @@ for $j=0,\dots,N$, and equation \eqref{eq:steadySSA} is approximated by
 \end{equation}
 where $\beta_j = k \rho g H_j$ if the ice is grounded at $x_j$ (i.e.~if $\rho H_j \ge \rho_w (z_o - b)$) and $\beta_j=0$ if the ice is floating, and where $h_j = H_j + b$ if the ice is grounded and $h_j = \omega H_j + z_o$ if the ice is floating.  Equation \eqref{eq:steadySSAFD} applies as stated both for grounded and floating ice, and it applies for all interior regular points, thus for $j=1,\dots,N$.
 
-At this point we have $2N+4$ unknowns, namely $u_j,H_j$ for $j=0,\dots,N+1$.  There are $2N+1$ nonlinear equations in \eqref{eq:steadymassFD} and \eqref{eq:steadySSAFD} above.  The two upstream Dirichlet equations \eqref{eq:leftbc}, namely $u_0=u_a$ and $H_0=H_a$, and an approximation of the calving front condition \eqref{eq:rightbc} complete the system.  For the last one we write
+At this point we have $2N+4$ unknowns, namely $u_j,H_j$ for $j=0,\dots,N+1$.  There are $2N+1$ nonlinear equations in \eqref{eq:steadymassFD} and \eqref{eq:steadySSAFD} above.  The two upstream Dirichlet equations \eqref{eq:leftbc}, namely $u_0=u(0)$ and $H_0=H(0)$, brings the number of equations to $2N+3$.  The following approximation of the calving front condition \eqref{eq:rightbc}, completes the system:
 \begin{equation}
-\frac{1}{2} \omega \rho g \left(\frac{H_N + H_{N+1}}{2}\right)^2 = T_N^* \label{eq:rightbcFD}
+\frac{1}{2} \omega \rho g \left(\frac{H_N + H_{N+1}}{2}\right)^2 = T_N^*, \label{eq:rightbcFD}
 \end{equation}
 where $T_N^*$ is the approximation given in \eqref{eq:TFD}.
 
-We now have a system of $2N+4$ equations in the same number of unknowns, which we can write abstractly as $\mathbf{F}(\mathbf{v})=0$.  These equations are solved by Newton's method \citep{Kelley} as implemented in PETSc \citep{petsc-user-ref}.  We first write a residual evaluation function which merely computes $\mathbf{F}(\mathbf{v})$ given $\mathbf{v}$, and a finite-difference Jacobian can be computed by PETSc, so this allows us to solve systems up to size about $N=1000$.  (It is critical in this finite-difference Jacobian case that the equations $\mathbf{F}(\mathbf{v})=0$ are scaled so that both the unknowns $\mathbf{v}$ and the ``residuals'', namely the output values of $\mathbf{F}$, have values which are $O(1)$.)  For higher resolution WE NEED AN ANALYTICAL JACOBIAN (FIXME).  FOR 2D CASES PERHAPS PRECONDITIONING BY AN APPROXIMATION TO THE JACOBIAN WOULD BE WISE.  
-
-FIXME: WHAT ABOUT INITIAL GUESS?
+Thus we have a system of $2N+4$ nonlinear equations in the same number of unknowns.  One can write this system abstractly as $\mathbf{F}(\mathbf{v})=0$.  These equations are solved by Newton's method \citep{Kelley}, as implemented in the PETSc library \citep{petsc-user-ref}.  We first write a residual evaluation function which merely computes $\mathbf{F}(\mathbf{v})$ given $\mathbf{v}$.  A finite-difference Jacobian can be computed by PETSc, so this allows us to solve systems up to size about $N=10^3$.  It is important in this finite-difference Jacobian case that both the unknowns $\mathbf{v}$ and the ``residuals'', namely the output values of $\mathbf{F}$, are scaled to have values which are $O(1)$.  We also implemented an exact Jacobian using by-hand differentiation for the formulas, and, for initial guesses sufficiently near the exact solution, this allows solutions of the system for up to about $N=10^5$.  A full analysis of the robustness and convergence rate of this Newton solver would be valuable, but that is beyond the scope of the current paper.
 
 \end{document}
