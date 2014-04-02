@@ -199,12 +199,12 @@ u(x) = \begin{cases} \frac{2 H_0}{k L_0^2}\,(x + x_a), & 0 \le x \le x_g, \\
 \end{equation}
 where $u_s(x)$ is defined by
 \begin{equation}
-u_s(x)^{n+1} = u(x_g)^{n+1} + \frac{C_s}{M(x_g)} \left(\left[Q_g + M(x_g) (x-x_g)\right]^{n+1} - Q_g^{n+1}\right), \label{eq:vanderveenvel}
+u_s(x)^{n+1} = u(x_g)^{n+1} + \frac{C_s}{M(x_g)} \left(Q_s(x)^{n+1} - Q_g^{n+1}\right), \label{eq:vanderveenvel}
 \end{equation}
-$C_s = \left(\rho g \omega/(4 B(x_g))\right)^n$, and $Q_g = u(x_g) H(x_g)$.  Similarly the thickness is:
+$C_s = \left(\rho g \omega/(4 B(x_g))\right)^n$, $Q_g = u(x_g) H(x_g)$, and $Q_s(x) = Q_g + M(x_g) (x-x_g)$.  Similarly the thickness is:
 \begin{equation}
 H(x) = \begin{cases} H_0 \left(1 - (\frac{x+x_a}{L_0})^2\right), & 0 \le x \le x_g, \\
-                     \frac{Q_g + M(x_g) (x-x_g)}{u_s(x)}, & x_g \le x \le x_c.
+                     \frac{Q_s(x)}{u_s(x)}, & x_g \le x \le x_c.
        \end{cases} \label{eq:marinethickness}
 \end{equation}
 Formulas \eqref{eq:marinevel} and \eqref{eq:marinethickness} define the continuous functions which are shown in Figure \ref{fig:exactmarine}, using the specific values in Table \ref{tab:exactsoln}.
@@ -291,22 +291,21 @@ The ODE solver also detects the grounding line as a point of transition to short
 u = \hu + \eps \tu, \qquad H = \hH + \eps \tH, \qquad T = \hT + \eps \tT. \label{eq:perturbation}
 \end{equation}
 Denote the column vector of perturbations by $\bw = [\tu, \tH, \tT]^T$.  Assuming $u_x > 0$, equations \eqref{eq:steadymass}--\eqref{eq:Tstress} imply that, to first order in $\eps$, the perturbation solves this linear ODE system in grounded ice,
-\begin{equation}
-\begin{bmatrix}
+\begin{align}
+&\begin{bmatrix}
 \frac{2}{n} B \hH (\hu_x)^q & 0 & 0 \\
 \hH & \hu & 0 \\
 0 & -\rho g \hH & 1
 \end{bmatrix}
-\bw_x
-=
+\bw_x \notag \\
+&\qquad =
 \begin{bmatrix}
 0 & - 2 B (\hu_x)^{1/n} & 1 \\
 - \hH_x & - \hu_x & 0 \\
 -k \rho g \hH & - k \rho g \hu + \rho g \hH_x & 0
 \end{bmatrix}
-\bw
-\label{eq:earlylinearization}
-\end{equation}
+\bw  \label{eq:earlylinearization}
+\end{align}
 where $q = \frac{1}{n} - 1$.  In floating ice only the last rows differ from \eqref{eq:earlylinearization}, as follows
 \begin{equation}
 \begin{bmatrix}
