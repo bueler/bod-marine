@@ -3,10 +3,10 @@
 # run as
 #   $ ./convmarine-realistic.sh |'grep' errHinf
 #(dx,errHinf,erruinf) 20000.000 1.0984e+02 1.3743e+02
-#(dx,errHinf,erruinf) 9873.418 7.3900e+01 5.6537e+01
-#(dx,errHinf,erruinf) 4968.153 4.2258e+01 3.2890e+01
-#(dx,errHinf,erruinf) 1994.885 3.3542e+01 2.6632e+01
-#(dx,errHinf,erruinf) 998.720 1.7569e+01 1.3896e+01
+#(dx,errHinf,erruinf) 9873.418 2.9679e+01 2.7486e+01
+#(dx,errHinf,erruinf) 4968.153 5.7678e+00 4.7760e+00
+#(dx,errHinf,erruinf) 1994.885 1.0727e+00 8.2240e-01
+#(dx,errHinf,erruinf) 998.720 8.7900e+00 6.9828e+00
 
 #MPIDO="mpiexec -n 4"
 MPIDO="mpiexec -n 1"

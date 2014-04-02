@@ -372,7 +372,7 @@ PetscErrorCode FillInitial(AppCtx *user, Vec *vHu)
   Node           *Hu;
   const PetscReal
       Hcguess = 300.0,
-      ucguess = (100.0/user->secpera),
+      ucguess = (300.0/user->secpera),
       Hslope  = (Hcguess - user->Ha) / (user->xc - user->xa),
       uslope  = (ucguess - user->ua) / (user->xc - user->xa);
 
