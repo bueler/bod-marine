@@ -53,9 +53,10 @@ for fnum in range(2):
     N = clen[fnum][0]
     loglog(dx[fnum][:N],errHinf[fnum][:N],sym[fnum],markersize=symsize[fnum],markerfacecolor=symface[fnum])
     hold(True)
-    p = polyfit(log(dx[fnum][:N]),log(errHinf[fnum][:N]),1)
-    print "result:  thickness error %d decays at rate O(dx^%.2f)" % (fnum,p[0])
-    loglog(dx[fnum][:N],exp(polyval(p,log(dx[fnum][:N]))),'k:')
+    if fnum == 0:
+      p = polyfit(log(dx[fnum][:N]),log(errHinf[fnum][:N]),1)
+      print "result:  thickness error %d decays at rate O(dx^%.2f)" % (fnum,p[0])
+      loglog(dx[fnum][:N],exp(polyval(p,log(dx[fnum][:N]))),'k:')
 hold(False)
 grid(True)
 miny = errHinf[0][:clen[0][0]].min()
@@ -72,9 +73,10 @@ for fnum in range(2):
     N = clen[fnum][0]
     loglog(dx[fnum][:N],erruinf[fnum][:N],sym[fnum],markersize=symsize[fnum],markerfacecolor=symface[fnum])
     hold(True)
-    p = polyfit(log(dx[fnum][:N]),log(erruinf[fnum][:N]),1)
-    print "result:  velocity error %d decays at rate O(dx^%.2f)" % (fnum,p[0])
-    loglog(dx[fnum][:N],exp(polyval(p,log(dx[fnum][:N]))),'k:')
+    if fnum == 0:
+      p = polyfit(log(dx[fnum][:N]),log(erruinf[fnum][:N]),1)
+      print "result:  velocity error %d decays at rate O(dx^%.2f)" % (fnum,p[0])
+      loglog(dx[fnum][:N],exp(polyval(p,log(dx[fnum][:N]))),'k:')
 hold(False)
 grid(True)
 miny = erruinf[0][:clen[0][0]].min()

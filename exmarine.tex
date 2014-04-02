@@ -14,24 +14,8 @@
 
 \usepackage{amsmath,xspace}
 
-% for "review" mode, fix lineno problem
-\newcommand*\patchAmsMathEnvironmentForLineno[1]{%
-  \expandafter\let\csname old#1\expandafter\endcsname\csname #1\endcsname
-  \expandafter\let\csname oldend#1\expandafter\endcsname\csname end#1\endcsname
-  \renewenvironment{#1}%
-     {\linenomath\csname old#1\endcsname}%
-     {\csname oldend#1\endcsname\endlinenomath}}% 
-\newcommand*\patchBothAmsMathEnvironmentsForLineno[1]{%
-  \patchAmsMathEnvironmentForLineno{#1}%
-  \patchAmsMathEnvironmentForLineno{#1*}}%
-\AtBeginDocument{%
-\patchBothAmsMathEnvironmentsForLineno{equation}%
-\patchBothAmsMathEnvironmentsForLineno{align}%
-\patchBothAmsMathEnvironmentsForLineno{flalign}%
-\patchBothAmsMathEnvironmentsForLineno{alignat}%
-\patchBothAmsMathEnvironmentsForLineno{gather}%
-\patchBothAmsMathEnvironmentsForLineno{multline}%
-}
+% only include this in review mode:
+\include{linenopatch.tex}
 
 \newcommand{\onecol}[1]{\includegraphics[width=86mm]{#1}}
 \newcommand{\twocol}[1]{\includegraphics[width=178mm]{#1}}
@@ -354,25 +338,27 @@ The linear ODE system \eqref{eq:linearization} is stiff if there is a large rati
 
 We believe that the strong stiffness contrast at the grounding line is significant in explaining large near-grounding-line errors made by gridded numerical methods \citep{Gladstoneetal2010,MISMIP2012}.  This ratio drops by a factor of almost ten at the grounding line, though it is largest in the interior part of the grounded ice.  It is possible that the benefit of modified basal stress models at the grounding line \citep[for example]{Leguyetal2014TCD} can be explained as a reduction in stiffness contrast.
 
-\subsection*{Verification of a fixed-grid finite difference numerical method}  We also implemented an equally-spaced, second-order, finite difference scheme using Newton iteration, described in Appendix B.  The new exact solution allows us to measure, for the first time, the errors from this numerical scheme.  No regularization of the grounding line problem was applied in this first application of the exact solution.  The grounding line interpolation methods of \cite{Gladstoneetal2010,Feldmannetal2014}, or the hydrology-motivated smoothing of basal friction from \cite{Leguyetal2014TCD}, could be explored in future work.
+\subsection*{Verification of a fixed-grid finite difference numerical method}  We also implemented an equally-spaced, second-order, finite difference scheme using Newton iteration, described in Appendix B.  The new exact solution allows us to measure, for the first time in a rapidly-sliding marine ice sheet context, the errors from such a numerical scheme of the common type implemented in practical marine ice sheet models \citep[e.g.][]{PollardDeConto2009WAIS,Winkelmannetal2011}.
 
-Figure \ref{fig:convmarine} shows verification results.  The maximum numerical thickness and velocity errors are observed to converge at much less than the optimal $O(\Delta x^2)$ rate under grid refinement \citep{MortonMayers}, essentially because of the low regularity (loss of smoothness) of the exact solution the grounding line.  By contrast, use of the \cite{Bodvardsson} exact solution alone, for an entirely grounded problem, confirms that the same equally-spaced finite difference method gives optimal $O(\Delta x^2)$ convergence; not shown.
+Figure \ref{fig:convmarine} shows that the maximum numerical thickness and velocity errors are observed to converge at much less than the optimal $O(\Delta x^2)$ rate under grid refinement \citep{MortonMayers}.  This is essentially because of the low regularity (loss of smoothness) of the exact solution at the grounding line.  By contrast, use of the \cite{Bodvardsson} exact solution in an (entirely) grounded problem, without a grounding line, confirms that the same finite difference method gives optimal $O(\Delta x^2)$ convergence; not shown.
 
 \begin{figure}[ht]
 \onecol{convmarine}
-\caption{Maximum errors in ice thickness (upper panel) and velocity (lower panel) on various grids.  When initialized with the exact solution, the numerical scheme converges at a rate $\Delta x^{1.08}$ for both thickness and velocity (dots).  For a more realistic initial iterate (see text) the convergence rate is initially good, but at around 1 km the Newton iteration fails to converge.} \label{fig:convmarine}
+\caption{Maximum errors in ice thickness (upper panel) and velocity (lower panel) on grids with spacing from $20$ km down to $5$ m.  When initialized with the exact solution, the numerical scheme converges at a rate $\Delta x^{1.08}$ for both thickness and velocity (large dots plus dotted line).  For a more realistic initial iterate the convergence rate is initially good, but at resolutions below 1 km the Newton iteration fails to converge (stars; see text).} \label{fig:convmarine}
 \end{figure}
 
-It is important to distinguish the errors attributable to the finite difference discretization itself from errors attributable to imperfect convergence of the nonlinear iterative solver as applied to the discrete equations.  For the former we initialized the nonlinear solver with the exact solution values and we see converged solutions down to 5 m grids.  The resulting thickness errors at the millimeter level and velocity errors at the millimeter per year level (see dots in Figure \ref{fig:convmarine}) are larger than from the adaptive (grid-free) higher-order ODE method above---compare Figure \ref{fig:shoot-error}---but they are certainly more than acceptable if they represented the realistic case.
+It is important to distinguish the errors attributable to the finite difference discretization itself from errors attributable to imperfect convergence of the nonlinear iterative solver (which is applied to solve the discretized equations).  For the former type of errors we initialized the nonlinear solver with the exact solution values.  These are not the exact solutions of the discretized equations but they are (obviously) close.  We see converged solutions to the discretized equations down to 5 m grids.  The resulting thickness and velocity errors, at the millimeter and millimeter-per-year level, respectively (Figure \ref{fig:convmarine}), are larger than from the adaptive (grid-free) higher-order ODE method above; compare Figure \ref{fig:shoot-error}.  Nonetheless errors at this level are certainly acceptable, if they were to represent the realistic case.
 
-However, if we use a simple ``wedge'' initial iterate, which has a linear thickness profile from the upstream initial condition $H(0)$ down to 300 m at the calving front, and a similar linear velocity profile increasing from $u(0)$ to 300 $\text{m}\,\text{a}^{-1}$, then we see more realistic results because the initial iterate is far from the exact solution.  That is, the errors include those arising from difficulties encountered by the global behavior of the Newton solver.  For grids finer than 1 km the iteration for this scheme does not converge, and for grids of 1 km or coarser, though the Newton iteration shows convergence, the grid refinement ($\Delta x\to 0$) error convergence rate is disappointingly slow.  These results suggest a lack of nonlinear solver robustness that we attribute to the nonsmooth, stiffness-constrasting properties of the problem near the grounding line.  Grounding line parameterizations \citep[e.g.][]{Gladstoneetal2010,Leguyetal2014TCD} may act as homotopy methods \citep{Kelley} to improve global solver behavior in this case, but such considerations go beyond our scope.
+However, if we use a simple ``wedge'' initial iterate, which has a linear thickness profile from the upstream initial condition $H(0)$ down to 300 m at the calving front, and a similar linear velocity profile increasing from $u(0)$ to 300 $\text{m}\,\text{a}^{-1}$ at the calving front, then we see more realistic results which reflect the experience of ice sheet modelers addressing these equations.  Here the initial iterate is relatively far from the exact solution.  Difficulties arise in the global convergence behavior of the Newton solver, even though standard line search techniques are used in these computations \citep{Kelley,petsc-user-ref}.  For grids finer than 1 km the iteration for this scheme does not converge, apparently because the Jacobian matrix is not providing useful directional information as to the location of the solution of the discretized equations.  In any case, our results suggest a lack of nonlinear solver robustness that we attribute to the nonsmooth, stiffness-constrasting properties of the problem near the grounding line.
+
+Grounding line parameterizations \citep[e.g.][]{Gladstoneetal2010,Feldmannetal2014} may act like homotopy continuation methods \citep{Kelley} to improve global solver behavior in this case, but such considerations go beyond our scope.  Alternatively, the hydrology-motivated smoothing of basal friction from \cite{Leguyetal2014TCD} may reduce the stiffness contrast, and this could be explored in future work.  For now, no regularization of the grounding line discontinuities in the formulas for $h(x)$ and $\beta(x)$---see equations \eqref{eq:surface} and \eqref{eq:betafull}---were applied in the current paper.  
 
 
-\section{Conclusion}  As noted by \cite{BLKCB}, \cite{Wesseling}, and many other sources, verification of numerical methods is a valuable first step in effective numerical modeling of realistic flows.  This is especially so in geophysical flows where validation by comparison to controlled laboratory experiments is difficult.  Thus the rediscovery of an exact solution to a marine ice sheet problem is a welcome development.  Even though this solution is for a steady-state and flat bed case, it provides an alternative to hard-to-interpret intercomparison results \citep{MISMIP2012}.
+\section{Conclusion}  As noted by \cite{BLKCB}, \cite{Wesseling}, and many other sources, verification of numerical methods is a valuable first step in effective numerical modeling of realistic flows.  This is especially so in geophysical flows where validation by comparison to controlled laboratory experiments is difficult.  Thus the rediscovery of an exact solution to a marine ice sheet problem is a welcome development.  Even though this solution is for a steady-state and flat bed case, it provides a partial alternative to hard-to-interpret intercomparison results \citep{MISMIP2012}.
 
-Finding that some of the earliest work in theoretical glaciology contains this solution also rescues a mostly-ignored approach to glacier dynamics.  The ``rapid-sliding'' case turns out to be one of the first dynamical situations examined, that is, by \cite{Bodvardsson}, even though other early efforts at global views of ice dynamics tended toward the plastic \citep{Orowan,Nye} and/or frozen bed \citep{Vialov} end of the spectrum, and these came to dominate the field.
+Because this solution is found in some of the first work in theoretical glaciology, we have ``rescued'' an early approach to sliding dynamics.  The ``rapid-sliding'' case turns out to be one of the first dynamical situations examined \citep{Bodvardsson}, even though most early efforts at global views of ice dynamics tended toward the plastic ice \citep{Orowan,Nye52plastic}, frozen bed \citep{Vialov}, and vertical-shear dominated \citep{Weertman61stability} models.  These came to dominate the field until recent decades.
 
-Application of the new exact solution also reveals one feature of the marine ice sheet problem that we feel has been overlooked.  Namely that there is a strong stiffness contrast, in the sense of differential equations, at the grounding line.  This is, conceptually, in addition to the loss of smoothness seen at the grounding line.  Both smoothness and stiffness must be addressed by successful numerical methods, so modelers must have more than grid refinement in mind as they attempt to model grounding lines correctly.
+Application of the new exact solution also reveals one feature of the marine ice sheet problem that we feel has been overlooked.  Namely that there is a strong stiffness contrast, in the sense of differential equations, in the flowline case at the grounding line.  This is, conceptually, in addition to the loss of smoothness seen at the grounding line.  Both smoothness and stiffness must be addressed by numerical methods.  Modelers should have more than grid refinement in mind as they attempt to model grounding lines correctly.
 
 
 
@@ -389,13 +375,13 @@ Application of the new exact solution also reveals one feature of the marine ice
 \begin{equation}
   (y y')' = Ay+B  \label{eq:abstractode}
 \end{equation}
-satisfying the single boundary condition $y(0) = y_0 > 0$, subject to both an initial downslope assumption ($y'(0) \le 0$) and the technical inequality
+satisfying the single boundary condition $y(0) = y_0 > 0$, subject to both an initial downslope assumption ($y'(0) \le 0$) and to the technical inequality
 \begin{equation}
 2A y_0 + 3 B \ge 0.  \label{eq:abstractinequality}
 \end{equation}
 Equation \eqref{eq:abstractode} is equation (17) in \cite{Bodvardsson}.  The additional assumptions (i.e.~initial downslope plus \eqref{eq:abstractinequality}) are unstated, though he comments that there is ``one and only one solution which is admittable from the physical point of view.''
 
-Here we justify this little theorem and, generally following \cite{Bodvardsson}, derive relations among parameters which yield the solution.  The unique polynomial solution to this problem may be interpreted as solving a free boundary problem for the first positive zero $x_0>0$ of $y(x)$.  In Bodvardsson's context $x_0=L_0$ is the length of the glacier, the location of the margin (in the ``dry'' case).
+Here we justify this little theorem and, generally following \cite{Bodvardsson}, derive relations among parameters which allow a solution.  The unique polynomial solution to this problem may be interpreted as solving a free boundary problem for the first positive zero $x_0>0$ of $y(x)$.  In Bodvardsson's context $x_0=L_0$ is the length of the glacier, the location of the margin in the ``dry'' case.
 
 It is easy to see by substitution into \eqref{eq:abstractode} that nontrivial solutions of degree $d$, i.e.~of the form $y(x) = \gamma x^d + (\text{lower degree})$ with $\gamma\ne 0$, exist only if $d=2$.  In that case we seek solutions which satisfy the boundary conditions, so
 \begin{equation}
@@ -405,14 +391,14 @@ for some $\alpha\ge 0$ and $\beta$ which are to be determined from $A,B$; this i
 \begin{equation}
 3 y_0^2 \alpha^2 = 2 A y_0 + 3 B \quad \text{ and } \quad 6 y_0 \beta = A.  \label{eq:abstractrelations}
 \end{equation}
-These two relations determine $\alpha,\beta$ from $A,B$.  The first relation explains \eqref{eq:abstractinequality}, noting $y_0$ and $\alpha$ are real.
+These two relations determine $\alpha,\beta$ from $A,B$.  The first relation explains \eqref{eq:abstractinequality}, noting $3 y_0^2 \alpha^2 \ge 0$ of course.
 
-In the main text, Bodvardsson's problem relates four numbers: the initial (upstream) ice thickness $y_0=H_0$, an ablation gradient $a>0$, the equilibrium-line altitude $H_{ela}$, and a sliding constant $k>0$ to the glacier thickness $y(x) = H(x)$.  He has $A=-ka$ and $B=k a H_{ela}$ in \eqref{eq:abstractode} so the technical condition \eqref{eq:abstractinequality} says $3 H_{ela} \ge 2 H_0$ after simplification.  This causes the equilibrium line altitude to be relatively high on the glacier.
+In the main text, Bodvardsson's problem relates four numbers to the unknown glacier thickness $y(x)=H(x)$: the initial (upstream) ice thickness $y_0=H_0$, an ablation gradient $a>0$, the equilibrium-line altitude $H_{ela}$, and a sliding constant $k>0$.  He has $A=-ka$ and $B=k a H_{ela}$ in \eqref{eq:abstractode} so the technical condition \eqref{eq:abstractinequality} says $3 H_{ela} \ge 2 H_0$ after simplification.  This causes the equilibrium line altitude to be relatively high on the glacier.
 
 
-\subsection{Appendix B: A finite difference scheme}  The steady-state equations for mass continuity \eqref{eq:steadymass} and stress balance \eqref{eq:steadySSA} form a coupled system that can be approximately solved by the numerical scheme described here.  It uses centered, second-order finite differences for both equations.
+\subsection{Appendix B: A finite difference scheme}  The steady-state equations for mass continuity \eqref{eq:steadymass} and stress balance \eqref{eq:steadySSA} form a coupled system that can be approximately solved by the centered, second-order finite difference scheme described here.  There is no claim that this scheme is optimal, but merely that it is a reasonable choice for first evaluation, among fixed-grid methods.  Because we use it to solve a steady-state problem, it may be generalized to the time-dependent case as a fully-implicit method.
 
-We define an equally-spaced grid on the domain $[0,x_c]$.  Because the boundary condition at the calving front evaluates the stress $T$, the right endpoint $x_c$ is at a ``staggered'' location halfway in-between grid points.  If $N$ is the number of spaces then we define $\Delta x = x_c / (N+1/2)$ and $x_j = j\Delta x$ for $j=0,\dots,N+1$.  Denote the numerical approximations $H_i\approx H(x_i)$ and $u_i \approx u(x_i)$.  Let $x_j^* = x_j + \Delta x/2$ be the staggered location, for $j=0,\dots,N$, and note $x_c = x_N^* < x_{N+1}$.  Denote $B_j^*=B(x_j^*)$ and $M_j^*=M(x_j^*)$.
+We define an equally-spaced grid on the domain $[0,x_c]$.  Because the boundary condition at the calving front evaluates the stress $T$, we put the right endpoint $x_c$ at a ``staggered'' location halfway in-between grid points.  If $N$ is the number of spaces then we define $\Delta x = x_c / (N+1/2)$ and $x_j = j\Delta x$ for $j=0,\dots,N+1$.  Denote the numerical approximations $H_i\approx H(x_i)$ and $u_i \approx u(x_i)$.  Let $x_j^* = x_j + \Delta x/2$ be the staggered location, for $j=0,\dots,N$, and note $x_c = x_N^* < x_{N+1}$.  Denote $B_j^*=B(x_j^*)$ and $M_j^*=M(x_j^*)$.
 
 The mass continuity equation \eqref{eq:steadymass} is approximated by a second-order method centered at the staggered location.  For $j=0,\dots,N$,
 \begin{equation}
@@ -425,20 +411,20 @@ F(u_l,u_r) = \left(\left(\frac{u_r-u_l}{\Delta x}\right)^2 + \eps^2\right)^{q/2}
 \end{equation}
 Then we approximate the stress $T$ at staggered points,
 \begin{equation}
-T_j^* = B_j^* \left(H_j + H_{j+1}\right) F(u_j,u_{j+1}), \label{eq:TFD}
+T_{j}^* = B_j^* \left(H_j + H_{j+1}\right) F(u_j,u_{j+1}), \label{eq:TFD}
 \end{equation}
-for $j=0,\dots,N$, and equation \eqref{eq:steadySSA} is approximated by
+for $j=0,\dots,N$.  Equation \eqref{eq:steadySSA} is approximated by
 \begin{equation}
-\frac{T_j^* - T_{j-1}^*}{\Delta x} - \beta_j u_j - \rho g H_j \frac{h_{j+1} - h_{j-1}}{2 \Delta x} = 0 \label{eq:steadySSAFD}
+\frac{T_{j}^* - T_{j-1}^*}{\Delta x} - \beta_j u_j - \rho g H_j \frac{h_{j+1} - h_{j-1}}{2 \Delta x} = 0 \label{eq:steadySSAFD}
 \end{equation}
-where $\beta_j = k \rho g H_j$ if the ice is grounded at $x_j$ (i.e.~if $\rho H_j \ge \rho_w (z_o - b)$) and $\beta_j=0$ if the ice is floating, and where $h_j = H_j + b$ if the ice is grounded and $h_j = \omega H_j + z_o$ if the ice is floating.  Equation \eqref{eq:steadySSAFD} applies as stated both for grounded and floating ice, and it applies for all interior regular points, thus for $j=1,\dots,N$.
+where $\beta_j = k \rho g H_j$ if the ice is grounded at $x_j$ (i.e.~if $\rho H_j \ge \rho_w (z_o - b)$) and $\beta_j=0$ if the ice is floating, and where $h_j = H_j + b$ if the ice is grounded and $h_j = \omega H_j + z_o$ if the ice is floating.  Thus equation \eqref{eq:steadySSAFD} applies as stated both for grounded and floating ice, for $j=1,\dots,N$.
 
-At this point we have $2N+4$ unknowns, namely $u_j,H_j$ for $j=0,\dots,N+1$.  There are $2N+1$ nonlinear equations in \eqref{eq:steadymassFD} and \eqref{eq:steadySSAFD} above.  The two upstream Dirichlet equations \eqref{eq:leftbc}, namely $u_0=u(0)$ and $H_0=H(0)$, brings the number of equations to $2N+3$.  The following approximation of the calving front condition \eqref{eq:rightbc}, completes the system:
+At this point we have $2N+4$ scalar unknowns, namely $u_j$ and $H_j$ for $j=0,\dots,N+1$.  There are $2N+1$ nonlinear equations in \eqref{eq:steadymassFD} and \eqref{eq:steadySSAFD} above.  The two upstream Dirichlet equations \eqref{eq:leftbc}, namely $u_0=u(0)$ and $H_0=H(0)$, brings the number of equations to $2N+3$.  The following approximation of the calving front condition \eqref{eq:rightbc}, completes the system:
 \begin{equation}
 \frac{1}{2} \omega \rho g \left(\frac{H_N + H_{N+1}}{2}\right)^2 = T_N^*, \label{eq:rightbcFD}
 \end{equation}
 where $T_N^*$ is the approximation given in \eqref{eq:TFD}.
 
-Thus we have a system of $2N+4$ nonlinear equations in the same number of unknowns.  One can write this system abstractly as $\mathbf{F}(\mathbf{v})=0$.  These equations are solved by Newton's method \citep{Kelley}, as implemented in the PETSc library \citep{petsc-user-ref}.  We first write a residual evaluation function which merely computes $\mathbf{F}(\mathbf{v})$ given $\mathbf{v}$.  A finite-difference Jacobian can be computed by PETSc, so this allows us to solve systems up to size about $N=10^3$.  It is important in this finite-difference Jacobian case that both the unknowns $\mathbf{v}$ and the ``residuals'', namely the output values of $\mathbf{F}$, are scaled to have values which are $O(1)$.  We also implemented an exact Jacobian using by-hand differentiation for the formulas, and, for initial guesses sufficiently near the exact solution, this allows solutions of the system for up to about $N=10^5$.  A full analysis of the robustness and convergence rate of this Newton solver would be valuable, but that is beyond the scope of the current paper.
+Thus we have a system of $2N+4$ nonlinear equations in the same number of unknowns.  One can write this system abstractly as $\mathbf{F}(\mathbf{v})=0$.  These equations are solved by Newton's method \citep{Kelley}, as implemented in the PETSc library \citep{petsc-user-ref}.  We first wrote a residual evaluation function, a C language program, which basically computes $\mathbf{F}(\mathbf{v})$ given $\mathbf{v}$.  A finite-difference Jacobian matrix $J=\mathbf{F}'$ can then be computed by PETSc, and this allows us to solve systems up to size about $N=10^3$.  We also implemented an exact Jacobian using by-hand differentiation of the above formulas.  For initial guesses sufficiently near the exact solution, this exact Jacobian permits solutions of the system for up to $N=10^5$.  A full analysis of the robustness and convergence rate of this Newton solver would be valuable, but it is beyond the scope of the current paper.
 
 \end{document}
