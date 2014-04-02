@@ -42,7 +42,8 @@ for fnum in range(2):
 fig = figure(figsize=(7,6))
 
 sym = ('ko','k*')
-symsize = (7.0,12.0)
+symsize = (10.0,12.0)
+symface = ('k','w')
 dxmin = dx[0][:clen[0][0]].min()
 dxmax = dx[1].max()
 
@@ -50,7 +51,7 @@ dxmax = dx[1].max()
 ax1 = fig.add_subplot(2,1,1)
 for fnum in range(2):
     N = clen[fnum][0]
-    loglog(dx[fnum][:N],errHinf[fnum][:N],sym[fnum],markersize=symsize[fnum])
+    loglog(dx[fnum][:N],errHinf[fnum][:N],sym[fnum],markersize=symsize[fnum],markerfacecolor=symface[fnum])
     hold(True)
     p = polyfit(log(dx[fnum][:N]),log(errHinf[fnum][:N]),1)
     print "result:  thickness error %d decays at rate O(dx^%.2f)" % (fnum,p[0])
@@ -69,7 +70,7 @@ ylabel(r'$H$ error  (m)')
 ax2 = fig.add_subplot(2,1,2)
 for fnum in range(2):
     N = clen[fnum][0]
-    loglog(dx[fnum][:N],erruinf[fnum][:N],sym[fnum],markersize=symsize[fnum])
+    loglog(dx[fnum][:N],erruinf[fnum][:N],sym[fnum],markersize=symsize[fnum],markerfacecolor=symface[fnum])
     hold(True)
     p = polyfit(log(dx[fnum][:N]),log(erruinf[fnum][:N]),1)
     print "result:  velocity error %d decays at rate O(dx^%.2f)" % (fnum,p[0])
