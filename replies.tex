@@ -1,0 +1,244 @@
+\documentclass[11pt,reqno]{amsart}
+%prepared in AMSLaTeX, under LaTeX2e
+\addtolength{\oddsidemargin}{-.65in}
+\addtolength{\evensidemargin}{-.65in}
+\addtolength{\topmargin}{-.3in}
+\addtolength{\textwidth}{1.5in}
+\addtolength{\textheight}{.6in}
+
+\renewcommand{\baselinestretch}{1.1}
+
+\usepackage{verbatim} % for "comment" environment
+
+\usepackage[pdftex, colorlinks=true, plainpages=false, linkcolor=blue, citecolor=red, urlcolor=blue]{hyperref}
+
+\newtheorem*{thm}{Theorem}
+\newtheorem*{defn}{Definition}
+\newtheorem*{example}{Example}
+\newtheorem*{problem}{Problem}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\mtt}{\texttt}
+\usepackage{alltt,xspace}
+\usepackage[normalem]{ulem}
+\newcommand{\mfile}[1]
+{\medskip\begin{quote}\scriptsize \begin{alltt}\input{#1.m}\end{alltt} \normalsize\end{quote}\medskip}
+
+\usepackage[final]{graphicx}
+\newcommand{\mfigure}[1]{\includegraphics[height=2.5in,
+width=3.5in]{#1.eps}}
+\newcommand{\regfigure}[2]{\includegraphics[height=#2in,
+keepaspectratio=true]{#1.eps}}
+\newcommand{\widefigure}[3]{\includegraphics[height=#2in,
+width=#3in]{#1.eps}}
+
+% macros
+\usepackage{amssymb}
+
+\newcommand{\bA}{\mathbf{A}}
+\newcommand{\bB}{\mathbf{B}}
+\newcommand{\bE}{\mathbf{E}}
+\newcommand{\bF}{\mathbf{F}}
+\newcommand{\bJ}{\mathbf{J}}
+\newcommand{\br}{\mathbf{r}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\hbi}{\mathbf{\hat i}}
+\newcommand{\hbj}{\mathbf{\hat j}}
+\newcommand{\hbk}{\mathbf{\hat k}}
+\newcommand{\hbn}{\mathbf{\hat n}}
+\newcommand{\hbr}{\mathbf{\hat r}}
+\newcommand{\hbt}{\mathbf{\hat t}}
+\newcommand{\hbx}{\mathbf{\hat x}}
+\newcommand{\hby}{\mathbf{\hat y}}
+\newcommand{\hbz}{\mathbf{\hat z}}
+\newcommand{\hbphi}{\mathbf{\hat \phi}}
+\newcommand{\hbtheta}{\mathbf{\hat \theta}}
+\newcommand{\complex}{\mathbb{C}}
+\newcommand{\ppr}[1]{\frac{\partial #1}{\partial r}}
+\newcommand{\ppt}[1]{\frac{\partial #1}{\partial t}}
+\newcommand{\ppx}[1]{\frac{\partial #1}{\partial x}}
+\newcommand{\ppy}[1]{\frac{\partial #1}{\partial y}}
+\newcommand{\ppz}[1]{\frac{\partial #1}{\partial z}}
+\newcommand{\pptheta}[1]{\frac{\partial #1}{\partial \theta}}
+\newcommand{\ppphi}[1]{\frac{\partial #1}{\partial \phi}}
+\newcommand{\pp}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\ppp}[2]{\frac{\partial^2 #1}{\partial^2 #2}}
+\newcommand{\pppp}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
+\newcommand{\Div}{\ensuremath{\nabla\cdot}}
+\newcommand{\Curl}{\ensuremath{\nabla\times}}
+\newcommand{\curl}[3]{\ensuremath{\begin{vmatrix} \hbi & \hbj & \hbk \\ \partial_x & \partial_y & \partial_z \\ #1 & #2 & #3 \end{vmatrix}}}
+\newcommand{\cross}[6]{\ensuremath{\begin{vmatrix} \hbi & \hbj & \hbk \\ #1 & #2 & #3 \\ #4 & #5 & #6 \end{vmatrix}}}
+\newcommand{\eps}{\epsilon}
+\newcommand{\grad}{\nabla}
+\newcommand{\image}{\operatorname{im}}
+\newcommand{\integers}{\mathbb{Z}}
+\newcommand{\ip}[2]{\ensuremath{\left<#1,#2\right>}}
+\newcommand{\lam}{\lambda}
+\newcommand{\lap}{\triangle}
+\newcommand{\Matlab}{\textsc{Matlab}\xspace}
+\newcommand{\exers}[1]{\bigskip\noindent\textbf{Exercises} #1}
+\newcommand{\fexer}[2]{\bigskip\noindent\textbf{Lesson #1, \##2}\quad }
+\newcommand{\prob}[1]{\bigskip\noindent\textbf{#1} }
+\newcommand{\pts}[1]{(\emph{#1 pts}) }
+\newcommand{\epart}[1]{\medskip\noindent\textbf{(#1)}\quad }
+\newcommand{\ppart}[1]{\,\textbf{(#1)}\quad }
+\newcommand{\note}[1]{[\scriptsize #1 \normalsize]}
+\newcommand{\MatIN}[1]{\mtt{>> #1}}
+\newcommand{\onull}{\operatorname{null}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\range}{\operatorname{range}}
+\renewcommand{\P}{\mathcal{P}}
+\newcommand{\real}{\mathbb{R}}
+\newcommand{\trace}{\operatorname{tr}}
+\renewcommand{\Re}{\operatorname{Re}}
+\renewcommand{\Im}{\operatorname{Im}}
+\newcommand{\Arg}{\operatorname{Arg}}
+
+\newcommand{\comm}[2]{\item \emph{#1}:\, #2}
+
+\renewcommand{\ln}[2]{\comm{line #1}{#2}}
+\newcommand{\lnpage}[3]{\comm{line #1 \underline{on page #2}}{#3}}
+\newcommand{\lns}[2]{\comm{lines #1}{#2}}
+\newcommand{\lnspage}[3]{\comm{lines #1 \underline{on page #2}}{#3}}
+\newcommand{\fg}[2]{\comm{Figure #1}{#2}}
+\newcommand{\eqn}[2]{\comm{equation #1}{#2}}
+
+\title[Author's replies to reviews of \emph{An exact solution \dots}]{Author's replies to reviews of \\ \emph{An exact solution for a steady, flow-line marine ice sheet}}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\thispagestyle{empty}
+
+
+
+\subsection*{Editor's comments and instructions}  \begin{quote}
+\emph{Scientific Editor Comments (S.H.~Faria):}
+
+\emph{The Reviewers (K.~Hutter and R.~Gladstone) agree that this is a well-written and mathematically sound manuscript. They share however a concern about the novelty of the results. Owing to this, it is in my opinion very important to highlight more the new results of this work, and to explore further their consequences, in order to make this manuscript publishable in the Journal of Glaciology.}
+
+\dots
+
+\emph{Could you please examine the reviews and address, point by point, each of the issues raised by the reviewers? You should revise the manuscript in line with the reviewers' comments, or provide me with point-by-point well-argued reasons for not revising the manuscript.}
+\end{quote}
+
+\noindent FIXME:  I have done so
+
+
+
+\subsection*{Reviewer \#1 (Hutter)}  \begin{itemize}
+\item  \begin{quote}
+\emph{Professionally and technically this paper is well written, correct in its essential parts, but its global aims and scope by the author are not clear to me.}
+
+\medskip
+\emph{It is shown that Bodvardsson's parabolic ice profile and flow solution is also an exact solution for floating ice (van der Veen).}
+\end{quote}
+
+\noindent FIXME
+
+\item  \begin{quote}
+\emph{\dots In a kind of inverse procedure - but not so named by the author - exact solutions to the ice sheet-shelf configuration are constructed by accordingly selecting the "ice stiffness" variation as a function of space. At least, this is what I believe the author does.}
+\end{quote}
+
+\noindent FIXME
+
+\item  \begin{quote}
+\emph{\dots It, is however, not explicitly expressed what this somewhat artificial mathematical approach serves to the physically inclined glaciological modeler. To me, it seems clear: `Testing numerical schemes for their reliability and performance'. And the author takes this view in the second part of the paper, to test the performance of two numerical schemes, a shooting method-IBV approach and a TPBVP-approach. By doing this, he even finds a glaciological relevant result: Loss of numerical accuracy of both schemes when crossing the grounding line region because of the associated stiffness--`jump'.  This may give hints of understanding glaciologists' doubtful results in grounding line regions.}
+\end{quote}
+
+\noindent FIXME
+
+\item  \begin{quote}
+\emph{There is one term ``Mass balance'', which is incorrectly used. The quantity $M$ is NOT a mass BALANCE, but an accumulation/ablation rate density, functioning as a climatological input quantity. I do not understand why glaciologists and other natural scientists (and here a mathematician) maintain this erroneous term for decades, which expresses simply the wrong thing.}
+\end{quote}
+
+\noindent FIXME
+
+\item  \begin{quote}
+\emph{I am not sure whether J. Glaciology is the adequate place for this paper, which to me looks like a worked out term paper in a first year graduate class of applied mathematics or mechanics.}
+\end{quote}
+
+\noindent FIXME
+\end{itemize}
+
+
+
+
+
+\subsection*{Reviewer \#2 (R.~Gladstone)}  \begin{itemize}
+\item  \begin{quote}
+\emph{The author provides an exact steady solution to a specific idealised marine ice sheet configuration by combining two previously established solutions. This combined solution is used to verify two numerical approaches. The paper is mostly clearly written and well laid out. The decisions about which material to move to appendices seem good to me, and the figures provide a concise and adequate visual representation of the ice sheet configuration and various solutions.}
+
+\medskip
+\emph{Regarding content, this marine ice sheet configuration has very contrived spatial patterns for ice hardness and for surface mass balance.  It provides an exact solution against which to compare numerical models, which could possibly replace the semi-analytic solution provided by Christian Schoof to a similar but simpler and less contrived problem for the purposes of numerical model verification. Whether or not this solution gains wide use in model verification, this is an elegant exercise which goes some way towards shedding light on the nature of currents problems with grounding line numerical modelling from a mathematical perspective.}
+\end{quote}
+
+\noindent FIXME
+
+
+\item  \begin{quote}
+\emph{The author would do well to add at least a brief paragraph discussing the validity of the basal drag law when extending the bodvardsson solution from a land terminating to a marine ice sheet. Basal drag is given as a function of overburden pressure, whereas there are arguments in favour of using effective pressure rather than overburden pressure. For a marine ice sheet a first approximation for effective pressure would be to assume a fully connected sub-glacial drainage system, i.e. effective pressure given by ice overburden pressure minus ocean pressure. Thus you could replace H with (h-z0) in eqn 5.}
+\end{quote}
+
+\noindent FIXME
+
+
+\item  \begin{quote}
+\emph{I've checked all the equations in the main text (except linearization about the exact solution) and all seem fine. I've read through the appendices and they seem clearly written, though I would question the choice of beta in appendix A for possible confusion with the sliding coefficient.}
+\end{quote}
+
+\noindent FIXME
+
+
+\item  \begin{quote}
+\emph{I don't really have the right background to verify the section about linearization around the exact solution, in which the stiffness ratio is calculated, but I do have some questions about this section. Apologies if my questions seem naive, I am a little out of my depth here. You say that the poor convergence of previous studies in terms of near-grounding line solution can be explained by the high stiffness. Current thinking is that the step change in basal drag, and the associated rapid variations in stress and other properties near the grounding line, are the cause of the problem. Is the stiffness explanation really saying anything different? Given that stiffness is not a precisely defined mathematical property (although I accept that the stiffness ratio, which I have not come across before, is clearly defined), can it give us any new insight into the problem? In other words, is this useful in any practical way? How does stiffness differ from smoothness in this context, and what can modellers do about it?}
+\end{quote}
+
+\noindent FIXME
+
+
+\item  \begin{quote}
+\emph{How easy would it be for you to create a plot of stiffness ratios for the same problem but with different sliding relations? In particular, if you replace [overburden pressure] with [overburden pressure minus ocean water pressure] does the step change in stiffness ratio go away? It might be interesting to see such a plot for the Schoof 2005 sliding law too (the Leguy 2014 sliding law is based on this).}
+\end{quote}
+
+\noindent FIXME
+
+
+\item  \begin{quote}
+Line by line comments
+L18 "perfectly" should be just "perfect"
+L32-35. This looks more like a conclusion than an introductory remark.
+Equation 10. Please clarify that this is essentially equation 2 following the assumptions made in the preceding paragraph.
+Equation 12. "combining these equations" $\to$ "substituting these equations into equation 1" or something like "combining these equations with the requirement for mass conservation"
+L105-112. This is basically what I figured out while trying to understand where eqns 10-12 came from. Perhaps it would make more sense to bring these arguments forward to where equations 10-12 are introduced?
+Paragraph following L112 (the line numbering seem to have been missed out in places). $T_x=0$ isnt just saying that ice hardness is variable, it is saying that ice hardness must vary in this particular way (as given by equation 14). You say "such variable hardness is physical". Well, yes, hardness is variable. But is there any physical justification for this particular pattern of hardness?
+Top of page 9. Formulas $\to$ formulae
+Table 2. It would be helpful to indicate which of these quantities are prescribed in order to generate the exact solution, and which are a result of the solution, i.e. which are the user defined inputs (e.g. $H_0$, $L_0$) and which are outputs (e.g. $B(x_g)$).
+L137-140. Presumably these lines refer just to the numerical models? Presumably eqn 11 is used in generation of your exact solution? In which case it might be better to move this to the next section, "Numerical Results".
+L173 "show" $\to$ "shown"
+
+References
+I would recommend citing Schoof 2005 in addition to Leguy 2014 as this paper (along with a test implementation in Gagliardini 2007) shows the full derivation of the Leguy 2014 sliding relation. The Leguy 2014 sliding relation is just a small deviation from Schoof's work.
+\end{quote}
+
+\noindent FIXME
+
+
+\item  \begin{quote}
+
+\end{quote}
+
+\noindent FIXME
+
+
+\end{itemize}
+
+
+%\bigskip
+%\small
+%\bibliography{ice-bib}
+%\bibliographystyle{siam}
+
+\end{document}
