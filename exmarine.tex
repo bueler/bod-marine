@@ -102,7 +102,7 @@ are the surface elevation and sliding coefficient, respectively.
 Equations \eqref{eq:steadymass}--\eqref{eq:betafull} apply on an interval $0 < x < x_c$ where $x_c$ is the floating calving-front.  The grounded ice rests on flat bedrock at elevation $b$, a constant in this context.  Note that $M(x)$ combines the surface and basal mass balance, while $B(x)$ is the ice hardness, and that these functions may depend on location $x$.  In grounded ice the basal shear stress satisfies $\tau_b = - \beta u$ \citep{MacAyeal}, but we have scaled the coefficient with the ice overburden pressure so that $\beta = k \rho g H$ \citepbod.  The ``Archimedean factor'' $\omega = 1 - \rho/\rho_w$ relates surface elevation to thickness in floating ice.  Note $z_o$ is the elevation of the ocean surface.
 
 \begin{figure}[ht]
-\onecol{exactmarine-geometry}
+\onecol{em-geometry}
 \caption{The geometry (solid) and velocity (dashed) of an exact solution of the simultaneous steady mass continuity and SSA stress balance equations for a marine ice sheet.  The solution is \bod's when grounded and van der Veen's when floating.} \label{fig:exactmarine}
 \end{figure}
 
@@ -217,7 +217,7 @@ H(x) = \begin{cases} H_0 \left(1 - (\frac{x+x_a}{L_0})^2\right), & 0 \le x \le x
 Formulas \eqref{eq:marinevel} and \eqref{eq:marinethickness} define the continuous functions which are shown in Figure \ref{fig:exactmarine}, using the specific values in Table \ref{tab:exactsoln}.
 
 \begin{table}
-\caption{Specific values of the exact solution shown in Figures \ref{fig:exactmarine}--\ref{fig:exactmarine-detail}; ``g.l.'' = grounding line and ``c.f.'' = calving front.}\label{tab:exactsoln}
+\caption{Specific values of the exact solution shown in Figures \ref{fig:exactmarine}--\ref{fig:em-detail}; ``g.l.'' = grounding line and ``c.f.'' = calving front.}\label{tab:exactsoln}
 
 \medskip
 \begin{tabular}{llll}
@@ -242,26 +242,26 @@ $u(x_c)$ & ice velocity at c.f. & 464.092 $\text{m}\,\text{a}^{-1}$  \\
 \end{tabular}
 \end{table}
 
-From the thickness $H(x)$ and the velocity $u(x)$ we can find continuous functions $M(x)$ and $B(x)$ for the full  flowline by using equations \eqref{eq:bodmassbalance} and \eqref{eq:hardnessdefine}.  These functions are shown in Figure \ref{fig:exactMB}.  Then we can use equation \eqref{eq:Tstress} to find $T(x)$; this is shown in Figure \ref{fig:exactbetaT}.  In Figure \ref{fig:exactbetaT} we also show the sliding coefficient $\beta(x)$, which drops to zero discontinuously at $x_g$.  Finally Figure \ref{fig:exactmarine-detail} shows a detail of the grounding line and floating ice in the exact solution.
+From the thickness $H(x)$ and the velocity $u(x)$ we can find continuous functions $M(x)$ and $B(x)$ for the full  flowline by using equations \eqref{eq:bodmassbalance} and \eqref{eq:hardnessdefine}.  These functions are shown in Figure \ref{fig:exactMB}.  Then we can use equation \eqref{eq:Tstress} to find $T(x)$; this is shown in Figure \ref{fig:exactbetaT}.  In Figure \ref{fig:exactbetaT} we also show the sliding coefficient $\beta(x)$, which drops to zero discontinuously at $x_g$.  Finally Figure \ref{fig:em-detail} shows a detail of the grounding line and floating ice in the exact solution.
 
 \begin{figure}[ht]
-\onecol{exactmarine-M-B}
+\onecol{em-M-B}
 \caption{The mass balance $M(x)$ (solid) and ice hardness $B(x)$ (dashed) of the exact solution.} \label{fig:exactMB}
 \end{figure}
 
 \begin{figure}[ht]
-\onecol{exactmarine-beta-T}
+\onecol{em-beta-T}
 \caption{The sliding coefficient $\beta(x)$ (solid) and the vertically-integrated longitudinal stress $T(x)$ (dashed) for the exact solution.  The solid curve shows $\beta = k \rho g H$ on both sides of the grounding line.  The actual basal resistance experienced by the shelf drops to zero at the grounding line (dotted).} \label{fig:exactbetaT}
 \end{figure}
 
 Note that, because this paper is focussed on ice flow dynamics and grounding lines, we treat $M(x)$ as a predetermined field (i.e.~the one shown in Figure \ref{fig:exactMB}).  This removes the climatically-important elevation--accumulation feedback, and the associated instability, of interest to \citebod and others.  This feedback can be restored by using equation \eqref{eq:bodmassbalance} to determine $M$ from $H$.
 
 \begin{figure}[ht]
-\onecol{exactmarine-geometry-detail}
-\caption{Detail of Figure \ref{fig:exactmarine}, showing the floating ice shelf geometry and velocity.} \label{fig:exactmarine-detail}
+\onecol{em-geometry-detail}
+\caption{Detail of Figure \ref{fig:exactmarine}, showing the floating ice shelf geometry and velocity.} \label{fig:em-detail}
 \end{figure}
 
-The floating ice shelf is a relatively short 40 km; see Figures \ref{fig:exactmarine} and \ref{fig:exactmarine-detail}.  To explain, note that the equilibrium line $H_{ela}$ in \bod's (1955) solution is high on the ice sheet because of its relation to the upstream ice thickness in the construction of the exact solution (i.e.~$H_{ela} = (2/3) H_0$).  This in turn implies $M(x_g)$ is quite negative (equation \eqref{eq:bodmassbalance}; see Figure \ref{fig:exactMB}).  Because van der Veen's (1983) solution uses constant mass balance, and because we want continuity for $M(x)$, we therefore have an ice shelf experiencing rapid melting.  The location of the calving front $x_c$ must, of course, be put upstream of the location where the ice has melted away.  As a result of these same factors we also see a rapid decline in the stress $T(x)$ from its constant grounded value to its small value at $x_c$ (Figure \ref{fig:exactbetaT} and Table \ref{tab:exactsoln}).  Though the ice shelf shown here is very wedge-like, the thickness $H(x)$ for floating ice comes from formula \eqref{eq:marinethickness}, and it is not a linear function because $u_s(x)$ is not constant on the shelf.
+The floating ice shelf is a relatively short 40 km; see Figures \ref{fig:exactmarine} and \ref{fig:em-detail}.  To explain, note that the equilibrium line $H_{ela}$ in \bod's (1955) solution is high on the ice sheet because of its relation to the upstream ice thickness in the construction of the exact solution (i.e.~$H_{ela} = (2/3) H_0$).  This in turn implies $M(x_g)$ is quite negative (equation \eqref{eq:bodmassbalance}; see Figure \ref{fig:exactMB}).  Because van der Veen's (1983) solution uses constant mass balance, and because we want continuity for $M(x)$, we therefore have an ice shelf experiencing rapid melting.  The location of the calving front $x_c$ must, of course, be put upstream of the location where the ice has melted away.  As a result of these same factors we also see a rapid decline in the stress $T(x)$ from its constant grounded value to its small value at $x_c$ (Figure \ref{fig:exactbetaT} and Table \ref{tab:exactsoln}).  Though the ice shelf shown here is very wedge-like, the thickness $H(x)$ for floating ice comes from formula \eqref{eq:marinethickness}, and it is not a linear function because $u_s(x)$ is not constant on the shelf.
 
 
 \section{Numerical Results}
@@ -277,7 +277,7 @@ and then we can apply a numerical method to find the solution (root) $\hat T_0$ 
 A robust root-finding method is bisection \citep[section 9.1]{Pressetal}.  It is guaranteed to converge if $F$ is continuous and if an initial bracket is given (easy to find in this case).  Regarding faster root-finding methods than bisection, such as Newton's method, we observe that $F'$ may not exist because of the low regularity of the solution at the interior point $x=x_g$. However, by using our exact solution we will see clear evidence that the bisection iteration succeeds in finding the root $\hat T_0$ to many digits despite the uncertain smoothness of $F$.
 
 \begin{figure}[ht]
-\onecol{exactmarine-error}
+\onecol{em-error}
 \caption{Pointwise error in thickness (upper panel) and in velocity (lower panel) from an adaptive numerical ODE scheme.  Both the ``cheating'' case (solid), where we use the exactly-correct initial value for $T$, and the ``realistic'' case (dashed), where the shooting method converges on the correct initial value for $T$ by the bisection method, are shown.} \label{fig:shoot-error}
 \end{figure}
 
@@ -288,7 +288,7 @@ Of course we apply this grid-free procedure to the same problem for which we hav
 The ODE solver also detects the grounding line as a point of transition to shorter (spatial) steps, as seen in Figure \ref{fig:shoot-dt-adaptive}.  More significantly, however, the grounded ice requires a stiff method while the floating ice allows a nonstiff one, according to the automatic switch mechanism in LSODA.  Note that high accuracy (e.g. 6 or 7 digits) is achieved in the ``realistic'' case despite rather large grid spacing in the grounded ice, with large portions at 5--10 km spacing.  The spacing drops to a minimum of 100 m just downstream of the grounding line at $x_g=350$ km.
 
 \begin{figure}[ht]
-\onecol{exactmarine-dt-adaptive}
+\onecol{em-dt-adaptive}
 \caption{The adaptive numerical ODE scheme in the ``realistic'' case makes steps of more than 10 km in grounded ice, but at the grounding line $x_g=350$ km the step size is reduced to a few hundred meters.  The adaptive mechanism automatically switches from stiff when grounded (circles) to non-stiff when floating (stars).} \label{fig:shoot-dt-adaptive}
 \end{figure}
 
@@ -338,7 +338,7 @@ where $A(x) = L(x)^{-1} R(x)$.  Note that we have ordered the equations and unkn
 The linear ODE system \eqref{eq:linearization} is stiff if there is a large ratio of magnitudes in the eigenvalues of $A(x)$ \citep{Pressetal}.  Because the entries and eigenvalues of $A(x)$ are exactly computable using the exact solution values $(\hu(x),\hH(x),\hT(x))$, we can plot, along the whole length of the flowline, the $x$-dependent ``stiffness ratio'' for $A(x)$, namely the ratio of absolute values of the real parts of the largest and smallest eigenvalues of $A(x)$.  See Figure \ref{fig:stiffness}.  This ratio is small in the nonstiff case, and it is independent of the direction of integration (i.e.~upstream versus downstream).  The computed ratio is by no means the last word on quantifying stiffness, which turns out to be hard problem generally \citep[e.g.][]{HighamTrefethen1993}.
 
 \begin{figure}[ht]
-\onecol{exactmarine-stiffness-ratio}
+\onecol{em-stiffness-ratio}
 \caption{Stiffness ratio for the linearized problem \eqref{eq:linearization}.  Specifically we plot $|\operatorname{Re}(\lambda_1)|/|\operatorname{Re}(\lambda_3)|$ where $\lambda_i$ are the ordered, $x$-dependent eigenvalues of $A(x)$ in \eqref{eq:linearization}.} \label{fig:stiffness}
 \end{figure}
 

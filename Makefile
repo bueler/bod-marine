@@ -1,19 +1,18 @@
 all: exmarine.pdf
 
-otherexmfigs = exactmarine-M-B.pdf exactmarine-beta-T.pdf \
-          exactmarine-geometry-detail.pdf exactmarine-error.pdf \
-          exactmarine-dt-adaptive.pdf
+otheremfigs = em-M-B.pdf em-beta-T.pdf em-geometry-detail.pdf em-error.pdf \
+          em-dt-adaptive.pdf
 
-figures = twoparabolas.pdf convmarine.pdf exactmarine-geometry.pdf exactmarine-stiffness-ratio.pdf
+figures = twoparabolas.pdf convmarine.pdf em-geometry.pdf em-stiffness-ratio.pdf
 
 twoparabolas.pdf: twoparabolas.py
 	./twoparabolas.py
 
-# also generates $(otherexmfigs)
-exactmarine-geometry.pdf : marineshoot.py
-	./marineshoot.py --saveroot exactmarine --figures
+# also generates $(otheremfigs)
+em-geometry.pdf : marineshoot.py
+	./marineshoot.py --saveroot em --figures
 
-exactmarine-stiffness-ratio.pdf : linearization.py
+em-stiffness-ratio.pdf : linearization.py
 	./linearization.py
 
 convmarine.pdf: convfigure.py petsc/convmarine-exactinit.sh petsc/convmarine-realistic.sh
@@ -38,4 +37,4 @@ exmarine.bbl: exmarine.aux ice-bib.bib
 
 clean:
 	@rm -f *.pyc *.out *.aux *.log *.bbl *.blg *.synctex.gz *~ \
-	$(figures) $(otherexmfigs) unnamed-*.pdf
+	$(figures) $(otheremfigs) unnamed-*.pdf
