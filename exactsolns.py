@@ -88,7 +88,9 @@ Tc = 0.5 * rho * g * omega * Hc**2
 
 def printtable():
   print 'important constants and values for exact solution:'
+  print '  Hela  = %10.3f m' % Hela
   print '  H0    = %10.3f m' % H0
+  print '  k     = %10.3f s m-1' % k
   print '  L0    = %10.3f km' % (L0 / 1000.0)
   print '  zo    = %10.3f m' % bedg
   print '  [xa   = %10.3f km]' % (xa / 1000.0)
@@ -105,3 +107,6 @@ def printtable():
   print '  u(xc) = %10.3f m/a' % (uc * secpera)
   print '  T(xc) = %10.3f 10^8 Pa m' % (1.0e-8 * Tc)
 
+
+if __name__ == "__main__":
+    printtable()
