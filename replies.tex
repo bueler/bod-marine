@@ -35,6 +35,14 @@ width=#3in]{#1.eps}}
 % macros
 \usepackage{amssymb}
 
+\usepackage[T1, OT1]{fontenc}
+\renewcommand{\dh}{\fontencoding{T1}\selectfont{\symbol{240}}}
+
+\newcommand{\bod}{B\"o\dh varsson\xspace}
+\newcommand{\bods}{B\"o\dh varsson's}
+\newcommand{\citebod}{B\"o\dh varsson (1955)\nocite{Bodvardsson}\xspace}
+\newcommand{\citepbod}{(B\"o\dh varsson, 1955)\nocite{Bodvardsson}\xspace}
+
 \newcommand{\bA}{\mathbf{A}}
 \newcommand{\bB}{\mathbf{B}}
 \newcommand{\bE}{\mathbf{E}}
@@ -109,7 +117,7 @@ width=#3in]{#1.eps}}
 \emph{#1}
 \end{quote}
 
-\smallskip
+\medskip
 \noindent #2}
 
 
@@ -134,8 +142,17 @@ width=#3in]{#1.eps}}
 \emph{Could you please examine the reviews and address, point by point, each of the issues raised by the reviewers? You should revise the manuscript in line with the reviewers' comments, or provide me with point-by-point well-argued reasons for not revising the manuscript.}
 \end{quote}
 
-\noindent FIXME:  I have done so
+\medskip
+\noindent I appreciate the quick review process!  I have indeed examined and addressed the reviewer's comments point-by-point, and I have spent most of my effort carefully making revisions to address these points.
 
+\medskip
+\noindent Note that reviewer \#1's comments are not very helpful.  Other than tilting at windmills (i.e.~``one term `Mass balance' \dots is incorrectly used'') and attempting to insult me (i.e.~``\dots worked out term paper in a first year graduate class \dots''), there is simply not much to respond to.  I have responded to the best of my ability to both reviewers, and in the case of \#2 that has led, I hope, to several improvements to the paper.
+
+\medskip
+\noindent I want to point out something that is not hidden in the paper---it is the first paragraph of the introduction and it is returned-to in the conclusion---but which neither reviewer commented on:  There is a historical purpose to this paper, namely to show that \bod's plug flow solution is both misunderstood---I can find no reference in the literature either to the fact that it solves a stress balance or to the fact that is an exact solution at all---and that it is surprisingly-relevant to a topic of current interest, namely marine ice sheet modeling in the rapidly-sliding case.  I have added a short paragraph to the conclusion to describe the citation history of \citebod, and thus to emphasize this historical purpose.  This historical revival is part of the novelty of this paper.
+
+\medskip
+\noindent Based on colleague's suggestions I have corrected the typography used for \bod's Icelandic name.  The revised acknowledgements clarify this too.
 
 
 \subsection*{Reviewer \#1 (Hutter)}  \begin{itemize}
@@ -161,16 +178,27 @@ width=#3in]{#1.eps}}
 
 
 \subsection*{Reviewer \#2 (R.~Gladstone)}  \begin{itemize}
-\reply{The author provides an exact steady solution to a specific idealised marine ice sheet configuration by combining two previously established solutions. This combined solution is used to verify two numerical approaches. The paper is mostly clearly written and well laid out. The decisions about which material to move to appendices seem good to me, and the figures provide a concise and adequate visual representation of the ice sheet configuration and various solutions.  \smallskip \\
-Regarding content, this marine ice sheet configuration has very contrived spatial patterns for ice hardness and for surface mass balance.  It provides an exact solution against which to compare numerical models, which could possibly replace the semi-analytic solution provided by Christian Schoof to a similar but simpler and less contrived problem for the purposes of numerical model verification. Whether or not this solution gains wide use in model verification, this is an elegant exercise which goes some way towards shedding light on the nature of currents problems with grounding line numerical modelling from a mathematical perspective.}{FIXME}
+\reply{The author provides an exact steady solution to a specific idealised marine ice sheet configuration by combining two previously established solutions. This combined solution is used to verify two numerical approaches. The paper is mostly clearly written and well laid out. The decisions about which material to move to appendices seem good to me, and the figures provide a concise and adequate visual representation of the ice sheet configuration and various solutions.}
+{I am delighted with, and appreciate, this highly-accurate summary of the paper.  I believe it also shows that reviewer \#1 had adequate information so as to understand the major points of the paper.}
 
-\reply{The author would do well to add at least a brief paragraph discussing the validity of the basal drag law when extending the bodvardsson solution from a land terminating to a marine ice sheet. Basal drag is given as a function of overburden pressure, whereas there are arguments in favour of using effective pressure rather than overburden pressure. For a marine ice sheet a first approximation for effective pressure would be to assume a fully connected sub-glacial drainage system, i.e. effective pressure given by ice overburden pressure minus ocean pressure. Thus you could replace H with (h-z0) in eqn 5.}{FIXME}
+\reply{Regarding content, this marine ice sheet configuration has very contrived spatial patterns for ice hardness and for surface mass balance.}
+{\bod's solution, remarkably, is an exact solution of equations that no one else seems to have ever solved exactly.  Though it is a natural plug flow solution (i.e.~one with constant vertically-integrated longitudinal stress), in order to interpret it in the modern (i.e.~SSA) context, so as to make it relevant to a large readership, it requires a contrived ice hardness function.  This is true and I agree with the ``contrived'' assessment.  Based on specific suggestions by the reviewer (below), I have revised the text to clarify this construction as much as possible. \medskip \\
+I simply disagree with the reviewer that it has a ``very contrived \dots surface mass balance''.  Indeed the formula $M=a(H-H_{ela})$ is the most widespread model for elevation-dependent surface mass balance, i.e.~a lapse rate $a$ around an equilibrium line $H_{ela}$.  Part of the reason that this surface mass balance model is widespread is that people cite \citebod for this formula!}
 
-\reply{I've checked all the equations in the main text (except linearization about the exact solution) and all seem fine. I've read through the appendices and they seem clearly written, though I would question the choice of beta in appendix A for possible confusion with the sliding coefficient.}{FIXME}
+\reply{\dots It provides an exact solution against which to compare numerical models, which could possibly replace the semi-analytic solution provided by Christian Schoof to a similar but simpler and less contrived problem for the purposes of numerical model verification.  Whether or not this solution gains wide use in model verification, this is an elegant exercise which goes some way towards shedding light on the nature of currents problems with grounding line numerical modelling from a mathematical perspective.}
+{I have nothing to add to this comment, which exactly describes my aspirations for the paper.  Actually I think that the new exact solution is too weak to ``replace the semi-analytic solution \dots by \dots Schoof'', but at least it has a chance to be useful for numerical verification.}
 
-\reply{I don't really have the right background to verify the section about linearization around the exact solution, in which the stiffness ratio is calculated, but I do have some questions about this section. Apologies if my questions seem naive, I am a little out of my depth here. You say that the poor convergence of previous studies in terms of near-grounding line solution can be explained by the high stiffness. Current thinking is that the step change in basal drag, and the associated rapid variations in stress and other properties near the grounding line, are the cause of the problem. Is the stiffness explanation really saying anything different? Given that stiffness is not a precisely defined mathematical property (although I accept that the stiffness ratio, which I have not come across before, is clearly defined), can it give us any new insight into the problem? In other words, is this useful in any practical way? How does stiffness differ from smoothness in this context, and what can modellers do about it?}{FIXME}
+\reply{The author would do well to add at least a brief paragraph discussing the validity of the basal drag law when extending the bodvardsson solution from a land terminating to a marine ice sheet. Basal drag is given as a function of overburden pressure, whereas there are arguments in favour of using effective pressure rather than overburden pressure. For a marine ice sheet a first approximation for effective pressure would be to assume a fully connected sub-glacial drainage system, i.e. effective pressure given by ice overburden pressure minus ocean pressure. Thus you could replace H with (h-z0) in eqn 5.}
+{FIXME}
 
-\reply{How easy would it be for you to create a plot of stiffness ratios for the same problem but with different sliding relations? In particular, if you replace [overburden pressure] with [overburden pressure minus ocean water pressure] does the step change in stiffness ratio go away? It might be interesting to see such a plot for the Schoof 2005 sliding law too (the Leguy 2014 sliding law is based on this).}{FIXME}
+\reply{I've checked all the equations in the main text (except linearization about the exact solution) and all seem fine. I've read through the appendices and they seem clearly written, though I would question the choice of beta in appendix A for possible confusion with the sliding coefficient.}
+{FIXME}
+
+\reply{I don't really have the right background to verify the section about linearization around the exact solution, in which the stiffness ratio is calculated, but I do have some questions about this section. Apologies if my questions seem naive, I am a little out of my depth here. You say that the poor convergence of previous studies in terms of near-grounding line solution can be explained by the high stiffness. Current thinking is that the step change in basal drag, and the associated rapid variations in stress and other properties near the grounding line, are the cause of the problem. Is the stiffness explanation really saying anything different? Given that stiffness is not a precisely defined mathematical property (although I accept that the stiffness ratio, which I have not come across before, is clearly defined), can it give us any new insight into the problem? In other words, is this useful in any practical way? How does stiffness differ from smoothness in this context, and what can modellers do about it?}
+{FIXME}
+
+\reply{How easy would it be for you to create a plot of stiffness ratios for the same problem but with different sliding relations? In particular, if you replace [overburden pressure] with [overburden pressure minus ocean water pressure] does the step change in stiffness ratio go away? It might be interesting to see such a plot for the Schoof 2005 sliding law too (the Leguy 2014 sliding law is based on this).}
+{FIXME}
 
 \reply{Line by line comments \smallskip \\
 L18 ``perfectly'' should be just ``perfect''}
@@ -196,13 +224,13 @@ Equation 12. "combining these equations" $\to$ "substituting these equations int
 {Good point.  Changes have been made to Table 2 so as to clarify this.  Nonetheless a clean separation between inputs and outputs is impossible because, in determining the exact solution, rigid equations relate quantities which one might regard as ``inputs''.  For example, the maximum elevation $H$ and the equilibrium-line altitude $H_{ela}$ are related by the equation $H_0 = 1.5 H_{ela}$ which allows (13) to be a solution; see Appendix A.}
 
 \reply{L137-140. Presumably these lines refer just to the numerical models? Presumably eqn 11 is used in generation of your exact solution? In which case it might be better to move this to the next section, ``Numerical Results''.}
-{FIXME}
+{Another good point.  This text is moved to the numerical results section.}
 
 \reply{L173 ``show'' $\to$ ``shown''}
-{FIXME}
+{Done.}
 
 \reply{References: I would recommend citing Schoof 2005 in addition to Leguy 2014 as this paper (along with a test implementation in Gagliardini 2007) shows the full derivation of the Leguy 2014 sliding relation. The Leguy 2014 sliding relation is just a small deviation from Schoof's work.}
-{FIXME}
+{I have added a citation to Schoof (2005), which is appropriate.  But, as noted above and is well-known, it is not just an effective-pressure-dependent sliding law that is relevant to the abruptness of the basal shear stress transition at the grounding law (e.g.~a law like in Schoof (2005)), but also the way subglacial water pressure or effective pressure is modeled (e.g.~an equation like (14) in Leguy et al.~(2014)).  So I have rewritten this text to clarify that models of hydrology are relevant to smoother grounding line stresses.}
 
 \end{itemize}
 
