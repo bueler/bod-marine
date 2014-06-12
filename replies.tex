@@ -104,10 +104,12 @@ width=#3in]{#1.eps}}
 \newcommand{\eqn}[2]{\comm{equation #1}{#2}}
 
 \newcommand{\reply}[2]{
+\medskip\medskip
 \item  \begin{quote}
 \emph{#1}
 \end{quote}
 
+\smallskip
 \noindent #2}
 
 
@@ -127,9 +129,7 @@ width=#3in]{#1.eps}}
 \subsection*{Editor's comments and instructions}  \begin{quote}
 \emph{Scientific Editor Comments (S.H.~Faria):}
 
-\emph{The Reviewers (K.~Hutter and R.~Gladstone) agree that this is a well-written and mathematically sound manuscript. They share however a concern about the novelty of the results. Owing to this, it is in my opinion very important to highlight more the new results of this work, and to explore further their consequences, in order to make this manuscript publishable in the Journal of Glaciology.}
-
-\dots
+\emph{The Reviewers (K.~Hutter and R.~Gladstone) agree that this is a well-written and mathematically sound manuscript. They share however a concern about the novelty of the results. Owing to this, it is in my opinion very important to highlight more the new results of this work, and to explore further their consequences, in order to make this manuscript publishable in the Journal of Glaciology.  \dots}
 
 \emph{Could you please examine the reviews and address, point by point, each of the issues raised by the reviewers? You should revise the manuscript in line with the reviewers' comments, or provide me with point-by-point well-argued reasons for not revising the manuscript.}
 \end{quote}
@@ -139,41 +139,23 @@ width=#3in]{#1.eps}}
 
 
 \subsection*{Reviewer \#1 (Hutter)}  \begin{itemize}
-\item  \begin{quote}
-\emph{Professionally and technically this paper is well written, correct in its essential parts, but its global aims and scope by the author are not clear to me.}
+\reply{Professionally and technically this paper is well written, correct in its essential parts, but its global aims and scope by the author are not clear to me.}
+{FIXME}
 
-\medskip
-\emph{It is shown that Bodvardsson's parabolic ice profile and flow solution is also an exact solution for floating ice (van der Veen).}
-\end{quote}
+\reply{It is shown that Bodvardsson's parabolic ice profile and flow solution is also an exact solution for floating ice (van der Veen).}
+{FIXME}
 
-\noindent FIXME
+\reply{\dots In a kind of inverse procedure---but not so named by the author---exact solutions to the ice sheet-shelf configuration are constructed by accordingly selecting the "ice stiffness" variation as a function of space. At least, this is what I believe the author does.}
+{FIXME}
 
-\item  \begin{quote}
-\emph{\dots In a kind of inverse procedure - but not so named by the author - exact solutions to the ice sheet-shelf configuration are constructed by accordingly selecting the "ice stiffness" variation as a function of space. At least, this is what I believe the author does.}
-\end{quote}
+\reply{\dots It, is however, not explicitly expressed what this somewhat artificial mathematical approach serves to the physically inclined glaciological modeler. To me, it seems clear: `Testing numerical schemes for their reliability and performance'. And the author takes this view in the second part of the paper, to test the performance of two numerical schemes, a shooting method-IBV approach and a TPBVP-approach. By doing this, he even finds a glaciological relevant result: Loss of numerical accuracy of both schemes when crossing the grounding line region because of the associated stiffness--`jump'.  This may give hints of understanding glaciologists' doubtful results in grounding line regions.}
+{FIXME}
 
-\noindent FIXME
+\reply{There is one term ``Mass balance'', which is incorrectly used. The quantity $M$ is NOT a mass BALANCE, but an accumulation/ablation rate density, functioning as a climatological input quantity. I do not understand why glaciologists and other natural scientists (and here a mathematician) maintain this erroneous term for decades, which expresses simply the wrong thing.}
+{FIXME}
 
-\item  \begin{quote}
-\emph{\dots It, is however, not explicitly expressed what this somewhat artificial mathematical approach serves to the physically inclined glaciological modeler. To me, it seems clear: `Testing numerical schemes for their reliability and performance'. And the author takes this view in the second part of the paper, to test the performance of two numerical schemes, a shooting method-IBV approach and a TPBVP-approach. By doing this, he even finds a glaciological relevant result: Loss of numerical accuracy of both schemes when crossing the grounding line region because of the associated stiffness--`jump'.  This may give hints of understanding glaciologists' doubtful results in grounding line regions.}
-\end{quote}
-
-\noindent FIXME
-
-\item  \begin{quote}
-\emph{There is one term ``Mass balance'', which is incorrectly used. The quantity $M$ is NOT a mass BALANCE, but an accumulation/ablation rate density, functioning as a climatological input quantity. I do not understand why glaciologists and other natural scientists (and here a mathematician) maintain this erroneous term for decades, which expresses simply the wrong thing.}
-\end{quote}
-
-\noindent FIXME
-
-\item  \begin{quote}
-\emph{I am not sure whether J. Glaciology is the adequate place for this paper, which to me looks like a worked out term paper in a first year graduate class of applied mathematics or mechanics.}
-\end{quote}
-
-\noindent FIXME
-
-
-\reply{}{FIXME}
+\reply{I am not sure whether J. Glaciology is the adequate place for this paper, which to me looks like a worked out term paper in a first year graduate class of applied mathematics or mechanics.}
+{FIXME}
 
 \end{itemize}
 
@@ -190,28 +172,37 @@ Regarding content, this marine ice sheet configuration has very contrived spatia
 
 \reply{How easy would it be for you to create a plot of stiffness ratios for the same problem but with different sliding relations? In particular, if you replace [overburden pressure] with [overburden pressure minus ocean water pressure] does the step change in stiffness ratio go away? It might be interesting to see such a plot for the Schoof 2005 sliding law too (the Leguy 2014 sliding law is based on this).}{FIXME}
 
-\reply{Line by line comments \\
-L18 ``perfectly'' should be just ``perfect''}{Done.}
+\reply{Line by line comments \smallskip \\
+L18 ``perfectly'' should be just ``perfect''}
+{Done.}
 
-\reply{L32-35. This looks more like a conclusion than an introductory remark.}{Agreed.  Most of the sentence claiming ``the most significant result'' is removed, }
+\reply{L32-35. This looks more like a conclusion than an introductory remark.}
+{Agreed.  Most of the sentence claiming ``the most significant result'' is removed.}
 
-\reply{Equation 10. Please clarify that this is essentially equation 2 following the assumptions made in the preceding paragraph.}{FIXME}
+\reply{Equation 10. Please clarify that this is essentially equation 2 following the assumptions made in the preceding paragraph. \smallskip \\
+Equation 12. "combining these equations" $\to$ "substituting these equations into equation 1" or something like "combining these equations with the requirement for mass conservation"}
+{Yes, this is a good point.  I have made the text between equations (10) and (12) much clearer on where things come from, even though this clarity is not present in the original (Bodvardsson, 1995).}
 
-\reply{Equation 12. "combining these equations" $\to$ "substituting these equations into equation 1" or something like "combining these equations with the requirement for mass conservation"}{FIXME}
+\reply{L105-112. This is basically what I figured out while trying to understand where eqns 10-12 came from. Perhaps it would make more sense to bring these arguments forward to where equations 10-12 are introduced?}
+{Yes, agreed and done.  I have also kept a summary of the logic here in this part of the paper, as a way to transition into the interpretation of constant longitudinal stress and variable ice hardness.}
 
-\reply{L105-112. This is basically what I figured out while trying to understand where eqns 10-12 came from. Perhaps it would make more sense to bring these arguments forward to where equations 10-12 are introduced?}{FIXME}
+\reply{Paragraph following L112 (the line numbering seem to have been missed out in places). $T_x=0$ isnt just saying that ice hardness is variable, it is saying that ice hardness must vary in this particular way (as given by equation 14).  You say ``such variable hardness is physical.''  Well, yes, hardness is variable. But is there any physical justification for this particular pattern of hardness?}
+{My explanation was poor, and I have tried again to write it properly.  It has been rewritten to emphasize that while non-constant ice hardness does arise from physical processes (esp.~temperature-dependence), and thus numerical models don't need added features so as to use this exact solution, the particular variability here is simply what is needed to have the solution solve the equations, specifically $T_x=0$.}
 
-\reply{Paragraph following L112 (the line numbering seem to have been missed out in places). $T_x=0$ isnt just saying that ice hardness is variable, it is saying that ice hardness must vary in this particular way (as given by equation 14). You say "such variable hardness is physical". Well, yes, hardness is variable. But is there any physical justification for this particular pattern of hardness?}{FIXME}
+\reply{Top of page 9. Formulas $\to$ formulae}
+{Done.}
 
-\reply{Top of page 9. Formulas $\to$ formulae}{FIXME}
+\reply{Table 2. It would be helpful to indicate which of these quantities are prescribed in order to generate the exact solution, and which are a result of the solution, i.e. which are the user defined inputs (e.g. $H_0$, $L_0$) and which are outputs (e.g. $B(x_g)$).}
+{Good point.  Changes have been made to Table 2 so as to clarify this.  Nonetheless a clean separation between inputs and outputs is impossible because, in determining the exact solution, rigid equations relate quantities which one might regard as ``inputs''.  For example, the maximum elevation $H$ and the equilibrium-line altitude $H_{ela}$ are related by the equation $H_0 = 1.5 H_{ela}$ which allows (13) to be a solution; see Appendix A.}
 
-\reply{Table 2. It would be helpful to indicate which of these quantities are prescribed in order to generate the exact solution, and which are a result of the solution, i.e. which are the user defined inputs (e.g. $H_0$, $L_0$) and which are outputs (e.g. $B(x_g)$).}{FIXME}
+\reply{L137-140. Presumably these lines refer just to the numerical models? Presumably eqn 11 is used in generation of your exact solution? In which case it might be better to move this to the next section, ``Numerical Results''.}
+{FIXME}
 
-\reply{L137-140. Presumably these lines refer just to the numerical models? Presumably eqn 11 is used in generation of your exact solution? In which case it might be better to move this to the next section, ``Numerical Results''.}{FIXME}
+\reply{L173 ``show'' $\to$ ``shown''}
+{FIXME}
 
-\reply{L173 ``show'' $\to$ ``shown''}{FIXME}
-
-\reply{References: I would recommend citing Schoof 2005 in addition to Leguy 2014 as this paper (along with a test implementation in Gagliardini 2007) shows the full derivation of the Leguy 2014 sliding relation. The Leguy 2014 sliding relation is just a small deviation from Schoof's work.}{FIXME}
+\reply{References: I would recommend citing Schoof 2005 in addition to Leguy 2014 as this paper (along with a test implementation in Gagliardini 2007) shows the full derivation of the Leguy 2014 sliding relation. The Leguy 2014 sliding relation is just a small deviation from Schoof's work.}
+{FIXME}
 
 \end{itemize}
 
