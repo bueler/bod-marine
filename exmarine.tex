@@ -153,7 +153,11 @@ $\omega$ & Archimedean factor; $=1 - \rho/\rho_w$ & $0.115$
 
 He initially states an equation for the ice sheet surface elevation which has both vertical-plane shear and longitudinal stress within the ice.  However, he says this equation ``is quite tedious and very difficult to handle especially because of the [shear] term in the parentheses.  It is therefore fortunate that [the shear] term appears to be small compared to the [basal sliding] term.''  Then he drops the shear term and writes an equation in which driving stress is balanced entirely by sliding resistance.  He solves and analyzes this plug flow model, which we now detail.
 
-For basal resistance he chooses a coefficient which scales with the overburden pressure, so that the basal shear stress is
+As is perhaps best-known about \bod's work, he chooses the surface mass balance to be
+\begin{equation}
+M = a (H - H_{ela})  \label{eq:bodmassbalance}
+\end{equation}
+for a mass balance gradient $a>0$ and equilibrium-line altitude $H_{ela}$.  For basal resistance he chooses a coefficient which scales with the overburden pressure, so that the basal shear stress is
 \begin{equation}
 \tau_b = - \beta u = - k \rho g H u  \label{eq:bodstresschoice}
 \end{equation}
@@ -161,42 +165,41 @@ He then writes the ice flux as $uH=-(H/k) H_x$, or equivalently the ice velocity
 \begin{equation}
 u = - \frac{1}{k} H_x. \label{eq:bodvelocity}
 \end{equation}
-As is perhaps best-known about \bod's work, he chooses the surface mass balance to be
+We will see that equation \eqref{eq:bodvelocity} can be derived from equations \eqref{eq:steadySSA} and \eqref{eq:bodstresschoice} in the special case where $T_x=0$ and the bed is flat.
+
+Combining equations \eqref{eq:bodmassbalance} and \eqref{eq:bodvelocity} with mass continuity \eqref{eq:steadymass} yields equation (17) in \citepbod, namely
 \begin{equation}
-M = a (H - H_{ela})  \label{eq:bodmassbalance}
+a (H - H_{ela}) + (k^{-1} H H_x)_x = 0.  \label{eq:bodsteady}
 \end{equation}
-for a mass balance gradient $a>0$ and equilibrium-line altitude $H_{ela}$.  Combining these equations yields \citep[equation (17)]{Bodvardsson}
-\begin{equation}
-a (H - H_{ela}) + (k^{-1} H H_x)_x = 0  \label{eq:bodsteady}
-\end{equation}
-for the thickness.  His solution to this equation is \citep[equivalent equations (18) and (23)]{Bodvardsson}
+His thickness solution to this equation is \citep[equations (18) and (23)]{Bodvardsson}
 \begin{equation}
 H(x) = H_0 (1 - (x/L_0)^2)  \label{eq:bodsoln}
 \end{equation}
 where $H_0 = 1.5 H_{ela}$ and $a k L_0^2 = 9 H_{ela}$ \citep[equation (24)]{Bodvardsson}.
 
-Despite its simplicity, equation \eqref{eq:bodsoln} is an exact solution to equation \eqref{eq:bodsteady}, with boundary condition $H(0)=H_0$, as the reader may verify.  Formula \eqref{eq:bodsoln} defines the solid parabola shown in Figure \ref{fig:twoparabolas}.  \bod does not offer a reason why there should be such a simple quadratic solution.  In fact, his solution even seems to be a new result for a narrow class of nonlinear second-order ODEs; see Appendix A.
+Despite its simplicity, equation \eqref{eq:bodsoln} is an exact solution to equation \eqref{eq:bodsteady}, with boundary condition $H(0)=H_0$, as the reader may verify.  Formula \eqref{eq:bodsoln} defines the solid parabola shown in Figure \ref{fig:twoparabolas}.  \bod does not offer a reason why there should be such a simple quadratic solution to \eqref{eq:bodsoln}.  In fact, his solution seems to be a new result for a narrow class of nonlinear second-order ODEs; see Appendix A.
 
-\bod explicitly considers solution \eqref{eq:bodsoln} as solving a free boundary problem, in the sense that the single boundary condition $H(0)=H_0$ applied to the equation \eqref{eq:bodsteady} determines the quadratic solution \eqref{eq:bodsoln}; see Appendix A.  Thus solving \eqref{eq:bodsteady} with one boundary condition generates a value $L_0$ from the hypothesis that the flux and the thickness at $x=L_0$ are both zero.
+He explicitly considers solution \eqref{eq:bodsoln} as solving a free boundary problem, in the sense that the single boundary condition $H(0)=H_0$ applied to the equation \eqref{eq:bodsteady} determines the quadratic solution \eqref{eq:bodsoln}; see Appendix A.  Solving \eqref{eq:bodsteady} with this single boundary condition generates a location $x=L_0$ where both the flux and the thickness are zero.
 
-The \citebod solution for a grounded glacier was apparently first cited by \cite{Weertman61stability}.  Weertman decided that the physics chosen by \bod should be replaced by a shear deformation model more like the shallow ice approximation, though he allowed sliding as well.  This replacement seems to have influenced readers from then on.
+\citebod was apparently first cited by \cite{Weertman61stability}, who decided that his sliding, plug-flow physics should be replaced by a shear deformation model more like the shallow ice approximation.  This replacement seems to have influenced readers from then on.  Nonetheless \bod had a particular ``sliding law'' in mind, namely equation \eqref{eq:bodstresschoice}, in which the sliding coefficient scales with overburden pressure.  The modern reader may protest that $\beta$ should instead be a function of, perhaps even proportional to, effective pressure $N=\rho g H - P$ where $P$ is the subglacial water pressure.  However, it is not unreasonable to suppose that basal water pressure also scales with (i.e.~is roughly a fixed fraction of) overburden pressure.  In that case we have equations $\beta = c N$, $N=\rho g H - P$, and $P = \lambda \rho g H$ which combine to $\beta = c (1-\lambda) \rho g H$.  In other words, as in \bod's model we have $\beta = k \rho g H$ with $k=c (1-\lambda)$.
 
 The surface balance parameterization \eqref{eq:bodmassbalance} reappears in \cite{Weertman61stability}, among many other places.  It realistically parameterizes a potential climatic instability, which was \bod's, Weertman's, and most readers', major interest.  We are, however, interested now in \bod's solution to the ice flow equations themselves.
 
 
-\subsection*{An SSA re-interpretation}  One can observe that \eqref{eq:bodsoln} exactly solves a combination of the steady flow-line mass-continuity equation \eqref{eq:steadymass} and the SSA stress balance equation \eqref{eq:steadySSA}, but with contrived (``manufactured'') ice softness.  In fact, suppose we look for solutions of \eqref{eq:steadymass} and \eqref{eq:steadySSA} with constant vertically-integrated longitudinal stress, $T_x \equiv 0$.  In that case equation \eqref{eq:steadySSA} and the scaling \eqref{eq:bodstresschoice} implies \bod's formula for the velocity, namely equation \eqref{eq:bodvelocity}.  Furthermore, equations \eqref{eq:steadymass} and \eqref{eq:bodmassbalance} then give \bod's main equation \eqref{eq:bodsteady}.  That is, if \emph{(i)} $T_x \equiv 0$, \emph{(ii)} sliding resistance is linear and scales with overburden pressure, and \emph{(iii)} mass balance is proportional to elevation above the equilibrium line, then we recover a simple parabolic profile for $H(x)$, namely equation \eqref{eq:bodsoln} which is a solution to \eqref{eq:bodsteady}.
+\subsection*{An SSA re-interpretation}  We have claimed that \eqref{eq:bodsoln} exactly solves a combination of the steady flow-line mass-continuity equation \eqref{eq:steadymass} and the SSA stress balance equation \eqref{eq:steadySSA}.  In fact, suppose we look for solutions of \eqref{eq:steadymass} and \eqref{eq:steadySSA} with constant vertically-integrated longitudinal stress, $T_x = 0$.  In that case equation \eqref{eq:steadySSA} and the scaling \eqref{eq:bodstresschoice} implies \bod's formula for the velocity, namely equation \eqref{eq:bodvelocity}.  Furthermore, equations \eqref{eq:steadymass} and \eqref{eq:bodmassbalance} then give \bod's main equation \eqref{eq:bodsteady}.  That is, if \emph{(i)} $T_x = 0$, \emph{(ii)} sliding resistance is linear and scales with overburden pressure, and \emph{(iii)} mass balance is proportional to elevation above the equilibrium line, then we can recover a simple parabolic profile for $H(x)$, namely equation \eqref{eq:bodsoln} which is a solution to \eqref{eq:bodsteady}.
 
-But what does the condition ``$T_x\equiv 0$'' imply as a relation among the modeled quantities?  Given a thickness profile $H(x)$ and a strain rate profile $u_x(x)$, we may interpret ``$T_x\equiv 0$'' as a statement of \emph{variable ice hardness}.  Such variable hardness is physical and common to various numerical models using the SSA \citep[for example]{BBssasliding}, so assuming such $x$-dependent hardness requires no conceptual extensions in the marine ice sheet modeling context.  In particular, if $T=T_0$ is the constant value then equation \eqref{eq:Tstress} yields a formula for ice hardness,
+But what does the condition ``$T_x = 0$'' imply as a relation among the modeled quantities?  Given a thickness profile $H(x)$ and a strain rate profile $u_x(x)$, we may interpret $T_x = 0$ as a statement of \emph{variable ice hardness} $B(x)$.  Some such hardness variation is physical, for example in numerical models which use the SSA in a temperature-dependent way \citep{BBssasliding}, so that assuming $x$-dependent hardness requires no conceptual extensions in the marine ice sheet modeling context.  Numerical models which might use for verification the exact solution we are building will often require no modifications to incorporate variable hardness.  By contrast, the variable hardness $B(x)$ used here allows us to ``manufacture'' an exact solution \citep{BLKCB} from the assumption that $T=T_0$ is constant.  That assumption used in equation \eqref{eq:Tstress} yields a formula for ice hardness,
 \begin{equation}
 B(x) = \frac{T_0}{2 H |u_x|^{(1/n)-1} u_x}. \label{eq:hardnessdefine}
 \end{equation}
+This formula determines ice hardness in our context because \eqref{eq:bodsoln} defines $H(x)$, so then \eqref{eq:bodvelocity} defines $u(x)$, and then we compute $u_x$ and use \eqref{eq:hardnessdefine}.
 
 
 \subsection*{Extending the exact solution to floating ice}  The value $T_0$ in \eqref{eq:hardnessdefine} can be set by a downstream stress condition, just as it is in many models for flowline ice shelves \citep[e.g.][]{MISMIP2012,SchoofMarine1}.  Two well-known observations are relevant:  \emph{(i)}  For floating ice with $\beta=0$, equations \eqref{eq:steadymass}--\eqref{eq:rightbc} also have a known exact solution, specifically in the case where the mass balance $M$ and the ice hardness $B$ are constant \citep{vanderVeen83,vanderVeen}.  \emph{(ii)}  The vertically-integrated longitudinal stress $T$ in a flowline ice shelf (i.e.~one without lateral stresses) satisfies equation \eqref{eq:rightbc} at each location $x$ in the shelf, that is, $T(x) = \frac{1}{2} \omega \rho g H(x)^2$, because this is a first integral of equation \eqref{eq:steadySSA} if $\beta=0$.
 
 Based on these observations we can construct a marine ice sheet exact solution by extending \bod's grounded solution to the floating ice.  First taking $b=0$ as the flat bed elevation, we suppose the ocean has surface elevation $z_o>0$, thus determining the grounding-line thickness $H(x_g) = (\rho_w/\rho) z_o$.  Then from \bod's thickness solution \eqref{eq:bodsoln} we can determine $x_g$.  At $x_g$, from \eqref{eq:bodvelocity} and \eqref{eq:bodsoln}, we know $u(x_g)$ as well.  For $x_g \le x \le x_c$, the floating ice shelf, we then set $M(x) = M(x_g)$ as constant from the formula \eqref{eq:bodmassbalance}, thus making $M(x)$ continuous across the grounding line, while at the same time allowing us to use van der Veen's construction (which is based on constant mass balance).  The equation $T(x) = \frac{1}{2} \omega \rho g H(x)^2$ determines $T_o=T(x_g)$ for use in equation \eqref{eq:hardnessdefine}, which determines $B(x_g)$ in particular, and so then we set $B(x)=B(x_g)$ for $x_g \le x \le x_c$, a constant needed in van der Veen's construction.
 
-The results of the above choices are the following formulas for an exact marine ice sheet satisfying our steady model equations \eqref{eq:steadymass}--\eqref{eq:xgregularity}.  The velocity comes from combining the \bod (1955) and van der Veen (1983) results,
+The results of the above choices are the following formulae for an exact marine ice sheet satisfying our steady model equations \eqref{eq:steadymass}--\eqref{eq:xgregularity}.  The velocity comes from combining the \bod (1955) and van der Veen (1983) results,
 \begin{equation}
 u(x) = \begin{cases} \frac{2 H_0}{k L_0^2}\,(x + x_a), & 0 \le x \le x_g, \\
                      u_s(x), & x_g \le x \le x_c.
