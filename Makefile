@@ -23,15 +23,16 @@ convmarine.pdf: convfigure.py petsc/convmarine-exactinit.sh petsc/convmarine-rea
 # (2) also need links from files in
 #       http://www.igsoc.org/production/igs-v2_00-distrib.zip
 #     namely  igs.cls igs.bst igsnatbib.sty
-exmarine.pdf: exmarine.aux exmarine.bbl exmarine.tex $(figures)
+#exmarine.pdf: exmarine.aux exmarine.bbl exmarine.tex $(figures)
+exmarine.pdf: exmarine.aux exmarine.tex $(figures)
 	pdflatex exmarine
 
 exmarine.aux: exmarine.tex $(figures)
 	pdflatex exmarine
-	bibtex exmarine
+#	bibtex exmarine
 
-exmarine.bbl: exmarine.aux ice-bib.bib
-	bibtex exmarine
+#exmarine.bbl: exmarine.aux ice-bib.bib
+#	bibtex exmarine
 
 .PHONY: clean
 
