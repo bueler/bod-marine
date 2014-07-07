@@ -1,7 +1,7 @@
 \NeedsTeXFormat{LaTeX2e}
 %\documentclass[twocolumn]{igs}
-\documentclass[twocolumn,letterpaper]{igs}
-%\documentclass[review,letterpaper]{igs}
+%\documentclass[twocolumn,letterpaper]{igs}
+\documentclass[review,letterpaper]{igs}
 
 \usepackage{igsnatbib}  % see igs2eguide.tex for example citation styles
 \usepackage[pdftex]{graphicx}
@@ -33,7 +33,7 @@
 
 \title{An exact solution for a steady, flow-line marine ice sheet}
 
-\abstract{G.~\bod's 1955 plug flow solution for an Icelandic glacier problem is shown to be an exact solution to the steady form of the simultaneous stress balance and mass continuity equations widely-used in numerical models of marine ice sheets.  The solution, which has parabolic ice thickness and constant vertically-integrated longitudinal stress, solves the steady shallow shelf approximation with linear sliding on a flat bed.  It has elevation-dependent surface mass balance and, in the interpretation given here, a contrived location-dependent ice hardness distribution.  By connecting \bod's solution to the \cite{vanderVeen83} solution for floating ice, we construct an exact solution to the ``rapid-sliding'' marine ice sheet problem, continuously across the grounding line.  We exploit this exact solution to examine the accuracy of two numerical methods, one grid-free and the other based on a fixed, equally-spaced grid.}
+\abstract{G.~\bod's 1955 plug flow solution for an Icelandic glacier problem is shown to be an exact solution to the steady form of the simultaneous stress balance and mass continuity equations widely-used in numerical models of marine ice sheets.  The solution, which has parabolic ice thickness and constant vertically-integrated longitudinal stress, solves the steady shallow shelf approximation with linear sliding on a flat bed.  It has elevation-dependent surface mass balance rate and, in the interpretation given here, a contrived location-dependent ice hardness distribution.  By connecting \bod's solution to the \cite{vanderVeen83} solution for floating ice, we construct an exact solution to the ``rapid-sliding'' marine ice sheet problem, continuously across the grounding line.  We exploit this exact solution to examine the accuracy of two numerical methods, one grid-free and the other based on a fixed, equally-spaced grid.}
 
 \author{Ed Bueler}
 
@@ -73,7 +73,7 @@ h = \begin{cases} H+b,            & \rho H \ge \rho_w (z_o - b) \\
 \end{gather}
 are the surface elevation and sliding coefficient, respectively.
 
-Equations \eqref{eq:steadymass}--\eqref{eq:betafull} apply on an interval $0 < x < x_c$ where $x_c$ is the floating calving-front.  The grounded ice rests on flat bedrock at elevation $b$, a constant in this context.  Note that $M(x)$ combines the surface and basal mass balance; it is the accumulation/ablation rate function for a vertically-integrated moving layer.  The coefficient $B(x)$ in \eqref{eq:Tstress} is called the ice ``hardness.''   In grounded ice the basal shear stress satisfies $\tau_b = - \beta u$ \citep{MacAyeal}, and we have scaled the coefficient with the ice overburden pressure so that $\beta = k \rho g H$ \citepbod.  The ``Archimedean factor'' $\omega = 1 - \rho/\rho_w$ relates surface elevation to thickness in floating ice.  Note $z_o$ is the elevation of the ocean surface.
+Equations \eqref{eq:steadymass}--\eqref{eq:betafull} apply on an interval $0 < x < x_c$ where $x_c$ is the floating calving-front.  The grounded ice rests on flat bedrock at elevation $b$, a constant in this context.  Note that the climatic-basal mass balance rate $M(x)$ \citep{massbalanceglossary} combines the surface mass balance rate and the rate of basal melt/refreeze; it is the accumulation/ablation rate function for a vertically-integrated moving layer.  The coefficient $B(x)$ in \eqref{eq:Tstress} is called the ice ``hardness.''   In grounded ice the basal shear stress satisfies $\tau_b = - \beta u$ \citep{MacAyeal}, and we have scaled the coefficient with the ice overburden pressure so that $\beta = k \rho g H$ \citepbod.  The ``Archimedean factor'' $\omega = 1 - \rho/\rho_w$ relates surface elevation to thickness in floating ice.  Note $z_o$ is the elevation of the ocean surface.
 
 \begin{figure}[ht]
 \onecol{em-geometry}
@@ -92,7 +92,7 @@ Here $x=0$ is an upstream location where Dirichlet boundary conditions are appli
 
 \subsection*{On well-posedness and the grounding line}  Given data $B(x)$, $b$, $k>0$, $M(x)$, $x_c>0$, $z_o$, along with physical constants $g,n,\rho,\rho_w$, we expect the problem consisting of equations \eqref{eq:steadymass}--\eqref{eq:xgregularity} to be well-posed.  To our knowledge this has not been proved, nor do we attempt to prove it.  It is, however, worth considering the smoothness (regularity) of the solution to \eqref{eq:steadymass}--\eqref{eq:rightbc}, including what hypotheses would lead to satisfying \eqref{eq:xgregularity} at the free (unknown) location $x_g$ in the interior of the domain.
 
-Indeed, suppose that, for physical reasons, the mass balance $M(x)$ and ice hardness $B(x)$ are bounded, and further that $B(x)$ is bounded below by a positive constant.  From integrating $M$, equation \eqref{eq:steadymass} implies that the flux $q=uH$ is absolutely-continuous and thus bounded.  If there is a positive lower bound on thickness $H$, then we can conclude that the magnitude of $u$ is bounded because $u=q/H$.  If the magnitude of the driving stress $-\rho g H h_x$ is bounded then equation \eqref{eq:steadySSA} implies $T$ is absolutely-continuous.  By equation \eqref{eq:Tstress} this implies $u$ has a bounded and integrable derivative, and thus that $u$ is also absolutely-continuous.  From these facts we could then return to the flux and write $H=q/u$ which shows $H$ is absolutely-continuous away from locations where $u=0$ (e.g.~divides).  In summary, assuming \emph{(i)} that an integrable solution $(H,u,T)$ to \eqref{eq:steadymass}--\eqref{eq:rightbc} exists, \emph{(ii)} that the functions $M,B$ are bounded and integrable, \emph{(iii)} that $B$ is bounded below by a positive constant, \emph{(iv)} that a positive lower bound on thickness exists, and \emph{(v)} that an upper bound on the magnitude of the driving stress exists, then we can regard conditions \eqref{eq:xgregularity}, giving continuity at the grounding line, as properties of the solution instead of as part of the ``imposed'' problem statement.
+Indeed, suppose that, for physical reasons, the climatic-basal mass balance rate $M(x)$ and ice hardness $B(x)$ are bounded, and further that $B(x)$ is bounded below by a positive constant.  From integrating $M$, equation \eqref{eq:steadymass} implies that the flux $q=uH$ is absolutely-continuous and thus bounded.  If there is a positive lower bound on thickness $H$, then we can conclude that the magnitude of $u$ is bounded because $u=q/H$.  If the magnitude of the driving stress $-\rho g H h_x$ is bounded then equation \eqref{eq:steadySSA} implies $T$ is absolutely-continuous.  By equation \eqref{eq:Tstress} this implies $u$ has a bounded and integrable derivative, and thus that $u$ is also absolutely-continuous.  From these facts we could then return to the flux and write $H=q/u$ which shows $H$ is absolutely-continuous away from locations where $u=0$ (e.g.~divides).  In summary, assuming \emph{(i)} that an integrable solution $(H,u,T)$ to \eqref{eq:steadymass}--\eqref{eq:rightbc} exists, \emph{(ii)} that the functions $M,B$ are bounded and integrable, \emph{(iii)} that $B$ is bounded below by a positive constant, \emph{(iv)} that a positive lower bound on thickness exists, and \emph{(v)} that an upper bound on the magnitude of the driving stress exists, then we can regard conditions \eqref{eq:xgregularity}, giving continuity at the grounding line, as properties of the solution instead of as part of the ``imposed'' problem statement.
 
 \begin{table}
 \caption{Notation and SI units.  Values of physical constants.}\label{tab:notation}
@@ -107,7 +107,7 @@ $g$ & acceleration of gravity  & 9.81 $\text{m}\,\text{s}^{-2}$\\
 $H$ & ice thickness & m \\
 $h$ & ice surface elevation & m \\
 $k$ & pressure-scaled sliding coefficient  & $\text{s}\,\text{m}^{-1}$ \\
-$M$ & mass balance & $\text{m}\,\text{s}^{-1}$ \\
+$M$ & climatic-basal mass balance rate & $\text{m}\,\text{s}^{-1}$ \\
 $n$ & Glen exponent in ice flow law & 3 \\
 $\rho$ & density of ice & 910 $\text{kg}\,\text{m}^{-3}$ \\
 $\rho_w$ & density of sea water & 1028 $\text{kg}\,\text{m}^{-3}$ \\
@@ -129,11 +129,11 @@ $\omega$ & Archimedean factor; $=1 - \rho/\rho_w$ & $0.115$
 
 He initially states an equation for the ice sheet surface elevation which has both vertical-plane shear and longitudinal stress within the ice.  However, he says this equation ``is quite tedious and very difficult to handle especially because of the [shear] term in the parentheses.  It is therefore fortunate that [the shear] term appears to be small compared to the [basal sliding] term.''  Then he drops the shear term and writes an equation in which driving stress is balanced entirely by sliding resistance.  He solves and analyzes this plug flow model, which we now detail.
 
-As is perhaps best-known about \bod's work, he chooses the surface mass balance to be
+As is perhaps best-known about \bod's work, he chooses the surface mass balance rate to be
 \begin{equation}
 M = a (H - \Hela)  \label{eq:bodmassbalance}
 \end{equation}
-for a mass balance gradient $a>0$ and equilibrium-line altitude $\Hela$.  For basal resistance he chooses a coefficient which scales with the overburden pressure, so that the basal shear stress is
+for a surface mass balance gradient $a>0$ and equilibrium-line altitude $\Hela$.  For basal resistance he chooses a coefficient which scales with the overburden pressure, so that the basal shear stress is
 \begin{equation}
 \tau_b = - \beta u = - k \rho g H u  \label{eq:bodstresschoice}
 \end{equation}
@@ -153,7 +153,7 @@ H(x) = H_0 (1 - (x/L_0)^2)  \label{eq:bodsoln}
 \end{equation}
 where $H_0 = 1.5 \Hela$ and $a k L_0^2 = 9 \Hela$ \citep[equation (24)]{Bodvardsson}.
 
-Despite its simplicity, equation \eqref{eq:bodsoln} is an exact solution to equation \eqref{eq:bodsteady}, with boundary condition $H(0)=H_0$, as the reader may verify.  Formula \eqref{eq:bodsoln} defines the solid parabola shown in Figure \ref{fig:twoparabolas}.  \bod does not offer a reason why there should be such a simple quadratic solution to \eqref{eq:bodsoln}.  In fact, his solution seems to be a new result for a narrow class of nonlinear second-order ODEs; see Appendix A.
+Despite its simplicity, equation \eqref{eq:bodsoln} is an exact solution to equation \eqref{eq:bodsteady}, with boundary condition $H(0)=H_0$, as the reader may verify.  Formula \eqref{eq:bodsoln} defines the solid parabola shown in Figure \ref{fig:twoparabolas}.  \bod does not offer a reason why there should be such a simple quadratic solution to \eqref{eq:bodsteady}.  In fact, his solution seems to be a new result for a narrow class of nonlinear second-order ODEs; see Appendix A.
 
 He explicitly considers solution \eqref{eq:bodsoln} as solving a free boundary problem, in the sense that the single boundary condition $H(0)=H_0$ applied to the equation \eqref{eq:bodsteady} determines the quadratic solution \eqref{eq:bodsoln}; see Appendix A.  Solving \eqref{eq:bodsteady} with this single boundary condition generates a location $x=L_0$ where both the flux and the thickness are zero.
 
@@ -162,7 +162,7 @@ He explicitly considers solution \eqref{eq:bodsoln} as solving a free boundary p
 The surface balance parameterization \eqref{eq:bodmassbalance} reappears in \cite{Weertman61stability}, among many other places.  It realistically parameterizes a potential climatic instability, which was \bod's, Weertman's, and most readers', major interest.  We are, however, interested now in \bod's solution to the ice flow equations themselves.
 
 
-\subsection*{An SSA re-interpretation}  We have claimed that \eqref{eq:bodsoln} exactly solves a combination of the steady flow-line mass-continuity equation \eqref{eq:steadymass} and the SSA stress balance equation \eqref{eq:steadySSA}.  In fact, suppose we look for solutions of \eqref{eq:steadymass} and \eqref{eq:steadySSA} with constant vertically-integrated longitudinal stress, $T_x = 0$.  In that case equation \eqref{eq:steadySSA} and the scaling \eqref{eq:bodstresschoice} implies \bod's formula for the velocity, namely equation \eqref{eq:bodvelocity}.  Furthermore, equations \eqref{eq:steadymass} and \eqref{eq:bodmassbalance} then give \bod's main equation \eqref{eq:bodsteady}.  That is, if \emph{(i)} $T_x = 0$, \emph{(ii)} sliding resistance is linear and scales with overburden pressure, and \emph{(iii)} mass balance is proportional to elevation above the equilibrium line, then we can recover a simple parabolic profile for $H(x)$, namely equation \eqref{eq:bodsoln} which is a solution to \eqref{eq:bodsteady}.
+\subsection*{An SSA re-interpretation}  We have claimed that \eqref{eq:bodsoln} exactly solves a combination of the steady flow-line mass-continuity equation \eqref{eq:steadymass} and the SSA stress balance equation \eqref{eq:steadySSA}.  In fact, suppose we look for solutions of \eqref{eq:steadymass} and \eqref{eq:steadySSA} with constant vertically-integrated longitudinal stress, $T_x = 0$.  In that case equation \eqref{eq:steadySSA} and the scaling \eqref{eq:bodstresschoice} implies \bod's formula for the velocity, namely equation \eqref{eq:bodvelocity}.  Furthermore, equations \eqref{eq:steadymass} and \eqref{eq:bodmassbalance} then give \bod's main equation \eqref{eq:bodsteady}.  That is, if \emph{(i)} $T_x = 0$, \emph{(ii)} sliding resistance is linear and scales with overburden pressure, and \emph{(iii)} climatic-basal mass balance rate is proportional to elevation above the equilibrium line, then we can recover a simple parabolic profile for $H(x)$, namely equation \eqref{eq:bodsoln} which is a solution to \eqref{eq:bodsteady}.
 
 But what does the condition ``$T_x = 0$'' imply as a relation among the modeled quantities?  Given a thickness profile $H(x)$ and a strain rate profile $u_x(x)$, we may interpret $T_x = 0$ as a statement of \emph{variable ice hardness} $B(x)$.  Some such hardness variation is physical, for example in numerical models which use the SSA in a temperature-dependent way \citep{BBssasliding}, so that assuming $x$-dependent hardness requires no conceptual extensions in the marine ice sheet modeling context.  Numerical models which might use for verification the exact solution we are building will often require no modifications to incorporate variable hardness.  By contrast, the variable hardness $B(x)$ used here allows us to ``manufacture'' an exact solution \citep{BLKCB} from the assumption that $T=T_0$ is constant.  That assumption used in equation \eqref{eq:Tstress} yields a formula for ice hardness,
 \begin{equation}
@@ -171,9 +171,9 @@ B(x) = \frac{T_0}{2 H |u_x|^{(1/n)-1} u_x}. \label{eq:hardnessdefine}
 This formula determines ice hardness in our context because \eqref{eq:bodsoln} defines $H(x)$, so then \eqref{eq:bodvelocity} defines $u(x)$, and then we compute $u_x$ and use \eqref{eq:hardnessdefine}.
 
 
-\subsection*{Extending the exact solution to floating ice}  The value $T_0$ in \eqref{eq:hardnessdefine} can be set by a downstream stress condition, just as it is in many models for flowline ice shelves \citep[e.g.][]{MISMIP2012,SchoofMarine1}.  Two well-known observations are relevant:  \emph{(i)}  For floating ice with $\beta=0$, equations \eqref{eq:steadymass}--\eqref{eq:rightbc} also have a known exact solution, specifically in the case where the mass balance $M$ and the ice hardness $B$ are constant \citep{vanderVeen83,vanderVeen}.  \emph{(ii)}  The vertically-integrated longitudinal stress $T$ in a flowline ice shelf (i.e.~one without lateral stresses) satisfies equation \eqref{eq:rightbc} at each location $x$ in the shelf, that is, $T(x) = \frac{1}{2} \omega \rho g H(x)^2$, because this is a first integral of equation \eqref{eq:steadySSA} if $\beta=0$.
+\subsection*{Extending the exact solution to floating ice}  The value $T_0$ in \eqref{eq:hardnessdefine} can be set by a downstream stress condition, just as it is in many models for flowline ice shelves \citep[e.g.][]{MISMIP2012,SchoofMarine1}.  Two well-known observations are relevant:  \emph{(i)}  For floating ice with $\beta=0$, equations \eqref{eq:steadymass}--\eqref{eq:rightbc} also have a known exact solution, specifically in the case where the climatic-basal mass balance rate $M$ and the ice hardness $B$ are constant \citep{vanderVeen83,vanderVeen}.  \emph{(ii)}  The vertically-integrated longitudinal stress $T$ in a flowline ice shelf (i.e.~one without lateral stresses) satisfies equation \eqref{eq:rightbc} at each location $x$ in the shelf, that is, $T(x) = \frac{1}{2} \omega \rho g H(x)^2$, because this is a first integral of equation \eqref{eq:steadySSA} if $\beta=0$.
 
-Based on these observations we can construct a marine ice sheet exact solution by extending \bod's grounded solution to the floating ice.  First taking $b=0$ as the flat bed elevation, we suppose the ocean has surface elevation $z_o>0$, thus determining the grounding-line thickness $H(x_g) = (\rho_w/\rho) z_o$.  Then from \bod's thickness solution \eqref{eq:bodsoln} we can determine $x_g$.  At $x_g$, from \eqref{eq:bodvelocity} and \eqref{eq:bodsoln}, we know $u(x_g)$ as well.  For $x_g \le x \le x_c$, the floating ice shelf, we then set $M(x) = M(x_g)$ as constant from the formula \eqref{eq:bodmassbalance}, thus making $M(x)$ continuous across the grounding line, while at the same time allowing us to use van der Veen's construction (which is based on constant mass balance).  The equation $T(x) = \frac{1}{2} \omega \rho g H(x)^2$ determines $T_o=T(x_g)$ for use in equation \eqref{eq:hardnessdefine}, which determines $B(x_g)$ in particular, and so then we set $B(x)=B(x_g)$ for $x_g \le x \le x_c$, a constant needed in van der Veen's construction.
+Based on these observations we can construct a marine ice sheet exact solution by extending \bod's grounded solution to the floating ice.  First taking $b=0$ as the flat bed elevation, we suppose the ocean has surface elevation $z_o>0$, thus determining the grounding-line thickness $H(x_g) = (\rho_w/\rho) z_o$.  Then from \bod's thickness solution \eqref{eq:bodsoln} we can determine $x_g$.  At $x_g$, from \eqref{eq:bodvelocity} and \eqref{eq:bodsoln}, we know $u(x_g)$ as well.  For $x_g \le x \le x_c$, the floating ice shelf, we then set $M(x) = M(x_g)$ as constant from the formula \eqref{eq:bodmassbalance}, thus making $M(x)$ continuous across the grounding line, while at the same time allowing us to use van der Veen's construction (which is based on constant climatic-basal mass balance rate).  The equation $T(x) = \frac{1}{2} \omega \rho g H(x)^2$ determines $T_o=T(x_g)$ for use in equation \eqref{eq:hardnessdefine}, which determines $B(x_g)$ in particular, and so then we set $B(x)=B(x_g)$ for $x_g \le x \le x_c$, a constant needed in van der Veen's construction.
 
 The results of the above choices are the following formulae for an exact marine ice sheet satisfying our steady model equations \eqref{eq:steadymass}--\eqref{eq:xgregularity}.  The velocity comes from combining the \bod (1955) and van der Veen (1983) results,
 \begin{equation}
@@ -199,7 +199,7 @@ Formulas \eqref{eq:marinevel} and \eqref{eq:marinethickness} define the continuo
 \medskip
 \begin{tabular}{llll}
 Symbol & Description & Units \\ \hline
-$a$ & mass balance gradient & 0.003 $\text{a}^{-1}$ \\
+$a$ & surface mass balance gradient & 0.003 $\text{a}^{-1}$ \\
 $b$ & bedrock elevation & 0 m \\
 $H_0$ & thickness used in \eqref{eq:bodsoln} & 3000 m  \\
 $\Hela$ & equilibrium line altitude & 2000 m  \\
@@ -212,7 +212,7 @@ $u(0)$ & ice velocity at $x=0$ & 100 $\text{m}\,\text{a}^{-1}$  \\ \hline
 $x_g$ & location of g.l. & 350 km  \\
 $B(x_g)$ & ice hardness at g.l. & $4.614 \times 10^{8}$ $\text{Pa}\,\text{s}^{1/3}$  \\
 $H(x_g)$ & thickness at g.l. & 570 m  \\
-$M(x_g)$ & mass balance at g.l. & -4.290 $\text{m}\,\text{a}^{-1}$  \\
+$M(x_g)$ & climatic-basal mass balance rate at g.l. & -4.290 $\text{m}\,\text{a}^{-1}$  \\
 $T(x_g)$ & stress at g.l. & $1.665 \times 10^{8}$ $\text{Pa}\,\text{m}$  \\
 $u(x_g)$ & ice velocity at g.l. & 450 $\text{m}\,\text{a}^{-1}$  \\
 $x_c$ & location of c.f. & 390 km  \\
@@ -226,7 +226,7 @@ From the thickness $H(x)$ and the velocity $u(x)$ we can find continuous functio
 
 \begin{figure}[ht]
 \onecol{em-M-B}
-\caption{The mass balance $M(x)$ (solid) and ice hardness $B(x)$ (dashed) of the exact solution.} \label{fig:exactMB}
+\caption{The climatic-basal mass balance rate $M(x)$ (solid) and ice hardness $B(x)$ (dashed) of the exact solution.} \label{fig:exactMB}
 \end{figure}
 
 \begin{figure}[ht]
@@ -239,7 +239,7 @@ From the thickness $H(x)$ and the velocity $u(x)$ we can find continuous functio
 \caption{Detail of Figure \ref{fig:exactmarine}, showing the floating ice shelf geometry and velocity.} \label{fig:em-detail}
 \end{figure}
 
-The floating ice shelf is a relatively short 40 km; see Figures \ref{fig:exactmarine} and \ref{fig:em-detail}.  To explain, note that the equilibrium line $\Hela$ in \bod's (1955) solution is high on the ice sheet because of its relation to the upstream ice thickness in the construction of the exact solution (i.e.~$\Hela = (2/3) H_0$).  This in turn implies $M(x_g)$ is quite negative (equation \eqref{eq:bodmassbalance}; see Figure \ref{fig:exactMB}).  Because van der Veen's (1983) solution uses constant mass balance, and because we want continuity for $M(x)$, we therefore have an ice shelf experiencing rapid melting.  The location of the calving front $x_c$ must, of course, be put upstream of the location where the ice has melted away.  As a result of these same factors we also see a rapid decline in the stress $T(x)$ from its constant grounded value to its small value at $x_c$ (Figure \ref{fig:exactbetaT} and Table \ref{tab:exactsoln}).  Though the ice shelf shown here is very wedge-like, the thickness $H(x)$ for floating ice comes from formula \eqref{eq:marinethickness}, and it is not a linear function because $u_s(x)$ is not constant on the shelf.
+The floating ice shelf is a relatively short 40 km; see Figures \ref{fig:exactmarine} and \ref{fig:em-detail}.  To explain, note that the equilibrium line $\Hela$ in \bod's (1955) solution is high on the ice sheet because of its relation to the upstream ice thickness in the construction of the exact solution (i.e.~$\Hela = (2/3) H_0$).  This in turn implies $M(x_g)$ is quite negative (equation \eqref{eq:bodmassbalance}; see Figure \ref{fig:exactMB}).  Because van der Veen's (1983) solution uses constant climatic-basal mass balance rate, and because we want continuity for $M(x)$, we therefore have an ice shelf experiencing rapid melting.  The location of the calving front $x_c$ must, of course, be put upstream of the location where the ice has melted away.  As a result of these same factors we also see a rapid decline in the stress $T(x)$ from its constant grounded value to its small value at $x_c$ (Figure \ref{fig:exactbetaT} and Table \ref{tab:exactsoln}).  Though the ice shelf shown here is very wedge-like, the thickness $H(x)$ for floating ice comes from formula \eqref{eq:marinethickness}, and it is not a linear function because $u_s(x)$ is not constant on the shelf.
 
 
 \section{Numerical Results}
@@ -340,7 +340,7 @@ Grounding line parameterizations \citep[e.g.][]{Gladstoneetal2010,Feldmannetal20
 
 Because this solution is found in some of the first work in theoretical glaciology, we have ``rescued'' an early approach to sliding dynamics.  The ``rapid-sliding'' case turns out to be one of the first dynamical situations examined \citepbod, even though most early efforts at global views of ice dynamics tended toward the plastic ice \citep{Orowan,Nye52plastic}, frozen bed \citep{Vialov}, and vertical-shear dominated \citep{Weertman61stability} models, and these came to dominate the field until recent decades.
 
-Citations of \citebod usually relate to its theory of climatic instability for glaciers and ice sheets in which surface mass balance depends on elevation.  The only exception to this pattern known to the current author is that \cite{Fowler1992} refers to the basal-shear-dominated dynamics of \citebod as ``approximate results.''  We hope that the current work revives interest in \bod's ice dynamical solution and corrects (understandable) misreading of his results as approximate.
+Citations of \citebod usually relate to its theory of climatic instability for glaciers and ice sheets in which surface mass balance rate depends on elevation.  The only exception to this pattern known to the current author is that \cite{Fowler1992} refers to the basal-shear-dominated dynamics of \citebod as ``approximate results.''  We hope that the current work revives interest in \bod's ice dynamical solution and corrects (understandable) misreading of his results as approximate.
 
 Application of the new exact solution also reveals one feature of the marine ice sheet problem that we feel has been overlooked.  Namely that there is a strong stiffness contrast, in the sense of differential equations, in the flowline case at the grounding line.  This is, conceptually, in addition to the loss of smoothness seen at the grounding line.  Both smoothness and stiffness must be addressed by numerical methods.  Modelers should have more than grid refinement in mind as they attempt to model grounding lines correctly.
 
@@ -352,7 +352,7 @@ Application of the new exact solution also reveals one feature of the marine ice
 %\bibliography{ice-bib}
 %\bibliographystyle{igs}
 
-\begin{thebibliography}{28}
+\begin{thebibliography}{29}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \expandafter\ifx\csname selectlanguage\endcsname\relax
   \def\selectlanguage#1{\relax}\fi
@@ -375,6 +375,11 @@ Bueler, E., C.~S. Lingle, J.~A. Kallen-Brown, D.~N. Covey and L.~N. Bowman,
   2005. Exact solutions and numerical verification for isothermal ice sheets,
   {\em J. Glaciol.\/}, {\bf 51}(173), 291--306.
 
+\bibitem[Cogley and others, 2011]{massbalanceglossary}
+Cogley, G. and others, 2011. Glossary of {M}ass-{B}alance and {R}elated
+  {T}erms, {IHP-VII Technical Documents in Hydrology No. 86, IACS
+  Contribution No. 2, UNESCO-IHP, Paris}.
+  
 \bibitem[Feldmann and others, 2014]{Feldmannetal2014}
 Feldmann, J., T.~Albrecht, C.~Khroulev, F.~Pattyn and A.~Levermann, 2014.
   Resolution-dependent performance of grounding line motion in a shallow model
