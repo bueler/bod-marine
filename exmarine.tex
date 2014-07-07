@@ -333,7 +333,7 @@ It is important to distinguish the errors attributable to the finite difference 
 
 However, if we use a simple ``wedge'' initial iterate, which has a linear thickness profile from the upstream initial condition $H(0)$ down to 300 m at the calving front, and a similar linear velocity profile increasing from $u(0)$ to 300 $\text{m}\,\text{a}^{-1}$ at the calving front, then we see more realistic results which reflect the experience of ice sheet modelers addressing these equations.  Here the initial iterate is relatively far from the exact solution.  Difficulties arise in the global convergence behavior of the Newton solver, even though standard line search techniques are used in these computations \citep{Kelley,petsc-user-ref}.  For grids finer than 1 km the iteration for this scheme does not converge, apparently because the Jacobian matrix is not providing useful directional information as to the location of the solution of the discretized equations.  In any case, our results suggest a lack of nonlinear solver robustness that we attribute to the nonsmooth, stiffness-constrasting properties of the problem near the grounding line.
 
-Grounding line parameterizations \citep[e.g.][]{Gladstoneetal2010,Feldmannetal2014} may act like homotopy continuation methods \citep{Kelley} to improve global solver behavior in this case, but such considerations go beyond our scope.  However, no regularization of grounding line discontinuities and slope discontinuities in the formulas for $\beta(x)$ and $h(x)$ (respectively) were applied in the current paper.  
+Grounding line parameterizations \citep[e.g.][]{Gladstoneetal2010,Feldmannetal2014} may act like homotopy continuation methods \citep{Kelley} to improve global solver behavior in this case, but such considerations go beyond our scope.  No regularization of grounding line discontinuities and slope discontinuities in the formulas for $\beta(x)$ and $h(x)$ (respectively) were applied in the current paper.
 
 
 \section{Conclusion}  As noted by \cite{BLKCB}, \cite{Wesseling}, and many other sources, verification of numerical methods is a valuable first step in effective numerical modeling of realistic flows.  This is especially so in geophysical flows where validation by comparison to controlled laboratory experiments is difficult.  Thus the rediscovery of an exact solution to a marine ice sheet problem is a welcome development.  Even though this solution is for a steady-state and flat bed case, it provides a partial alternative to hard-to-interpret intercomparison results \citep{MISMIP2012}.
@@ -379,7 +379,7 @@ Bueler, E., C.~S. Lingle, J.~A. Kallen-Brown, D.~N. Covey and L.~N. Bowman,
 Cogley, G. and others, 2011. Glossary of {M}ass-{B}alance and {R}elated
   {T}erms, {IHP-VII Technical Documents in Hydrology No. 86, IACS
   Contribution No. 2, UNESCO-IHP, Paris}.
-  
+
 \bibitem[Feldmann and others, 2014]{Feldmannetal2014}
 Feldmann, J., T.~Albrecht, C.~Khroulev, F.~Pattyn and A.~Levermann, 2014.
   Resolution-dependent performance of grounding line motion in a shallow model
