@@ -319,7 +319,7 @@ The linear ODE system \eqref{eq:linearization} is stiff if there is a large rati
 \caption{Stiffness ratio $|\operatorname{Re}(\lambda_1)|/|\operatorname{Re}(\lambda_3)|$ for the linearized problem \eqref{eq:linearization}, where $\lambda_i$ are the eigenvalues of $A(x)$ in \eqref{eq:linearization}.} \label{fig:stiffness}
 \end{figure}
 
-We believe that the strong stiffness contrast at the grounding line is significant in explaining large near-grounding-line errors made by gridded numerical methods \citep{Gladstoneetal2010,MISMIP2012}.  The stiffness ratio drops by a factor of almost ten at the grounding line, though it is largest in the interior part of the grounded ice.  It is possible that models of modified effective pressure near the grounding line \citep{Leguyetal2014TCD}, in sliding laws that are parameterized by effective pressure \citep{Schoof2005cavitation}, can reduce this stiffness contrast.
+We believe that the strong stiffness contrast at the grounding line is significant in explaining large near-grounding-line errors made by gridded numerical methods \citep{Gladstoneetal2010,MISMIP2012}.  The stiffness ratio drops by a factor of almost ten at the grounding line, though it is largest in the interior part of the grounded ice.  It is possible that models of modified effective pressure near the grounding line \citep{Leguyetal2014}, in sliding laws that are parameterized by effective pressure \citep{Schoof2005cavitation}, can reduce this stiffness contrast.
 
 \subsection*{Verification of a fixed-grid finite difference numerical method}  We also implemented an equally-spaced, second-order, finite difference scheme using Newton iteration, described in Appendix B.  Our exact solution allows us to measure, for the first time in a rapidly-sliding marine ice sheet context, the errors from such a numerical scheme of the common type implemented in practical marine ice sheet models \citep[e.g.][]{PollardDeConto2009WAIS,Winkelmannetal2011}.
 
@@ -409,10 +409,10 @@ Hindmarsh, A.~C, 1983. {ODEPACK, A Systematized Collection of ODE Solvers},
 Kelley, C.~T., 1987. Solving Nonlinear Equations with Newton's Method,
   Fundamentals of Algorithms, SIAM Press.
 
-\bibitem[Leguy and others, 2014]{Leguyetal2014TCD}
+\bibitem[Leguy and others, 2014]{Leguyetal2014}
 Leguy, G.~R., X.~S. Asay-Davis and W.~H. Lipscomb, 2014. Parameterization of
-  basal hydrology near grounding lines in a one-dimensional ice sheet model,
-  {\em The Cryosphere Discussions\/}, {\bf 8}(1), 363--419.
+  basal friction near grounding lines in a one-dimensional ice sheet model,
+  {\em The Cryosphere\/}, {\bf 8}, 1239--1259.
 
 \bibitem[MacAyeal, 1989]{MacAyeal}
 MacAyeal, D.~R., 1989. Large-scale ice flow over a viscous basal sediment:
