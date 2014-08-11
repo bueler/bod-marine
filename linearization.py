@@ -96,6 +96,7 @@ fig = plt.figure(figsize=(6,4))
 plt.semilogy((x-xa)/1000.0,arl[:,-1]/arl[:,0],'k',lw=2.0)
 plt.grid(True)
 plt.xlabel("x   (km)")
+plt.ylabel("Stiffness ratio")
 nameroot = "em"
 imagename = nameroot + '-stiffness-ratio.pdf'
 plt.savefig(imagename)

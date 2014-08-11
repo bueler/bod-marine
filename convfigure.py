@@ -85,7 +85,7 @@ axis((0.6*dxmin,1.7*dxmax,0.3*miny,3.0*maxy))
 xlabel('')
 xticks(array([10.0, 100.0, 1000.0, 10000.0]),
        ('', '', '', '') )
-ylabel(r'$u$ error  (m/a)')
+ylabel(r'$u$ error  ($\mathrm{m} \mathrm{a}^{-1}$)')
 
 # only lower x-axis gets labels
 xlabel(r'$\Delta x$')

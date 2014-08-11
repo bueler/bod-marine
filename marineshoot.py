@@ -169,7 +169,7 @@ plt.semilogy(tcur[mused==1],hu[mused==1],'k*',ms=12)
 # circle = (mused==2) = stiff BDF
 plt.semilogy(tcur[mused==2],hu[mused==2],'ko',ms=8,markerfacecolor='w')
 plt.xlabel('x  (km)')
-plt.ylabel('stepsize  (km)')
+plt.ylabel('Step size  (km)')
 plt.grid(True)
 plt.ylim(1.0e-2,2.0e1)
 imagename = nameroot + '-dt-adaptive.pdf'
@@ -187,8 +187,8 @@ Tmid = vmid[:,2]
 hh, bb = surfaces(H)
 fig = plt.figure(figsize=(6,4))
 ax1fig1, ax2fig1 = plottwo(fig,(x-exactsolns.xa)/1000.0,hh,u * exactsolns.secpera,
-                           "z   (m, solid)",
-                           "ice velocity   (m a-1, dashed)",
+                           "z   (m) (solid)",
+                           r"Ice velocity   ($\mathrm{m} \mathrm{a}^{-1}$) (dashed)",
                            y1min=0.0)
 ax1fig1.set_xlim(0.0,(xoceanend-exactsolns.xa)/1000.0)
 ax2fig1.set_xlim(0.0,(xoceanend-exactsolns.xa)/1000.0)
@@ -214,8 +214,8 @@ print '  image file %s saved' % imagename
 fig = plt.figure(figsize=(6,4))
 detail = (x > 0.95*exactsolns.xg)
 ax1fig1, ax2fig1 = plottwo(fig,(x[detail]-exactsolns.xa)/1000.0,hh[detail],u[detail] * exactsolns.secpera,
-                           "z   (m, solid)",
-                           "ice velocity   (m a-1, dashed)",
+                           "z   (m) (solid)",
+                           r"Ice velocity   ($\mathrm{m} \mathrm{a}^{-1}$) (dashed)",
                            y1min=0.0)
 ax1fig1.hold(True)
 ax1fig1.plot((x[detail]-exactsolns.xa)/1000.0,bb[detail],'k',lw=2.0)
@@ -240,8 +240,8 @@ for j in range(len(x)):
    BB[j] = B(x[j])
 fig = plt.figure(figsize=(6,4))
 ax1fig2, ax2fig2 = plottwo(fig,(x-exactsolns.xa)/1000.0,MM * exactsolns.secpera,BB/1.0e8,
-                           "M(x)   (m a-1, solid)",
-                           r"B(x)   ($10^8$ Pa s-1/3, dashed)")
+                           r"M(x)   ($\mathrm{m} \mathrm{a}^{-1}$) (solid)",
+                           r"B(x)   ($10^8\, \mathrm{Pa} \mathrm{s}^{-1/3}$) (dashed)")
 ax1fig2.set_xlim(0.0,(xoceanend-exactsolns.xa)/1000.0)
 ax2fig2.set_xlim(0.0,(xoceanend-exactsolns.xa)/1000.0)
 ax1fig2.set_ylim(-5.0,5.0)
@@ -261,8 +261,8 @@ for j in range(len(H)):
    else:
        bbeta[j] = 0.0
 ax1fig3, ax2fig3 = plottwo(fig,(x-exactsolns.xa)/1000.0,bbeta/1.0e10,T/1.0e8,
-                           r"$\beta$(x)   ($10^{10}$  Pa s m-1, solid)",
-                           r"$T$(x)   ($10^8$ Pa m, dashed)")
+                           r"$\beta$(x)   ($10^{10} \,\mathrm{Pa}\, \mathrm{s}\, \mathrm{m}^{-1}$) (solid)",
+                           r"$T$(x)   ($10^8 \,\mathrm{Pa}\, \mathrm{m}$) (dashed)")
 ax1fig3.set_ylim(-0.1,2.1)
 ax2fig3.set_ylim(0.0,2.0)
 bbeta[x > exactsolns.xg] = 0.0
@@ -295,7 +295,7 @@ ax2 = plt.gca()
 ax2.set_xlim([0.0,(xoceanend-exactsolns.xa)/1000.0])
 ax2.set_yticks([1.0e-14,1.0e-12,1.0e-10,1.0e-8,1.0e-6,1.0e-4,1.0e-2])
 plt.grid(True)
-plt.ylabel("u error   (m a-1)", fontsize=14)
+plt.ylabel(r"u error   ($\mathrm{m} \mathrm{a}^{-1}$)", fontsize=14)
 plt.xlabel("x   (km)")
 imagename = nameroot + '-error.pdf'
 plt.savefig(imagename)
