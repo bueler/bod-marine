@@ -49,7 +49,8 @@ E-mail: \emph{\texttt{elbueler\@@alaska.edu}}}
 Early theoretical glaciology created two fundamentally-different parabolic profiles as the shapes of steady flow-line ice sheets lying on flat beds, as in Figure \ref{fig:twoparabolas}.  One was the profile of an ice sheet with perfect-plasticity \citep{Orowan,Nye52plastic} and the other the profile for a sliding ``plug'' flow investigated by \citebod.  These global views of free surface flows in glaciology focus on different aspects of the problem and they come to rather different conclusions.  Up to scaling, one is of the form $x=1-z^2$ (Orowan-Nye) and the other is of the form $z=1-x^2$ (\bod).  The former perfect-plasticity solution has a central peak at the highest point of the ice sheet, and a margin with unbounded surface gradient.  The latter plug flow solution has a smooth dome and a finite-slope, wedge-shaped margin.
 
 \begin{figure}[ht]
-\onecol{twoparabolas}
+%\onecol{twoparabolas}
+\onecol{figure1}
 \caption{The parabolas by Orowan and Nye (1949, 1952; dotted) and by \bod (1955; solid) for steady, flowline ice sheets on flat beds.  A dome thickness of $H_0=3000$ m and a length of $L_0=500$ km are chosen for concreteness.} \label{fig:twoparabolas}
 \end{figure}
 
@@ -83,7 +84,8 @@ where we have scaled $\beta = k \rho g H$ with the ice overburden pressure $\rho
 Equations \eqref{eq:steadymass}--\eqref{eq:betafull} apply on an interval $0 < x < x_c$ where $x_c$ is the floating calving-front.  We must solve for the location $x=x_g$ of the grounding line, at which we know $\rho H(x_g) = \rho_w (z_o - b)$.
 
 \begin{figure}[ht]
-\onecol{em-geometry}
+%\onecol{em-geometry}
+\onecol{figure2}
 \caption{The geometry (solid) and velocity (dashed) of an exact solution of the simultaneous steady mass continuity and SSA stress balance equations for a marine ice sheet.  The solution is \bod's when grounded and van der Veen's when floating.} \label{fig:exactmarine}
 \end{figure}
 
@@ -228,17 +230,20 @@ $u(x_c)$ & ice velocity at c.f. & 464.092 $\text{m}\,\text{a}^{-1}$  \\
 As described above, from the thickness $H(x)$ and the velocity $u(x)$ we can find continuous functions $M(x)$ and $B(x)$ for the full  flowline by using equations \eqref{eq:bodmassbalance} and \eqref{eq:hardnessdefine}.  These functions are shown in Figure \ref{fig:exactMB}.  Then we can use equation \eqref{eq:Tstress} to find $T(x)$; this is shown in Figure \ref{fig:exactbetaT}.  In Figure \ref{fig:exactbetaT} we also show the sliding coefficient $\beta(x)$, which drops to zero discontinuously at $x_g$.  Finally Figure \ref{fig:em-detail} shows a detail of the grounding line and floating ice in the exact solution.
 
 \begin{figure}[ht]
-\onecol{em-M-B}
+%\onecol{em-M-B}
+\onecol{figure3}
 \caption{The climatic-basal mass balance rate $M(x)$ (solid) and ice hardness $B(x)$ (dashed) for the exact solution.} \label{fig:exactMB}
 \end{figure}
 
 \begin{figure}[ht]
-\onecol{em-beta-T}
+%\onecol{em-beta-T}
+\onecol{figure4}
 \caption{The sliding coefficient $\beta(x)$ (solid) and the vertically-integrated longitudinal stress $T(x)$ (dashed) for the exact solution.  The solid curve shows $\beta = k \rho g H$ on both sides of the grounding line.  The actual basal resistance experienced by the shelf drops to zero at the grounding line (dotted).} \label{fig:exactbetaT}
 \end{figure}
 
 \begin{figure}[ht]
-\onecol{em-geometry-detail}
+%\onecol{em-geometry-detail}
+\onecol{figure5}
 \caption{Detail of Figure \ref{fig:exactmarine}, showing the floating ice shelf geometry and velocity.} \label{fig:em-detail}
 \end{figure}
 
@@ -258,7 +263,8 @@ and then we can apply a numerical method to find the solution (root) $\hat T_0$ 
 A robust root-finding method is bisection \citep[section 9.1]{Pressetal}.  It is guaranteed to converge if $F$ is continuous and if an initial bracket is given, which is easy to find in this case.  Regarding faster root-finding methods than bisection, such as Newton's method, we observe that $F'$ may not exist because of the low regularity of the solution at the interior point $x=x_g$. However, by using our exact solution we will see clear evidence that the bisection iteration succeeds in finding the root $\hat T_0$ to many digits despite the uncertain smoothness of $F$.
 
 \begin{figure}[ht]
-\onecol{em-error}
+%\onecol{em-error}
+\onecol{figure6}
 \caption{Pointwise error in thickness (upper panel) and in velocity (lower panel) from an adaptive numerical ODE scheme.  Both the ``cheating'' case (solid), where we use the exactly-correct initial value for $T$, and the ``realistic'' case (dashed), where the shooting method converges on the correct initial value for $T$ by the bisection method, are shown.} \label{fig:shoot-error}
 \end{figure}
 
@@ -269,7 +275,8 @@ We now apply this grid-free procedure to the same problem for which we have the 
 The ODE solver also detects the grounding line as a point of transition to shorter (spatial) steps, as seen in Figure \ref{fig:shoot-dt-adaptive}.  More significantly, however, the grounded ice requires a stiff method while the floating ice allows a nonstiff one, according to the automatic switch mechanism in LSODA.  Note that high accuracy (e.g. 6 or 7 digits) is achieved in the ``realistic'' case despite rather large grid spacing in the grounded ice, with large portions at 5--10 km spacing.  The spacing drops to a minimum of 100 m just downstream of the grounding line at $x_g=350$ km.
 
 \begin{figure}[ht]
-\onecol{em-dt-adaptive}
+%\onecol{em-dt-adaptive}
+\onecol{figure7}
 \caption{The adaptive numerical ODE scheme in the ``realistic'' case makes steps of 1 km to 10 km in grounded ice, but at the grounding line $x_g=350$ km the step size is reduced to a few hundred meters.  The adaptive mechanism automatically switches from a stiff method where grounded (circles) to a non-stiff method where floating (stars).} \label{fig:shoot-dt-adaptive}
 \end{figure}
 
@@ -317,7 +324,8 @@ along its whole length, where $A(x) = L(x)^{-1} R(x)$.
 Linear ODE system \eqref{eq:linearization} is stiff if there is a large ratio of magnitudes in the eigenvalues of $A(x)$ \citep{Pressetal}.  Because the entries and eigenvalues of $A(x)$ are exactly computable using the exact solution values $(\hu(x),\hH(x),\hT(x))$, we can plot in Figure \ref{fig:stiffness} the $x$-dependent ``stiffness ratio'' for $A(x)$, namely the ratio of absolute values of the real parts of the largest and smallest eigenvalues of $A(x)$, along the whole length of the flowline.  Note this ratio is small in the nonstiff floating ice.  This ratio is independent of the direction of integration (i.e.~upstream versus downstream).  The stiffness ratio is by no means the last word on quantifying stiffness, which turns out to be difficult generally \citep[e.g.][]{HighamTrefethen1993}.
 
 \begin{figure}[ht]
-\onecol{em-stiffness-ratio}
+%\onecol{em-stiffness-ratio}
+\onecol{figure8}
 \caption{Stiffness ratio $|\operatorname{Re}(\lambda_1)|/|\operatorname{Re}(\lambda_3)|$ for the linearized problem \eqref{eq:linearization}, where $\lambda_i$ are the eigenvalues of $A(x)$ in \eqref{eq:linearization}.} \label{fig:stiffness}
 \end{figure}
 
@@ -328,7 +336,8 @@ We believe that the strong stiffness contrast at the grounding line is significa
 Figure \ref{fig:convmarine} shows that the maximum numerical thickness and velocity errors are observed to converge at a rate much slower than the optimal $O(\Delta x^2)$ rate under grid refinement \citep{MortonMayers}.  This is essentially because of the loss of smoothness in the exact solution at the grounding line.  By contrast, use of the grounded-only \citebod exact solution, without a grounding line, confirms that the same finite difference method gives optimal $O(\Delta x^2)$ convergence; not shown.
 
 \begin{figure}[ht]
-\onecol{convmarine}
+%\onecol{convmarine}
+\onecol{figure9}
 \caption{Maximum errors in ice thickness (upper panel) and velocity (lower panel) on grids with spacing from $20$ km down to $5$ m.  When initialized with the exact solution, the numerical scheme converges at a rate $\Delta x^{1.08}$ for both thickness and velocity (large dots plus dotted line).  For a more realistic initial iterate the convergence rate is initially good, but at resolutions below 1 km the Newton iteration fails to converge (stars; see text).} \label{fig:convmarine}
 \end{figure}
 
