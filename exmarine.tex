@@ -495,7 +495,7 @@ Winkelmann, R., M.~A. Martin, M.~Haseloff, T.~Albrecht, E.~Bueler, C.~Khroulev
 
 \appendix
 
-\subsection{Appendix A: \bod's little theorem}  \citebod does not identify a source for the exact parabolic thickness solution to his plug flow equations, and we have not been able to attribute it to earlier work.  We summarize his result as the theorem that there is a unique polynomial solution $y(x)$ to the nonlinear second-order differential equation
+\subsection{Appendix A: \bod's little theorem}  \citebod does not identify a source for the exact parabolic thickness solution to his flow equations, and we have not been able to attribute it to earlier work.  We summarize his result as the theorem that there is a unique polynomial solution $y(x)$ to the nonlinear second-order differential equation
 \begin{equation}
   (y y')' = c_1 y + c_0  \label{eq:abstractode}
 \end{equation}
@@ -503,7 +503,7 @@ satisfying the single boundary condition $y(0) = y_0 > 0$, subject to both an in
 
 Equation \eqref{eq:abstractode} is equation (17) in \citebod.  The additional assumptions (i.e.~initial downslope plus the technical inequality) are unstated, though he comments that there is ``one and only one solution which is admittable from the physical point of view.''
 
-Here we justify this little theorem and, generally following \citebod, derive relations among parameters which allow a solution.  The unique polynomial solution to this problem may be interpreted as solving a free boundary problem for the first positive zero $x_0>0$ of $y(x)$.  In \bod's context $x_0=L_0$ is the length of the glacier, the location of the margin in the everywhere-grounded case.
+Here we justify this little theorem and, generally following \citebod, derive relations among parameters which allow a solution.  The unique polynomial solution may be interpreted as solving a free boundary problem for the first positive zero $x_0>0$ of $y(x)$.  In \bod's context $x_0=L_0$ is the length of the glacier, the location of the margin in the everywhere-grounded case.
 
 It is easy to see by substitution into \eqref{eq:abstractode} that nontrivial solutions of degree $d$, i.e.~of the form $y(x) = C x^d + (\text{lower degree})$ with $C \ne 0$, exist only if $d=2$.  In that case we seek solutions which satisfy the boundary conditions $y(0)=y_0$ and $y'(0) \le 0$, so
 \begin{equation}
@@ -515,7 +515,7 @@ for some $\alpha\ge 0$ and $\gamma$ which are to be determined; this is equation
 \end{equation}
 These two relations determine $\alpha$ and $\gamma$ from $c_0$ and $c_1$.  The first relation explains the technical inequality, noting $3 y_0^2 \alpha^2 \ge 0$ of course.
 
-In the main text, \bod's problem relates four numbers to the unknown glacier thickness $y(x)=H(x)$: the initial (upstream) ice thickness $y_0=H_0$, an ablation gradient $a>0$, the equilibrium-line altitude $\Hela$, and a scaled sliding coefficient $k>0$.  He has $c_0=k a \Hela$ and $c_1=-ka$ in \eqref{eq:abstractode} so the technical inequality says $3 \Hela \ge 2 H_0$ after simplification.  This causes the equilibrium line altitude to be relatively high on the glacier.
+In the main text, \bod's problem relates four numbers to the unknown glacier thickness $H(x)$, which is $y(x)$ in the above formulas: the initial (upstream) ice thickness $H_0$, an ablation gradient $a>0$, the equilibrium-line altitude $\Hela$, and a scaled sliding coefficient $k>0$.  He has $c_0=k a \Hela$ and $c_1=-ka$ in \eqref{eq:abstractode} so the technical inequality says $3 \Hela \ge 2 H_0$ after simplification.  This causes the equilibrium line altitude to be relatively high on the glacier.
 
 
 \subsection{Appendix B: A finite difference scheme}  The steady-state equations for mass continuity \eqref{eq:steadymass} and stress balance \eqref{eq:steadySSA} form a coupled system that can be approximately solved by the centered, second-order finite difference scheme described here.  There is no claim that this scheme is optimal, but merely that it is a reasonable fixed-grid method for initial evaluation.  Because we use it to solve a steady-state problem, it generalizes to the time-dependent case as an implicit method.
