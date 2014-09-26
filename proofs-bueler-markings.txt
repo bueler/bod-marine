@@ -1,0 +1,48 @@
+Dear Craig Baxter, Production at J. Glaciol. --
+
+> I have attached page proofs of your paper. Please check these proofs carefully,
+> answering any specific queries we have indicated.
+> You can return these proofs to us by:
+> -- e-mailing a list of corrections, citing page, column and line number.
+> -- e-mailing the corrected pdf back to us with the corrections clearly marked
+> -- fax ...
+
+The page proofs look quite good!
+
+I have listed corrections below at the end of this email.  The attached scanned
+PDF is auxiliary, to confirm/corroborate the corrections listed below.
+
+> I have also attached the order form and authorization to publish forms. ...
+
+I will return these in my next email.
+
+> If your paper contains material that would be of interest to a wider
+> readership than that of the Journal/Annals of Glaciology, we would be
+> happy to promote (via the IGS website, Facebook and Twitter) any press
+> release that you or your institution's press office produce to coincide
+> with publication. Please let us have any relevant details.
+
+I think the current technical article is not a good candidate for such
+treatment.
+
+
+------- CORRECTIONS: --------
+
+page 1, abstract, 4th line:  "equally spaced" --> "equally-spaced"
+
+page 1, introduction, 4th line:  There is a reference here to a possibly-oral comment by
+Orowan at a 1949 British Glaciological Society meeting, which was then written
+down by someone for the minutes.  I think that for clarity the in-text citation
+should say "(Orowan, 1949)" not "(British Glaciological Society, 1949)",
+even if the BGS was the "author" of the minutes (and their publisher).
+At several points I refer, *accurately*, to the "Orowan-Nye" solution, so the
+reader will be confused by the current citation.
+
+page 1, introduction, 6th line:  "(investigated by Bodvarsson, 1955)" -->
+"(Bodvarsson, 1955)"
+
+page 1, introduction, 13th line:  "The latter, plug-flow, solution" --> "The
+latter plug-flow solution"
+
+page 1, introduction, 2nd paragraph, 12th line:  "errors using two different"
+--> "errors from two different"
