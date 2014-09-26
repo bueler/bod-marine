@@ -1,4 +1,4 @@
-Dear Craig Baxter, Production at J. Glaciol. --
+Dear Craig Baxter, Production --
 
 > I have attached page proofs of your paper. Please check these proofs carefully,
 > answering any specific queries we have indicated.
@@ -26,11 +26,18 @@ I think the current technical article is not a good candidate for such
 treatment.
 
 
+Regarding the corrections below, I realize I made one systematic mistake which
+I have attempted to correct.  Namely, I had several enumerated lists within the
+text which I wrote as "(1) first item, (2) second item, ..."  This is confusing
+because "(1)" indicates Eqn (1).  So I have changed the style to "(i) first item,
+(ii) second item, ..." and so on.  See below.
+
+
 ------- CORRECTIONS: --------
 
-page 1, abstract, 4th line:  "equally spaced" --> "equally-spaced"
+page 1, Abstract, 4th line:  "equally spaced" --> "equally-spaced"
 
-page 1, introduction, 4th line:  There is a reference here to a possibly-oral comment by
+page 1, Introduction, 4th line:  There is a reference here to a possibly-oral comment by
 Orowan at a 1949 British Glaciological Society meeting, which was then written
 down by someone for the minutes.  I think that for clarity the in-text citation
 should say "(Orowan, 1949)" not "(British Glaciological Society, 1949)",
@@ -38,11 +45,43 @@ even if the BGS was the "author" of the minutes (and their publisher).
 At several points I refer, *accurately*, to the "Orowan-Nye" solution, so the
 reader will be confused by the current citation.
 
-page 1, introduction, 6th line:  "(investigated by Bodvarsson, 1955)" -->
+page 1, Introduction, 6th line:  "(investigated by Bodvarsson, 1955)" -->
 "(Bodvarsson, 1955)"
 
-page 1, introduction, 13th line:  "The latter, plug-flow, solution" --> "The
+page 1, Introduction, 13th line:  "The latter, plug-flow, solution" --> "The
 latter plug-flow solution"
 
-page 1, introduction, 2nd paragraph, 12th line:  "errors using two different"
+page 1, Introduction, 2nd paragraph, 12th line:  "errors using two different"
 --> "errors from two different"
+
+page 1, Continuum model, subheading: "*Model" --> "Model"
+
+page 1, Continuum model, 1st paragraph, 3rd line from end:  "floating ice so"
+--> "floating ice, so"
+
+page 1, Continuum model, 2nd paragraph, 2nd line:  "floating ice and let z_o"
+--> "floating ice.  Let z_o"
+
+page 1, Continuum model, 2nd paragraph, 4th line:  "which in this paper we
+assume is a constant" --> "which is a constant in this paper"
+
+page 2, caption of Figure 1:  "(British Glaciological Society, 1949;" -->
+"(Orowan, 1949;"
+
+page 2, first paragraph, Eqn (8) and the line following:  Put comma at end of
+Eqn (8).  Then put this after Eqn (8):  "where u_a and H_a simply denote
+boundary values for velocity and thickness, respectively."
+
+page 2, paragraph before Exact solution section, 15th line:  Fix item numbering:
+"(1) that an integrable" --> "(i) that an integrable" AND "(ii) that the
+functions" AND "(iii) that B is bounded" AND "(iv) that a positive" AND "(v)
+that an upper"
+
+page 2, paragraph before Exact solution section, last line:  "grounding line,
+x_g, as part of the solution only." --> "grounding line, x_g, unknown, and with
+Eqn (8) only describing properties of the solution."
+
+page 2, very last line:  "stress within" --> "stresses within"
+
+
+
