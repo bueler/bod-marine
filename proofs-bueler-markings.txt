@@ -26,18 +26,20 @@ I think the current technical article is not a good candidate for such
 treatment.
 
 
-Regarding the corrections below, I realize I made one systematic mistake which
-I have attempted to correct.  Namely, I had several enumerated lists within the
-text which I wrote as "(1) first item, (2) second item, ..."  This is confusing
-because "(1)" indicates Eqn (1).  So I have changed the style to "(i) first item,
+Regarding the corrections below, I have tried to systematically correct a
+mistake in the proofs.  The several enumerated lists within the text should not
+appear as "(1) first item, (2) second item, ..."  This is confusing because
+"(1)" indicates Eqn (1).  So I have changed the style to "(i) first item,
 (ii) second item, ..." and so on.  See below.
 
 
-------- CORRECTIONS: --------
+------- CORRECTIONS, ORGANIZED BY PAGE NUMBER IN PROOFS: --------
 
-page 1, Abstract, 4th line:  "equally spaced" --> "equally-spaced"
+*** PAGE 1 ***
 
-page 1, Introduction, 4th line:  There is a reference here to a possibly-oral comment by
+Abstract, 4th line:  "equally spaced" --> "equally-spaced"
+
+1st column, 4th line:  There is a reference here to a possibly-oral comment by
 Orowan at a 1949 British Glaciological Society meeting, which was then written
 down by someone for the minutes.  I think that for clarity the in-text citation
 should say "(Orowan, 1949)" not "(British Glaciological Society, 1949)",
@@ -45,43 +47,174 @@ even if the BGS was the "author" of the minutes (and their publisher).
 At several points I refer, *accurately*, to the "Orowan-Nye" solution, so the
 reader will be confused by the current citation.
 
-page 1, Introduction, 6th line:  "(investigated by Bodvarsson, 1955)" -->
+1st column, 6th line:  "(investigated by Bodvarsson, 1955)" -->
 "(Bodvarsson, 1955)"
 
-page 1, Introduction, 13th line:  "The latter, plug-flow, solution" --> "The
+1st column, 13th line:  "The latter, plug-flow, solution" --> "The
 latter plug-flow solution"
 
-page 1, Introduction, 2nd paragraph, 12th line:  "errors using two different"
+1st column, 2nd paragraph, 12th line:  "errors using two different"
 --> "errors from two different"
 
-page 1, Continuum model, subheading: "*Model" --> "Model"
+Continuum model, the subheading: "*Model" --> "Model"
 
-page 1, Continuum model, 1st paragraph, 3rd line from end:  "floating ice so"
+2nd column, 1st paragraph, 3rd line from end:  "floating ice so"
 --> "floating ice, so"
 
-page 1, Continuum model, 2nd paragraph, 2nd line:  "floating ice and let z_o"
+2nd column, 2nd paragraph, 2nd line:  "floating ice and let z_o"
 --> "floating ice.  Let z_o"
 
-page 1, Continuum model, 2nd paragraph, 4th line:  "which in this paper we
+2nd column, 2nd paragraph, 4th line:  "which in this paper we
 assume is a constant" --> "which is a constant in this paper"
 
-page 2, caption of Figure 1:  "(British Glaciological Society, 1949;" -->
+
+*** PAGE 2 ***
+
+caption of Figure 1:  "(British Glaciological Society, 1949;" -->
 "(Orowan, 1949;"
 
-page 2, first paragraph, Eqn (8) and the line following:  Put comma at end of
+1st column, Eqn (8) and the line following:  Put comma at end of
 Eqn (8).  Then put this after Eqn (8):  "where u_a and H_a simply denote
 boundary values for velocity and thickness, respectively."
 
-page 2, paragraph before Exact solution section, 15th line:  Fix item numbering:
-"(1) that an integrable" --> "(i) that an integrable" AND "(ii) that the
-functions" AND "(iii) that B is bounded" AND "(iv) that a positive" AND "(v)
-that an upper"
+2nd column, 2nd paragraph, 15th line:  Fix item numbering:
+"(1) that an integrable" --> "(i) that an integrable",
+"(2)" --> "(ii)",  "(3)" --> "(iii)",  "(4)" --> "(iv)",  "(5)" --> "(v)"
 
-page 2, paragraph before Exact solution section, last line:  "grounding line,
+2nd column, 2nd paragraph, last line:  "grounding line,
 x_g, as part of the solution only." --> "grounding line, x_g, unknown, and with
 Eqn (8) only describing properties of the solution."
 
-page 2, very last line:  "stress within" --> "stresses within"
+very last line:  "stress within" --> "stresses within"
 
 
+*** PAGE 3 ***
+
+1st column, line 5:  "balanced entirely by" --> "balanced by"
+
+2nd column, 2nd paragraph, line 3:  "but Eqn (11) may be mysterious." -->
+"but the source of Eqn (11) may be less clear."
+
+2nd column, 2nd paragraph, line 10:  Fix item numbering:  "(1)" --> "(i)",
+"(2)" --> "(ii)",  "(3)" --> "(iii)"
+
+2nd column, 3rd paragraph, line 10:  "can use the exact" --> "can therefore use
+the exact"
+
+2nd column, 3rd paragraph, line 11:  "requiring special modifications to
+incorporate variable hardness." --> "requiring unusual modifications."
+
+2nd column, 4th paragraph, line 6:  "in Eqn (14) can be set" --> "in Eqn (14)
+will be set"
+
+2nd column, 5th paragraph, line 2:  Fix item numbering:  "(1)" --> "(i)",
+"(2)" --> "(ii)"
+
+
+*** PAGE 4 ***
+
+caption of Figure 3:  Yes, it is o.k. for the Table to have units  m s^{-1}  for
+M and have the axis label instead by  m a^{-1}.
+
+1st column, line 2:  Yes, it is o.k. to replace T_o with T_0.
+
+1st column, line 5:  Add comma:  "x_g \le x \le x_c a constant," -->
+"x_g \le x \le x_c, a constant,"
+
+1st column, 2nd paragraph, 3rd line:  "comes from combining" --> "combines"
+
+1st column, 2nd paragraph, 6th line (just after Eqn (16)):  "where u_s(x) is"
+--> "where the ice shelf velocity u_s(x) is"
+
+2nd column, Table 2:  As indicated in the caption of Table 2, it is important
+that the reader can see which quantities are "used in" the equations and which
+are "determined by".  This distinguishes between the inputs of the mathematical
+model and its outputs.  Therefore there should be a horizontal line between the
+"u(0)" line and the "x_g" line.  In the caption, "(top)" should be "(above
+divider)", or similar, and "(bottom)" should be "(below divider)".  If this
+structure is unacceptable for some reason then the Table should be split in two.
+
+2nd column, Table 2:  The "Units" column label should be replaced by "Value and
+Units".
+
+2nd column, Table 2:  The "Units" (now "Value and Units") entry for "B(x_g)" has
+become wrapped.  This should be avoided.
+
+
+*** PAGE 5 ***
+
+2nd column, 1st paragraph, line 7:  Add comma:  "to many digits despite" -->
+"to many digits, despite"
+
+2nd column, 2nd paragraph, line 4:  Remove commas, add "an", and italicize:
+"we avoid, a priori, choice of" --> "we avoid an \emph{a priori} choice of"
+
+2nd column, 3rd paragraph, line 4:  "we get the results shown" --> "we get the
+numerical error shown"
+
+
+*** PAGE 6 ***
+
+1st column, 3rd paragraph, line 4:  "the exact solution (u_0, H_0, T_0)" -->
+"the exact solution by (\hat u, \hat H, \hat T)"
+
+1st column, Eqn (19):  replace power "q" with "p" in upper left matrix entry
+
+1st column, line after Eqn (19):  "where $q = \frac{1}{n} - 1$."  -->  "where
+$p = \frac{1}{n} - 1$."
+
+2nd column, 3rd paragraph, 1st line:  "equally spaced" --> "equally-spaced"
+
+
+*** PAGE 7 ***
+
+1st column, 1st paragraph of Conclusion, last line:  Strike "for verification".
+
+1st column, 2nd paragraph of Conclusion, 5th line:  "even though most early"
+--> "even though other early"
+
+2nd column, 1st entry in References:  "Balay S and 10 others" --> "Balay S and
+13 others".
+
+2nd column, 3rd entry in References:  Again, I assert it should be made clear
+that I am referring to a comment by E. Orowan, within a BGS meeting report.
+
+
+*** PAGE 8 ***
+
+1st column, Leguy et al entry:  This has appeared in The Cryosphere.  Here is
+the bibtex:
+
+@Article{tc-8-1239-2014,
+AUTHOR = {Leguy, G. R. and Asay-Davis, X. S. and Lipscomb, W. H.},
+TITLE = {Parameterization of basal friction near grounding lines in a
+one-dimensional ice sheet model},
+JOURNAL = {The Cryosphere},
+VOLUME = {8},
+YEAR = {2014},
+NUMBER = {4},
+PAGES = {1239--1259},
+URL = {http://www.the-cryosphere.net/8/1239/2014/},
+DOI = {10.5194/tc-8-1239-2014}
+}
+
+2nd column, last paragraph of Appendix A, line 2:
+"glacier thickness, H(x), which" --> ""glacier thickness, which"
+
+2nd column, second paragraph of Appendix B, line 1: "equally spaced" -->
+"equally-spaced"
+
+
+*** PAGE 9 ***
+
+1st column, 1st paragraph, line before Eqn (B2):  "Also let q = (1 - 1/n)/n, and
+define" --> "Define"
+
+1st column, 1st paragraph, Eqn (B2):  Replace power "q/2" by "(1-n)/(2n)".
+
+1st column, 1st paragraph, Eqn (B2):  Also remove period (full stop) at end of
+Eqn (B2).
+
+1st column, 1st paragraph, line after Eqn (B2):  Add "where u_l, u_r are
+velocity values to the left and right of a staggered grid point, respectively."
 
