@@ -45,7 +45,9 @@ down by someone for the minutes.  I think that for clarity the in-text citation
 should say "(Orowan, 1949)" not "(British Glaciological Society, 1949)",
 even if the BGS was the "author" of the minutes (and their publisher).
 At several points I refer, *accurately*, to the "Orowan-Nye" solution, so the
-reader will be confused by the current citation.
+reader will be confused by the current citation.  (This particular J Glaciol
+number has been taken over by ingenta, so I cannot currently access it so as to
+confirm my memory of the situation.)
 
 1st column, 6th line:  "(investigated by Bodvarsson, 1955)" -->
 "(Bodvarsson, 1955)"
