@@ -1,19 +1,16 @@
 ALL: marine
 
-include ${PETSC_DIR}/conf/rules
-include ${PETSC_DIR}/conf/variables
+#include ${PETSC_DIR}/conf/rules
+#include ${PETSC_DIR}/conf/variables
 
-exactsolns.o : exactsolns.c
+include ${PETSC_DIR}/lib/petsc-conf/variables
+include ${PETSC_DIR}/lib/petsc-conf/rules
 
 bodvardsson : bodvardsson.o exactsolns.o chkopts
-	-${CLINKER} -o $@ $< ${PETSC_SNES_LIB} exactsolns.o
+	-${CLINKER} -o bodvardsson bodvardsson.o exactsolns.o ${PETSC_SNES_LIB}
+	${RM} bodvardsson.o exactsolns.o
 
 marine : marine.o exactsolns.o chkopts
-	-${CLINKER} -o $@ $< ${PETSC_SNES_LIB} exactsolns.o
-
-ex5: ex5.o chkopts
-	-${CLINKER} -o $@ $< ${PETSC_SNES_LIB}
-
-ex9: ex9.o chkopts
-	-${CLINKER} -o $@ $< ${PETSC_SNES_LIB}
+	-${CLINKER} -o marine marine.o exactsolns.o ${PETSC_SNES_LIB}
+	${RM} marine.o exactsolns.o
 
