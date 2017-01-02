@@ -9,9 +9,8 @@ static const char help[] =
 "  ./bodvardsson -snes_mf -da_grid_x 181 -snes_monitor -bod_exact_init\n"
 "Visualization:\n"
 "  ./bodvardsson -snes_fd -da_grid_x 201 -snes_monitor -snes_monitor_solution -draw_pause 1\n"
-"See conv.sh for convergence graph.  Add option -upwind1 to see first-order upwinding.\n"
-"TO DO:  * add Picard or Jacobian\n"
-"        * reasonable initial guesses\n\n";
+"See convbod.sh for convergence graph.  Add option -bod_up_one to see first-order upwinding.\n"
+"Compare marine.c.\n\n";
 
 #include <petscdmda.h>
 #include <petscsnes.h>
@@ -52,7 +51,6 @@ extern PetscErrorCode FillInitial(AppCtx*,Vec*);
 extern PetscErrorCode FillDistributedParams(AppCtx*);
 extern PetscErrorCode BodFunctionLocal(DMDALocalInfo*,Node*,Node*,AppCtx*);
 extern PetscErrorCode scshell(DMDALocalInfo*,Node*,Node*,AppCtx*);
-extern PetscErrorCode BodJacobianMatrixLocal(DMDALocalInfo*,Node*,Mat,AppCtx*);
 
 
 int main(int argc,char **argv)
@@ -62,14 +60,12 @@ int main(int argc,char **argv)
   SNES                   snes;                 /* nonlinear solver */
   Vec                    Hu,r;                 /* solution, residual vectors */
   AppCtx                 user;                 /* user-defined work context */
-  PetscInt               its, i, tmpxs, tmpxm; /* iteration count, index, etc. */
+  PetscInt               i, tmpxs, tmpxm; /* iteration count, index, etc. */
   PetscReal              tmp1, tmp2, tmp3, tmp4,
                          errnorms[2], descaleNode[2];
   PetscBool              eps_set = PETSC_FALSE,
                          dump = PETSC_FALSE,
-                         exactinitial = PETSC_FALSE,
-                         snes_mf_set, snes_fd_set;
-  SNESConvergedReason    reason;               /* Check convergence */
+                         exactinitial = PETSC_FALSE;
 
   PetscInitialize(&argc,&argv,(char *)0,help);
   ierr = MPI_Comm_rank(PETSC_COMM_WORLD, &user.rank); CHKERRQ(ierr);
@@ -91,42 +87,15 @@ int main(int argc,char **argv)
   /* tools for non-dimensionalizing to improve equation scaling */
   user.scaleNode[0] = 1000.0;  user.scaleNode[1] = 100.0 / user.secpera;
 
-  ierr = PetscOptionsBegin(PETSC_COMM_WORLD,
-           "","options to ssa (bodvardsson case) solver","");CHKERRQ(ierr);
+  ierr = PetscOptionsBegin(PETSC_COMM_WORLD,"bod_",
+      "bodvardsson program options","");CHKERRQ(ierr);
   {
-    ierr = PetscOptionsBool("-snes_mf","","",PETSC_FALSE,&snes_mf_set,NULL);CHKERRQ(ierr);
-    ierr = PetscOptionsBool("-snes_fd","","",PETSC_FALSE,&snes_fd_set,NULL);CHKERRQ(ierr);
-  }
-  ierr = PetscOptionsEnd();CHKERRQ(ierr);
-
-  if (!snes_mf_set && !snes_fd_set) {
-    PetscPrintf(PETSC_COMM_WORLD,
-       "\n***ERROR: bodvardsson needs one or zero of '-snes_mf', '-snes_fd'***\n\n"
-       "USAGE FOLLOWS ...\n\n%s",help);
-    PetscEnd();
-  }
-
-  if (snes_fd_set) {
-    ierr = PetscPrintf(PETSC_COMM_WORLD,
-       "  using approximate Jacobian; finite-differencing using coloring\n");
-       CHKERRQ(ierr);
-  } else if (snes_mf_set) {
-    ierr = PetscPrintf(PETSC_COMM_WORLD,
-       "  matrix free; no preconditioner\n"); CHKERRQ(ierr);
-  } else {
-    ierr = PetscPrintf(PETSC_COMM_WORLD,
-       "  true Jacobian\n"); CHKERRQ(ierr);
-  }
-
-  ierr = PetscOptionsBegin(PETSC_COMM_WORLD,NULL,
-      "bodvardsson program options",__FILE__);CHKERRQ(ierr);
-  {
-    ierr = PetscOptionsBool("-bod_up_one","","",PETSC_FALSE,&user.upwind1,NULL);CHKERRQ(ierr);
-    ierr = PetscOptionsBool("-bod_exact_init","","",PETSC_FALSE,&exactinitial,NULL);CHKERRQ(ierr);
-    ierr = PetscOptionsBool("-bod_dump",
+    ierr = PetscOptionsBool("-up_one","","",PETSC_FALSE,&user.upwind1,NULL);CHKERRQ(ierr);
+    ierr = PetscOptionsBool("-exact_init","","",PETSC_FALSE,&exactinitial,NULL);CHKERRQ(ierr);
+    ierr = PetscOptionsBool("-dump",
       "dump out exact and approximate solution and residual, as asci","",
       dump,&dump,NULL);CHKERRQ(ierr);
-    ierr = PetscOptionsReal("-bod_epsilon","regularization (a strain rate in units of 1/a)","",
+    ierr = PetscOptionsReal("-epsilon","regularization (a strain rate in units of 1/a)","",
                             user.epsilon * user.secpera,&user.epsilon,&eps_set);CHKERRQ(ierr);
     if (eps_set)  user.epsilon *= 1.0 / user.secpera;
   }
@@ -137,8 +106,10 @@ int main(int argc,char **argv)
      dx=10 km.  Also degrees of freedom = 2 (thickness and velocity
      at each point) and stencil radius = ghost width = 2 for 2nd-order upwinding.  */
   user.solnghostwidth = 2;
-  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,-46,2,user.solnghostwidth,PETSC_NULL,&user.da);
+  ierr = DMDACreate1d(PETSC_COMM_WORLD,DM_BOUNDARY_NONE,46,2,user.solnghostwidth,PETSC_NULL,&user.da);
             CHKERRQ(ierr);
+  ierr = DMSetFromOptions(user.da); CHKERRQ(ierr);
+  ierr = DMSetUp(user.da); CHKERRQ(ierr);
   ierr = DMSetApplicationContext(user.da,&user);CHKERRQ(ierr);
   ierr = DMDASetUniformCoordinates(user.da,0.0,user.xc,0.0,1.0,0.0,1.0);CHKERRQ(ierr);
 
@@ -156,7 +127,8 @@ int main(int argc,char **argv)
   user.dx = user.xc / (PetscReal)(user.Mx-1);
 
   /* another DMDA for scalar parameters, with same length */
-  ierr = DMDACreate1d(PETSC_COMM_WORLD,DMDA_BOUNDARY_NONE,user.Mx,1,1,PETSC_NULL,&user.scalarda);CHKERRQ(ierr);
+  ierr = DMDACreate1d(PETSC_COMM_WORLD,DM_BOUNDARY_NONE,user.Mx,1,1,PETSC_NULL,&user.scalarda);CHKERRQ(ierr);
+  ierr = DMSetUp(user.scalarda); CHKERRQ(ierr);
   ierr = DMDASetUniformCoordinates(user.scalarda,0.0,user.xc,0.0,1.0,0.0,1.0);CHKERRQ(ierr);
   /* check that parallel layout of scalar DMDA is same as dof=2 DMDA */
   ierr = DMDAGetCorners(user.scalarda,&tmpxs,PETSC_NULL,PETSC_NULL,&tmpxm,PETSC_NULL,PETSC_NULL);
@@ -187,7 +159,6 @@ int main(int argc,char **argv)
   ierr = SNESSetDM(snes,user.da);CHKERRQ(ierr);
 
   ierr = DMDASNESSetFunctionLocal(user.da,INSERT_VALUES,(DMDASNESFunction)scshell,&user);CHKERRQ(ierr);
-  ierr = DMDASNESSetJacobianLocal(user.da,(DMDASNESJacobian)BodJacobianMatrixLocal,&user);CHKERRQ(ierr);
 
   ierr = SNESSetFromOptions(snes);CHKERRQ(ierr);
 
@@ -212,12 +183,6 @@ int main(int argc,char **argv)
   ierr = VecStrideScaleAll(Hu,descaleNode); CHKERRQ(ierr); /* de-dimensionalize initial guess */
   ierr = SNESSolve(snes,PETSC_NULL,Hu);CHKERRQ(ierr);
   ierr = VecStrideScaleAll(Hu,user.scaleNode); CHKERRQ(ierr); /* put back in "real" scale */
-
-  ierr = SNESGetIterationNumber(snes,&its);CHKERRQ(ierr);
-  ierr = SNESGetConvergedReason(snes,&reason);CHKERRQ(ierr);
-  ierr = PetscPrintf(PETSC_COMM_WORLD,
-           "  %s Number of Newton iterations = %D\n",
-           SNESConvergedReasons[reason],its);CHKERRQ(ierr);
 
   if (dump) {
     ierr = PetscPrintf(PETSC_COMM_WORLD,
@@ -475,96 +440,5 @@ PetscErrorCode scshell(DMDALocalInfo *info, Node *Hu, Node *f, AppCtx *user)
     Hu[i].H /= (user->scaleNode)[0];  Hu[i].u /= (user->scaleNode)[1];
   }
   return 0;
-}
-
-
-/* Apply same scalings to matrix (Jacobian) entries, as applied by scshell(). */
-PetscReal scentry(AppCtx *user, MatStencil row, MatStencil col, PetscReal v)
-{
-  /* residual scaling coeffs:
-  PetscReal rscH      = 1.0 / user->H0,
-            rscu      = user->secpera / 100.0,
-            rscuH     = user->secpera / user->H0,
-            rscstress = 1.0 / (user->rho * user->g * user->H0 * user->dx * 0.001);
-  */
-  /* Hu[i].H *= (user->scaleNode)[0];  Hu[i].u *= (user->scaleNode)[1]; */
-
-  if (row.c == 0) {
-    /* MASS CONT EQNS */
-    return v;  /* FIXME:  implement! */
-  } else { /* row.c == 1 */
-    /* SSA EQNS */
-    return v;  /* FIXME:  implement! */    
-  }
-}
-
-
-/* Evaluate analytical Jacobian matrix. */
-PetscErrorCode BodJacobianMatrixLocal(DMDALocalInfo *info, Node *Hu, Mat jac, AppCtx *user)
-{
-  PetscErrorCode ierr;
-  PetscInt       i;
-  PetscReal      v[6];
-  MatStencil     row,col[6];
-
-  PetscFunctionBegin;
-  for (i=info->xs; i<info->xs+info->xm; i++) {
-  
-    /* MASS CONT */
-    row.i = i; row.c = 0;
-    if (i == 0) {
-      col[0].i = i; col[0].c = 0;   v[0] = scentry(user,row,col[0],1.0);
-      ierr = MatSetValuesStencil(jac,1,&row,1,col,v,INSERT_VALUES);CHKERRQ(ierr);
-    } else {
-      if (user->upwind1) {
-        /* 1st-order upwind */
-        col[0].i = i; col[0].c = 0;   v[0] = scentry(user,row,col[0], - Hu[i].u);
-        col[1].i = i; col[1].c = 1;   v[1] = scentry(user,row,col[1], - Hu[i].H);
-        if (i == 1) {
-          ierr = MatSetValuesStencil(jac,1,&row,2,col,v,INSERT_VALUES);CHKERRQ(ierr);      
-        } else {
-          col[2].i = i-1; col[2].c = 0;   v[2] = scentry(user,row,col[2], + Hu[i-1].u);
-          col[3].i = i-1; col[3].c = 1;   v[3] = scentry(user,row,col[3], + Hu[i-1].H);
-          ierr = MatSetValuesStencil(jac,1,&row,4,col,v,INSERT_VALUES);CHKERRQ(ierr);      
-        }
-      } else {
-        /* 2nd-order upwind */
-        if (i == 1) {
-          col[0].i = i; col[0].c = 0;   v[0] = scentry(user,row,col[0], - 2.0 * Hu[i].u);
-          col[1].i = i; col[1].c = 1;   v[1] = scentry(user,row,col[1], - 2.0 * Hu[i].H);
-          ierr = MatSetValuesStencil(jac,1,&row,2,col,v,INSERT_VALUES);CHKERRQ(ierr);      
-        } else {
-          col[0].i = i;   col[0].c = 0;   v[0] = scentry(user,row,col[0], - 1.5 * Hu[i].u);
-          col[1].i = i;   col[1].c = 1;   v[1] = scentry(user,row,col[1], - 1.5 * Hu[i].H);
-          col[2].i = i-1; col[2].c = 0;   v[2] = scentry(user,row,col[2], + 2.0 * Hu[i-1].u);
-          col[3].i = i-1; col[3].c = 1;   v[3] = scentry(user,row,col[3], + 2.0 * Hu[i-1].H);
-          if (i == 2) {
-            ierr = MatSetValuesStencil(jac,1,&row,4,col,v,INSERT_VALUES);CHKERRQ(ierr);
-          } else {
-            col[4].i = i-2; col[4].c = 0;   v[4] = scentry(user,row,col[4], - 0.5 * Hu[i-2].u);
-            col[5].i = i-2; col[5].c = 1;   v[5] = scentry(user,row,col[5], - 0.5 * Hu[i-2].H);
-            ierr = MatSetValuesStencil(jac,1,&row,6,col,v,INSERT_VALUES);CHKERRQ(ierr);
-          }
-        }
-      }
-    }  /* done with MASS CONT */
-    
-    /* SSA */
-    row.i = i; row.c = 1;
-    if (i == 0) {
-      col[0].i = i; col[0].c = 1;   v[0] = scentry(user,row,col[0],1.0);
-      ierr = MatSetValuesStencil(jac,1,&row,1,col,v,INSERT_VALUES);CHKERRQ(ierr);
-    } else {
-      /* FIXME implement */
-    }
-  }
-
-  /* assemble matrix, using the 2-step process */
-  ierr = MatAssemblyBegin(jac,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-  ierr = MatAssemblyEnd(jac,MAT_FINAL_ASSEMBLY);CHKERRQ(ierr);
-  /* tell matrix we will never add a new nonzero location; if we do then gives error  */
-  ierr = MatSetOption(jac,MAT_NEW_NONZERO_LOCATION_ERR,PETSC_TRUE);CHKERRQ(ierr);
-
-  PetscFunctionReturn(0);
 }
 
