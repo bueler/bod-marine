@@ -16,9 +16,11 @@
 #MPIDO="mpiexec -n 4"
 MPIDO="mpiexec -n 1"
 
-for dx in 5000  2000  1000  500  200  100  50  20  10  5
+for DX in 5000  2000  1000  500  200  100  50  20  10  5
 do
   # use exact, unscaled jacobian and exact soln as initial guess:
-  $MPIDO ./marine -snes_max_funcs 100000 -dx $dx -snes_monitor -snes_rtol 1.0e-8 -exactinit -noscale
+  #$MPIDO ./marine -dx $DX -snes_converged_reason -snes_rtol 1.0e-8 -exactinit -noscale
+  # use FD, scaled jacobian and exact soln as initial guess:
+  $MPIDO ./marine -snes_fd_color -dx $DX -snes_converged_reason -snes_rtol 1.0e-8 -exactinit
 done
 

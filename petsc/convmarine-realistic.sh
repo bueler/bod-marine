@@ -14,6 +14,6 @@ MPIDO="mpiexec -n 1"
 for dx in 20000  10000  5000  2000  1000
 do
   # use f.d. for jacobian, and realistic (slab) initial guess:
-  $MPIDO ./marine -snes_fd -snes_max_funcs 100000 -dx $dx -snes_monitor -snes_rtol 1.0e-8
+  $MPIDO ./marine -snes_fd_color -dx $dx -snes_converged_reason -snes_rtol 1.0e-8
 done
 
