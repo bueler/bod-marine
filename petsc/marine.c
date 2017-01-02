@@ -379,7 +379,6 @@ PetscErrorCode DumpToMatlab(const char* dumpfile, Vec Hu, ExactCtx *exact, AppCt
     ierr = PetscObjectSetName((PetscObject)coord_x,"x");CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(viewer,"%%  viewing coordinate vector x \n");CHKERRQ(ierr);
     ierr = VecView(coord_x,viewer); CHKERRQ(ierr);
-    ierr = VecView(Hu,viewer); CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(viewer,"%%  viewing combined result Hu\n");CHKERRQ(ierr);
     ierr = VecView(Hu,viewer); CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(viewer,"%%  viewing combined exact result exactHu\n");CHKERRQ(ierr);
